@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transfer-radar/schema/partners.schema.json",
+  "title": "Transfer Radar partner directory",
+  "type": "object",
+  "required": ["version", "banks", "airlineDomains", "bankDomains", "airlineValues", "directory"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "banks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["name", "short", "bg", "fg"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "short": { "type": "string" },
+          "bg": { "type": "string" },
+          "fg": { "type": "string" }
+        }
+      }
+    },
+    "airlineDomains": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "bankDomains": {
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+    "airlineValues": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    },
+    "directory": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["air", "hotel"],
+        "additionalProperties": false,
+        "properties": {
+          "air": { "type": "array", "items": { "$ref": "#/$defs/partnerTuple" } },
+          "hotel": { "type": "array", "items": { "$ref": "#/$defs/partnerTuple" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "partnerTuple": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": [
+        { "type": "string" },
+        { "type": "string" }
+      ]
+    }
+  }
+}

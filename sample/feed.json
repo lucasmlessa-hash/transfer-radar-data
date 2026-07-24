@@ -1,0 +1,279 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-23T18:00:00Z",
+  "routes": [
+    {
+      "id": "bilt-af", "bank": "BILT", "airline": "Air France / KLM Flying Blue", "code": "AF", "time": "INSTANT",
+      "active": { "pct": 75, "endDate": "2026-07-25" }, "typical": "+75–100%",
+      "mp": [0.7, 0.5, 0.5, 0.6, 0.5, 0.7, 0.6, 0.7, 0.5, 0.7, 0.5, 0.8],
+      "hist": [
+        { "w": "JUN 2026", "pct": 100, "len": "1 day" },
+        { "w": "FEB 2026", "pct": 75, "len": "1 day" },
+        { "w": "OCT 2025", "pct": 100, "len": "1 day" },
+        { "w": "JUN 2025", "pct": 75, "len": "1 day" },
+        { "w": "DEC 2024", "pct": 150, "len": "1 day" },
+        { "w": "JUN 2024", "pct": 100, "len": "1 day" }
+      ]
+    },
+    {
+      "id": "amex-av", "bank": "AMEX", "airline": "Avianca LifeMiles", "code": "AV", "time": "INSTANT",
+      "active": { "pct": 25, "endDate": "2026-07-29" }, "typical": "+20–30%",
+      "mp": [0.2, 0.15, 0.35, 0.3, 0.3, 0.4, 0.5, 0.45, 0.6, 0.5, 0.3, 0.2],
+      "hist": [
+        { "w": "MAR 2026", "pct": 20, "len": "14 days" },
+        { "w": "SEP 2025", "pct": 25, "len": "21 days" },
+        { "w": "APR 2025", "pct": 20, "len": "14 days" },
+        { "w": "OCT 2024", "pct": 25, "len": "30 days" },
+        { "w": "MAY 2024", "pct": 15, "len": "14 days" },
+        { "w": "AUG 2023", "pct": 25, "len": "21 days" },
+        { "w": "JUN 2022", "pct": 30, "len": "30 days" },
+        { "w": "NOV 2021", "pct": 25, "len": "21 days" },
+        { "w": "SEP 2020", "pct": 25, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "c1-am", "bank": "C1", "airline": "Aeromexico Rewards", "code": "AM", "time": "~1 DAY",
+      "active": { "pct": 25, "endDate": "2026-08-01" }, "typical": "+20–25%",
+      "mp": [0.2, 0.35, 0.2, 0.2, 0.25, 0.35, 0.45, 0.4, 0.25, 0.35, 0.2, 0.15],
+      "hist": [
+        { "w": "OCT 2025", "pct": 20, "len": "14 days" },
+        { "w": "FEB 2025", "pct": 25, "len": "21 days" },
+        { "w": "AUG 2024", "pct": 20, "len": "14 days" },
+        { "w": "JUN 2023", "pct": 25, "len": "30 days" }
+      ]
+    },
+    {
+      "id": "chase-vs", "bank": "CHASE", "airline": "Virgin Atlantic Flying Club", "code": "VS", "time": "INSTANT",
+      "active": { "pct": 30, "endDate": "2026-08-04" }, "typical": "+30%",
+      "mp": [0.2, 0.2, 0.4, 0.3, 0.25, 0.3, 0.45, 0.35, 0.4, 0.45, 0.5, 0.25],
+      "hist": [
+        { "w": "NOV 2025", "pct": 30, "len": "21 days" },
+        { "w": "MAR 2025", "pct": 30, "len": "14 days" },
+        { "w": "OCT 2024", "pct": 30, "len": "30 days" },
+        { "w": "MAR 2024", "pct": 25, "len": "14 days" },
+        { "w": "SEP 2022", "pct": 30, "len": "21 days" },
+        { "w": "MAY 2021", "pct": 30, "len": "30 days" }
+      ]
+    },
+    {
+      "id": "citi-qr", "bank": "CITI", "airline": "Qatar Airways Avios", "code": "QR", "time": "INSTANT",
+      "active": { "pct": 25, "endDate": "2026-08-11" }, "typical": "+25–30%",
+      "mp": [0.2, 0.4, 0.2, 0.2, 0.2, 0.3, 0.5, 0.3, 0.25, 0.3, 0.45, 0.2],
+      "hist": [
+        { "w": "NOV 2025", "pct": 25, "len": "21 days" },
+        { "w": "FEB 2025", "pct": 30, "len": "14 days" },
+        { "w": "JUL 2024", "pct": 25, "len": "21 days" },
+        { "w": "NOV 2023", "pct": 20, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "wf-av", "bank": "WF", "airline": "Avianca LifeMiles", "code": "AV", "time": "INSTANT",
+      "active": { "pct": 20, "endDate": "2026-08-17" }, "typical": "+20–25%",
+      "mp": [0.15, 0.2, 0.2, 0.25, 0.2, 0.4, 0.45, 0.3, 0.25, 0.2, 0.35, 0.4],
+      "hist": [
+        { "w": "DEC 2025", "pct": 25, "len": "21 days" },
+        { "w": "JUN 2025", "pct": 20, "len": "14 days" },
+        { "w": "NOV 2024", "pct": 20, "len": "21 days" }
+      ]
+    },
+    {
+      "id": "bilt-av", "bank": "BILT", "airline": "Avianca LifeMiles", "code": "AV", "time": "INSTANT",
+      "next": { "label": "Aug 1 · Rent Day", "prob": 88 }, "typical": "+75–100%",
+      "summary": "Bilt runs Rent Day transfer promos on the 1st of most months; Avianca has featured 3 times since 2024, averaging +92%.",
+      "mp": [0.5, 0.3, 0.3, 0.3, 0.3, 0.3, 0.5, 0.6, 0.5, 0.3, 0.3, 0.3],
+      "hist": [
+        { "w": "JAN 2026", "pct": 100, "len": "1 day" },
+        { "w": "JUL 2025", "pct": 75, "len": "1 day" },
+        { "w": "SEP 2024", "pct": 100, "len": "1 day" }
+      ]
+    },
+    {
+      "id": "chase-af", "bank": "CHASE", "airline": "Air France / KLM Flying Blue", "code": "AF", "time": "INSTANT",
+      "ended": { "pct": 25, "endedAt": "2026-07-14" }, "next": { "label": "Sep 2026", "prob": 82 }, "typical": "+25–30%",
+      "summary": "A very regular route: 8 windows since 2021, strongly clustered in September. Typically +25% for about three weeks.",
+      "mp": [0.15, 0.2, 0.35, 0.2, 0.35, 0.25, 0.4, 0.2, 0.85, 0.45, 0.2, 0.15],
+      "hist": [
+        { "w": "JUL 2026", "pct": 25, "len": "18 days" },
+        { "w": "SEP 2025", "pct": 25, "len": "21 days" },
+        { "w": "MAR 2025", "pct": 20, "len": "14 days" },
+        { "w": "SEP 2024", "pct": 30, "len": "21 days" },
+        { "w": "MAY 2024", "pct": 25, "len": "14 days" },
+        { "w": "SEP 2023", "pct": 25, "len": "30 days" },
+        { "w": "OCT 2022", "pct": 30, "len": "21 days" },
+        { "w": "SEP 2021", "pct": 25, "len": "21 days" }
+      ]
+    },
+    {
+      "id": "amex-ba", "bank": "AMEX", "airline": "British Airways Avios", "code": "BA", "time": "INSTANT",
+      "ended": { "pct": 40, "endedAt": "2026-06-30" }, "next": { "label": "Oct 2026", "prob": 74 }, "typical": "+30–40%",
+      "summary": "Annual spring/summer window nearly every year since 2020, with an occasional second window in fall. Usually +40%.",
+      "mp": [0.1, 0.15, 0.3, 0.4, 0.75, 0.8, 0.3, 0.2, 0.3, 0.55, 0.3, 0.15],
+      "hist": [
+        { "w": "JUN 2026", "pct": 40, "len": "30 days" },
+        { "w": "MAY 2025", "pct": 30, "len": "21 days" },
+        { "w": "JUN 2024", "pct": 40, "len": "30 days" },
+        { "w": "MAY 2023", "pct": 40, "len": "21 days" },
+        { "w": "JUN 2022", "pct": 30, "len": "30 days" },
+        { "w": "MAY 2021", "pct": 40, "len": "30 days" },
+        { "w": "JUN 2020", "pct": 40, "len": "30 days" }
+      ]
+    },
+    {
+      "id": "citi-av", "bank": "CITI", "airline": "Avianca LifeMiles", "code": "AV", "time": "INSTANT",
+      "next": { "label": "Sep 2026", "prob": 71 }, "typical": "+20–30%",
+      "summary": "5 windows since 2023, favoring May and September. Citi bonuses on this route tend to run 2–3 weeks.",
+      "mp": [0.3, 0.15, 0.2, 0.25, 0.5, 0.35, 0.2, 0.25, 0.6, 0.4, 0.2, 0.15],
+      "hist": [
+        { "w": "MAY 2026", "pct": 25, "len": "21 days" },
+        { "w": "SEP 2025", "pct": 30, "len": "14 days" },
+        { "w": "JAN 2025", "pct": 20, "len": "14 days" },
+        { "w": "JUN 2024", "pct": 25, "len": "21 days" },
+        { "w": "OCT 2023", "pct": 25, "len": "21 days" }
+      ]
+    },
+    {
+      "id": "c1-av", "bank": "C1", "airline": "Avianca LifeMiles", "code": "AV", "time": "INSTANT",
+      "next": { "label": "Nov 2026", "prob": 62 }, "typical": "+15–25%",
+      "summary": "Capital One features Avianca about twice a year, most often in late fall — usually a few weeks after Amex or Citi run theirs.",
+      "mp": [0.2, 0.15, 0.2, 0.3, 0.2, 0.25, 0.2, 0.25, 0.3, 0.4, 0.6, 0.35],
+      "hist": [
+        { "w": "NOV 2025", "pct": 20, "len": "21 days" },
+        { "w": "APR 2025", "pct": 15, "len": "14 days" },
+        { "w": "OCT 2024", "pct": 25, "len": "21 days" },
+        { "w": "NOV 2023", "pct": 20, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "amex-af", "bank": "AMEX", "airline": "Air France / KLM Flying Blue", "code": "AF", "time": "INSTANT",
+      "next": { "label": "Oct 2026", "prob": 68 }, "typical": "+20–25%",
+      "summary": "6 windows since 2021, leaning spring and fall. Amex tends to alternate with Chase on Flying Blue promos.",
+      "mp": [0.15, 0.2, 0.4, 0.3, 0.25, 0.2, 0.2, 0.2, 0.35, 0.6, 0.3, 0.2],
+      "hist": [
+        { "w": "APR 2026", "pct": 25, "len": "21 days" },
+        { "w": "OCT 2025", "pct": 20, "len": "14 days" },
+        { "w": "MAR 2025", "pct": 25, "len": "21 days" },
+        { "w": "SEP 2024", "pct": 20, "len": "14 days" },
+        { "w": "APR 2023", "pct": 25, "len": "21 days" },
+        { "w": "OCT 2021", "pct": 20, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "amex-vs", "bank": "AMEX", "airline": "Virgin Atlantic Flying Club", "code": "VS", "time": "INSTANT",
+      "next": { "label": "Nov 2026", "prob": 65 }, "typical": "+25–30%",
+      "summary": "Roughly twice a year, with a reliable late-fall window. +30% is the norm.",
+      "mp": [0.15, 0.2, 0.55, 0.25, 0.2, 0.2, 0.2, 0.25, 0.35, 0.5, 0.65, 0.2],
+      "hist": [
+        { "w": "MAR 2026", "pct": 30, "len": "21 days" },
+        { "w": "NOV 2025", "pct": 30, "len": "14 days" },
+        { "w": "MAR 2025", "pct": 25, "len": "14 days" },
+        { "w": "NOV 2024", "pct": 30, "len": "21 days" },
+        { "w": "OCT 2023", "pct": 30, "len": "30 days" },
+        { "w": "MAR 2022", "pct": 30, "len": "21 days" }
+      ]
+    },
+    {
+      "id": "c1-ba", "bank": "C1", "airline": "British Airways Avios", "code": "BA", "time": "INSTANT",
+      "next": { "label": "Oct 2026", "prob": 58 }, "typical": "+25–30%",
+      "summary": "4 windows since 2023, alternating spring and fall. Capital One tends to match Amex BA promos within weeks.",
+      "mp": [0.15, 0.2, 0.25, 0.4, 0.3, 0.2, 0.2, 0.2, 0.5, 0.55, 0.25, 0.15],
+      "hist": [
+        { "w": "APR 2026", "pct": 25, "len": "14 days" },
+        { "w": "SEP 2025", "pct": 30, "len": "21 days" },
+        { "w": "OCT 2024", "pct": 25, "len": "21 days" },
+        { "w": "SEP 2023", "pct": 30, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "chase-ei", "bank": "CHASE", "airline": "Aer Lingus AerClub", "code": "EI", "time": "INSTANT",
+      "next": { "label": "Dec 2026", "prob": 44 }, "typical": "+25–30%",
+      "summary": "A quieter route: 3 windows since 2023, all in Nov–Dec. Worth watching ahead of winter award releases.",
+      "mp": [0.1, 0.1, 0.15, 0.1, 0.15, 0.1, 0.1, 0.15, 0.2, 0.25, 0.5, 0.55],
+      "hist": [
+        { "w": "DEC 2025", "pct": 25, "len": "14 days" },
+        { "w": "NOV 2024", "pct": 30, "len": "21 days" },
+        { "w": "DEC 2023", "pct": 25, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "citi-cx", "bank": "CITI", "airline": "Cathay Pacific Asia Miles", "code": "CX", "time": "~1 DAY",
+      "next": { "label": "Jan 2027", "prob": 38 }, "typical": "+20–25%",
+      "summary": "Sporadic: 3 windows since 2023 with no strong seasonal pattern. Slight late-summer lean.",
+      "mp": [0.25, 0.15, 0.1, 0.15, 0.15, 0.2, 0.3, 0.35, 0.3, 0.15, 0.1, 0.15],
+      "hist": [
+        { "w": "SEP 2025", "pct": 20, "len": "14 days" },
+        { "w": "AUG 2024", "pct": 25, "len": "21 days" },
+        { "w": "JUL 2023", "pct": 30, "len": "14 days" }
+      ]
+    },
+    {
+      "id": "liv-g3", "bank": "LIV", "airline": "Smiles (GOL)", "code": "G3", "time": "INSTANT",
+      "active": { "pct": 80, "endDate": "2026-07-27" }, "typical": "+80–100%",
+      "mp": [0.7, 0.6, 0.7, 0.6, 0.7, 0.7, 0.7, 0.7, 0.6, 0.7, 0.8, 0.7],
+      "hist": [
+        { "w": "JUN 2026", "pct": 100, "len": "3 days" },
+        { "w": "MAY 2026", "pct": 80, "len": "4 days" },
+        { "w": "MAR 2026", "pct": 100, "len": "2 days" },
+        { "w": "JAN 2026", "pct": 80, "len": "5 days" },
+        { "w": "NOV 2025", "pct": 110, "len": "2 days" },
+        { "w": "SEP 2025", "pct": 80, "len": "4 days" }
+      ]
+    },
+    {
+      "id": "esf-la", "bank": "ESF", "airline": "LATAM Pass", "code": "LA", "time": "~1 DAY",
+      "active": { "pct": 70, "endDate": "2026-07-31" }, "typical": "+60–80%",
+      "mp": [0.6, 0.5, 0.6, 0.5, 0.6, 0.6, 0.6, 0.5, 0.6, 0.5, 0.6, 0.6],
+      "hist": [
+        { "w": "MAY 2026", "pct": 80, "len": "5 days" },
+        { "w": "MAR 2026", "pct": 60, "len": "7 days" },
+        { "w": "DEC 2025", "pct": 80, "len": "3 days" },
+        { "w": "OCT 2025", "pct": 70, "len": "5 days" },
+        { "w": "JUL 2025", "pct": 60, "len": "7 days" }
+      ]
+    },
+    {
+      "id": "liv-la", "bank": "LIV", "airline": "LATAM Pass", "code": "LA", "time": "INSTANT",
+      "next": { "label": "Aug 2026", "prob": 90 }, "typical": "+70–100%",
+      "summary": "Livelo runs LATAM Pass bonuses almost monthly; +70% is routine, +100% appears a few times a year. Never transfer at 1:1.",
+      "mp": [0.7, 0.6, 0.7, 0.6, 0.7, 0.7, 0.7, 0.8, 0.7, 0.7, 0.8, 0.7],
+      "hist": [
+        { "w": "JUL 2026", "pct": 70, "len": "4 days" },
+        { "w": "JUN 2026", "pct": 100, "len": "2 days" },
+        { "w": "APR 2026", "pct": 70, "len": "5 days" },
+        { "w": "FEB 2026", "pct": 80, "len": "3 days" },
+        { "w": "DEC 2025", "pct": 100, "len": "2 days" },
+        { "w": "OCT 2025", "pct": 70, "len": "5 days" }
+      ]
+    },
+    {
+      "id": "liv-ad", "bank": "LIV", "airline": "Azul Fidelidade", "code": "AD", "time": "INSTANT",
+      "next": { "label": "Aug 2026", "prob": 84 }, "typical": "+60–80%",
+      "summary": "Azul features in Livelo campaigns most months, often stacking with Clube TudoAzul multipliers for members.",
+      "mp": [0.6, 0.5, 0.6, 0.6, 0.5, 0.6, 0.6, 0.7, 0.6, 0.6, 0.7, 0.6],
+      "hist": [
+        { "w": "JUN 2026", "pct": 80, "len": "4 days" },
+        { "w": "MAY 2026", "pct": 60, "len": "6 days" },
+        { "w": "MAR 2026", "pct": 80, "len": "3 days" },
+        { "w": "JAN 2026", "pct": 60, "len": "5 days" }
+      ]
+    },
+    {
+      "id": "esf-g3", "bank": "ESF", "airline": "Smiles (GOL)", "code": "G3", "time": "~1 DAY",
+      "next": { "label": "Sep 2026", "prob": 76 }, "typical": "+80%",
+      "summary": "Esfera and Smiles run joint campaigns every 1–2 months, usually +80%, occasionally +100% on short flash windows.",
+      "mp": [0.6, 0.5, 0.6, 0.5, 0.6, 0.6, 0.5, 0.6, 0.7, 0.6, 0.7, 0.6],
+      "hist": [
+        { "w": "JUN 2026", "pct": 80, "len": "3 days" },
+        { "w": "APR 2026", "pct": 100, "len": "2 days" },
+        { "w": "FEB 2026", "pct": 80, "len": "4 days" },
+        { "w": "NOV 2025", "pct": 80, "len": "3 days" }
+      ]
+    },
+    {
+      "id": "amex-ana", "bank": "AMEX", "airline": "ANA Mileage Club", "code": "NH", "time": "~2 DAYS",
+      "next": { "label": "—", "prob": 12 }, "typical": "—",
+      "summary": "ANA has never run a US transfer bonus in the tracked period. Treat any future window as exceptional.",
+      "mp": [0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
+      "hist": []
+    }
+  ]
+}

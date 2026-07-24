@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://transfer-radar/schema/feed.schema.json",
+  "title": "Transfer Radar feed",
+  "type": "object",
+  "required": ["version", "generatedAt", "routes"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "routes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/route" }
+    }
+  },
+  "$defs": {
+    "route": {
+      "type": "object",
+      "required": ["id", "bank", "airline", "code", "time", "typical", "mp", "hist"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "bank": { "type": "string" },
+        "airline": { "type": "string" },
+        "code": { "type": "string" },
+        "time": { "type": "string" },
+        "typical": { "type": "string" },
+        "mp": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "active": {
+          "type": "object",
+          "required": ["pct", "endDate"],
+          "additionalProperties": false,
+          "properties": {
+            "pct": { "type": "number" },
+            "endDate": { "type": "string", "format": "date" }
+          }
+        },
+        "ended": {
+          "type": "object",
+          "required": ["pct", "endedAt"],
+          "additionalProperties": false,
+          "properties": {
+            "pct": { "type": "number" },
+            "endedAt": { "type": "string", "format": "date" }
+          }
+        },
+        "next": {
+          "type": "object",
+          "required": ["label", "prob"],
+          "additionalProperties": false,
+          "properties": {
+            "label": { "type": "string" },
+            "prob": { "type": "integer", "minimum": 0, "maximum": 100 }
+          }
+        },
+        "summary": { "type": "string" },
+        "hist": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["w", "pct", "len"],
+            "additionalProperties": false,
+            "properties": {
+              "w": { "type": "string" },
+              "pct": { "type": "number" },
+              "len": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
