@@ -17,7 +17,7 @@ const BANK_ALIASES = {
   LIV: ['livelo', 'livelo pontos'],
 };
 
-const PARTNER_ALIASES = {
+export const PARTNER_ALIASES = {
   AF: ['air france', 'air france klm', 'air france / klm flying blue', 'air france/klm flying blue', 'flying blue', 'klm'],
   AV: ['avianca', 'avianca lifemiles', 'lifemiles'],
   AM: ['aeromexico', 'aeromexico rewards', 'aeromexico club premier'],
@@ -30,6 +30,19 @@ const PARTNER_ALIASES = {
   G3: ['gol', 'smiles', 'smiles (gol)'],
   LA: ['latam', 'latam pass'],
   AD: ['azul', 'azul fidelidade', 'tudoazul'],
+  // Codes below cover names the live sources actually return today but the
+  // 12-code model dropped into `unmapped`. Each also needs an entry in
+  // partners.json's airlineDomains + airlineValues (see CONTRACT.md).
+  BR: ['eva', 'eva air', 'eva airways', 'infinity mileagelands', 'eva air infinity mileagelands', 'eva infinity mileagelands'],
+  QF: ['qantas', 'qantas frequent flyer'],
+  JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank'],
+  LH: ['lufthansa', 'miles and more', 'miles more', 'lufthansa miles and more', 'lufthansa miles more'],
+  AS: ['alaska', 'alaska airlines', 'atmos rewards', 'alaska atmos rewards', 'alaska mileage plan', 'mileage plan'],
+  AA: ['american', 'american airlines', 'aadvantage', 'american aadvantage', 'american airlines aadvantage'],
+  AC: ['air canada', 'aeroplan', 'air canada aeroplan'],
+  TK: ['turkish', 'turkish airlines', 'miles smiles', 'turkish miles smiles'],
+  EK: ['emirates', 'skywards', 'emirates skywards'],
+  SQ: ['singapore', 'singapore airlines', 'krisflyer', 'singapore krisflyer'],
 };
 
 // Display name used for a route's `airline` field when no seed route already
@@ -47,6 +60,16 @@ const PARTNER_DISPLAY_NAMES = {
   G3: 'Smiles (GOL)',
   LA: 'LATAM Pass',
   AD: 'Azul Fidelidade',
+  BR: 'EVA Infinity MileageLands',
+  QF: 'Qantas Frequent Flyer',
+  JL: 'Japan Airlines (JAL Mileage Bank)',
+  LH: 'Lufthansa Miles & More',
+  AS: 'Alaska Atmos Rewards',
+  AA: 'American Airlines AAdvantage',
+  AC: 'Air Canada Aeroplan',
+  TK: 'Turkish Miles&Smiles',
+  EK: 'Emirates Skywards',
+  SQ: 'Singapore KrisFlyer',
 };
 
 // Real sources spell the same bank/partner a dozen ways: a trailing

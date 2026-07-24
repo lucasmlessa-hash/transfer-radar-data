@@ -2,7 +2,7 @@
 // Parse -> normalize -> validate -> publish, with a fail-safe: invalid or
 // mostly-failed source data never overwrites out/feed.json.
 
-import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -17,9 +17,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 const SOURCES = [frequentmiler, awardwallet, livelo, esfera];
 
-async function fetchHtml(src, fixtures) {
+// Route-count cliff guard. A run that publishes less than half the previous
+// feed is far more likely a parser quietly breaking (site redesign -> selectors
+// match nothing -> warn-and-skip -> short feed) than the market really losing
+// half its bonuses overnight, so abort instead of shipping the shrunken feed.
+// Below MIN_PREV_ROUTES the feed is small enough that ordinary churn (one bonus
+// ending) reads as a >50% drop, so the guard stays off there.
+const CLIFF_MAX_DROP = 0.5;
+const CLIFF_MIN_PREV_ROUTES = 4;
+
+async function fetchHtml(src, fixtures, fixturesDir) {
   if (fixtures) {
-    return readFileSync(path.join(ROOT, 'fixtures', `${src.id}.html`), 'utf8');
+    return readFileSync(path.join(fixturesDir, `${src.id}.html`), 'utf8');
   }
   // Live mode - only exercised at go-live (see GO-LIVE.md); never run during
   // this build (no network access in this environment).
@@ -48,26 +57,55 @@ function validateCandidate(candidate, outDir) {
   }
 }
 
+// Previous published feed, or null when there isn't a readable one (bootstrap
+// run, or a corrupt file). Both the partial-failure merge and the cliff guard
+// read it.
+function readPreviousFeed(outDir) {
+  try {
+    return JSON.parse(readFileSync(path.join(outDir, 'feed.json'), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Runs the full pipeline and returns a summary instead of calling
  * process.exit, so both the CLI wrapper below and tests can drive it.
  *
- * @param {{fixtures?:boolean, outDir?:string, now?:Date, injectBadRoute?:boolean}} opts
+ * @param {{fixtures?:boolean, fixturesDir?:string, outDir?:string, now?:Date, injectBadRoute?:boolean}} opts
  *   injectBadRoute is a test-only hook (see test/publish.test.mjs) that
  *   forces a schema-invalid candidate to exercise the abort path without
- *   needing a real source failure.
+ *   needing a real source failure. fixturesDir lets tests point the parsers at
+ *   degraded HTML (see test/robustness.test.mjs).
  */
-export async function runPipeline({ fixtures = false, outDir = path.join(ROOT, 'out'), now = new Date(), injectBadRoute = false } = {}) {
+export async function runPipeline({
+  fixtures = false,
+  fixturesDir = path.join(ROOT, 'fixtures'),
+  outDir = path.join(ROOT, 'out'),
+  now = new Date(),
+  injectBadRoute = false,
+} = {}) {
   mkdirSync(outDir, { recursive: true });
 
   const raw = [];
   const failedSources = [];
+  const entryCounts = {};
 
   for (const src of SOURCES) {
+    entryCounts[src.id] = 0;
     try {
-      const html = await fetchHtml(src, fixtures);
-      const entries = await src.parse(html);
-      if (!entries || entries.length === 0) throw new Error('parser returned no entries');
+      const html = await fetchHtml(src, fixtures, fixturesDir);
+      const entries = (await src.parse(html)) ?? [];
+      entryCounts[src.id] = entries.length;
+      // A parse that yields nothing is a broken parser, not an empty listing:
+      // none of these four sources is ever legitimately at zero bonuses. The
+      // parsers warn-and-skip rather than throw, so this is the only place a
+      // page redesign shows up. Same bucket as a thrown error.
+      if (entries.length === 0) {
+        console.warn(`[publish] source "${src.id}" returned 0 entries — treating as failed`);
+        failedSources.push(src.id);
+        continue;
+      }
       raw.push(...entries);
     } catch (e) {
       console.warn(`[publish] source "${src.id}" failed: ${e.message}`);
@@ -83,6 +121,7 @@ export async function runPipeline({ fixtures = false, outDir = path.join(ROOT, '
   }
 
   const { routes: candidateRoutes, unmapped } = normalize(raw, now);
+  const previous = readPreviousFeed(outDir);
 
   // ponytail: a route in the contract carries no source tag, so a failed
   // source's prior contribution can't be pulled out individually. The
@@ -92,22 +131,23 @@ export async function runPipeline({ fixtures = false, outDir = path.join(ROOT, '
   // absence). Upgrade path: tag routes with their source id if per-source
   // fallback ever matters more precisely than this.
   let mergedFromPrevious = 0;
-  if (failedSources.length > 0) {
-    const prevPath = path.join(outDir, 'feed.json');
-    if (existsSync(prevPath)) {
-      try {
-        const prev = JSON.parse(readFileSync(prevPath, 'utf8'));
-        const candidateIds = new Set(candidateRoutes.map((r) => r.id));
-        for (const r of prev.routes ?? []) {
-          if (!candidateIds.has(r.id)) {
-            candidateRoutes.push(r);
-            mergedFromPrevious += 1;
-          }
-        }
-      } catch {
-        // previous feed missing/corrupt - nothing to merge, candidate stands alone
+  if (failedSources.length > 0 && previous) {
+    const candidateIds = new Set(candidateRoutes.map((r) => r.id));
+    for (const r of previous.routes ?? []) {
+      if (!candidateIds.has(r.id)) {
+        candidateRoutes.push(r);
+        mergedFromPrevious += 1;
       }
     }
+  }
+
+  // Cliff guard, after the merge: what's checked is what would actually be
+  // published. No previous feed (bootstrap) = nothing to compare, publish.
+  const prevRoutes = previous?.routes?.length ?? 0;
+  if (prevRoutes >= CLIFF_MIN_PREV_ROUTES && candidateRoutes.length < prevRoutes * CLIFF_MAX_DROP) {
+    const reason = `route count fell from ${prevRoutes} to ${candidateRoutes.length}`;
+    console.error(`PUBLISH ABORTED: ${reason}`);
+    return { ok: false, reason };
   }
 
   if (injectBadRoute) {
@@ -132,14 +172,17 @@ export async function runPipeline({ fixtures = false, outDir = path.join(ROOT, '
 
   const activeCount = candidateRoutes.filter((r) => r.active).length;
   const unmappedNames = unmapped.map((u) => u.partnerName || u.bankName);
+  // per-source counts so a source quietly sliding toward zero is visible in the
+  // Actions log before it hits zero and trips the guard above
+  const perSource = SOURCES.map((s) => `${s.id}:${entryCounts[s.id]}`).join(' ');
   console.log(
-    `PUBLISH OK: ${candidateRoutes.length} routes (${activeCount} active), sources ok ${sourcesOk}/${SOURCES.length}, unmapped: [${unmappedNames.join(', ')}]`,
+    `PUBLISH OK: ${candidateRoutes.length} routes (${activeCount} active), sources ok ${sourcesOk}/${SOURCES.length} (${perSource}), unmapped: [${unmappedNames.join(', ')}]`,
   );
   if (mergedFromPrevious > 0) {
     console.log(`[publish] merged ${mergedFromPrevious} stale route(s) from previous feed for failed source(s): ${failedSources.join(', ')}`);
   }
 
-  return { ok: true, routes: candidateRoutes, unmapped, sourcesOk, sourcesTotal: SOURCES.length, failedSources };
+  return { ok: true, routes: candidateRoutes, unmapped, sourcesOk, sourcesTotal: SOURCES.length, failedSources, entryCounts };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

@@ -33,6 +33,45 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The cliff guard in src/publish.mjs compares this run's candidate against
+      # the PREVIOUS feed, which it reads from out/feed.json. out/ is gitignored
+      # and the runner is fresh, so without this step readPreviousFeed() returns
+      # null on every CI run and the guard is dead code in the only place it
+      # matters. Seed it from what is actually published — that is the real
+      # invariant (what users are consuming right now), not whatever a cache
+      # happens to hold.
+      #
+      # Ordering: after `npm ci` (a dependency failure should surface as itself,
+      # not behind an unrelated network step) and before `npm run build` (which
+      # reads out/feed.json at the start, then overwrites it with the new
+      # candidate on success — so the Pages artifact always carries the new feed,
+      # never this seed). On abort the build step exits non-zero, the job fails,
+      # and deploy (needs: build) never runs, so the stale seed is never uploaded.
+      #
+      # Never fails the build: a first-ever deploy 404s and an outage is not our
+      # problem to escalate — in both cases the guard correctly stays off rather
+      # than blocking a legitimate publish. curl -f leaves a 0-byte file behind
+      # on an HTTP error, hence the rm; a truncated-but-200 body is also safe,
+      # readPreviousFeed() JSON.parse-fails and returns null (see the
+      # "unreadable previous feed" test in test/robustness.test.mjs).
+      - name: Seed previous published feed (arms the cliff guard)
+        env:
+          # Literal, not derived from ${{ github.repository }}: this must be the
+          # URL the extension actually reads. If Pages moves, change it here and
+          # in transfer-bonus-radar/config.js together.
+          FEED_URL: https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
+        run: |
+          mkdir -p out
+          if curl -fsSL --max-time 30 -o out/feed.json "$FEED_URL"; then
+            # `|| echo ?` so an unparseable body logs oddly instead of erroring here;
+            # publish.mjs is the thing that decides what a bad previous feed means.
+            routes=$(node -p 'JSON.parse(require("fs").readFileSync("out/feed.json","utf8")).routes.length' 2>/dev/null || echo '?')
+            echo "cliff guard armed against $FEED_URL — previous feed: $routes routes"
+          else
+            rm -f out/feed.json
+            echo "no previous feed at $FEED_URL (first deploy, or unreachable) — cliff guard stays off this run"
+          fi
+
       - name: Run pipeline
         id: build
         run: npm run build

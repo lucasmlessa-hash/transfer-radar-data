@@ -1,113 +1,861 @@
 {
   "version": 1,
   "banks": {
-    "AMEX": { "name": "Amex MR", "short": "Amex", "bg": "#E7EEF5", "fg": "#2E5B87" },
-    "CHASE": { "name": "Chase UR", "short": "Chase", "bg": "#E5EBF4", "fg": "#16457F" },
-    "CITI": { "name": "Citi ThankYou", "short": "Citi", "bg": "#E9EBF6", "fg": "#414FA0" },
-    "C1": { "name": "Capital One", "short": "Cap One", "bg": "#F5E8E6", "fg": "#96393A" },
-    "BILT": { "name": "Bilt Rewards", "short": "Bilt", "bg": "#ECEAE3", "fg": "#26221B" },
-    "WF": { "name": "Wells Fargo", "short": "Wells", "bg": "#F5E7E3", "fg": "#872E2A" },
-    "ESF": { "name": "Esfera", "short": "Esfera", "bg": "#F6E7E5", "fg": "#9E2C24" },
-    "LIV": { "name": "Livelo", "short": "Livelo", "bg": "#F7E6EE", "fg": "#A81D5E" }
+    "AMEX": {
+      "name": "Amex MR",
+      "short": "Amex",
+      "bg": "#E7EEF5",
+      "fg": "#2E5B87"
+    },
+    "CHASE": {
+      "name": "Chase UR",
+      "short": "Chase",
+      "bg": "#E5EBF4",
+      "fg": "#16457F"
+    },
+    "CITI": {
+      "name": "Citi ThankYou",
+      "short": "Citi",
+      "bg": "#E9EBF6",
+      "fg": "#414FA0"
+    },
+    "C1": {
+      "name": "Capital One",
+      "short": "Cap One",
+      "bg": "#F5E8E6",
+      "fg": "#96393A"
+    },
+    "BILT": {
+      "name": "Bilt Rewards",
+      "short": "Bilt",
+      "bg": "#ECEAE3",
+      "fg": "#26221B"
+    },
+    "WF": {
+      "name": "Wells Fargo",
+      "short": "Wells",
+      "bg": "#F5E7E3",
+      "fg": "#872E2A"
+    },
+    "ESF": {
+      "name": "Esfera",
+      "short": "Esfera",
+      "bg": "#F6E7E5",
+      "fg": "#9E2C24"
+    },
+    "LIV": {
+      "name": "Livelo",
+      "short": "Livelo",
+      "bg": "#F7E6EE",
+      "fg": "#A81D5E"
+    }
   },
   "airlineDomains": {
-    "AF": "airfrance.com", "AV": "lifemiles.com", "AM": "aeromexico.com", "VS": "virginatlantic.com",
-    "QR": "qatarairways.com", "BA": "britishairways.com", "EI": "aerlingus.com", "CX": "cathaypacific.com",
-    "NH": "ana.co.jp", "G3": "smiles.com.br", "LA": "latam.com", "AD": "voeazul.com.br"
+    "AF": "airfrance.com",
+    "AV": "lifemiles.com",
+    "AM": "aeromexico.com",
+    "VS": "virginatlantic.com",
+    "QR": "qatarairways.com",
+    "BA": "britishairways.com",
+    "EI": "aerlingus.com",
+    "CX": "cathaypacific.com",
+    "NH": "ana.co.jp",
+    "G3": "voegol.com.br",
+    "LA": "latam.com",
+    "AD": "voeazul.com.br",
+    "BR": "evaair.com",
+    "QF": "qantas.com",
+    "JL": "jal.co.jp",
+    "LH": "lufthansa.com",
+    "AS": "alaskaair.com",
+    "AA": "aa.com",
+    "AC": "aircanada.com",
+    "TK": "turkishairlines.com",
+    "EK": "emirates.com",
+    "SQ": "singaporeair.com"
+  },
+  "airlineIconUrls": {
+    "AD": "https://icons.duckduckgo.com/ip3/voeazul.com.br.ico"
   },
   "bankDomains": {
-    "AMEX": "americanexpress.com", "CHASE": "chase.com", "CITI": "citi.com", "C1": "capitalone.com",
-    "BILT": "biltrewards.com", "WF": "wellsfargo.com", "ESF": "esfera.com.vc", "LIV": "livelo.com.br"
+    "AMEX": "americanexpress.com",
+    "CHASE": "chase.com",
+    "CITI": "citi.com",
+    "C1": "capitalone.com",
+    "BILT": "biltrewards.com",
+    "WF": "wellsfargo.com",
+    "ESF": "esfera.com.vc",
+    "LIV": "livelo.com.br"
   },
   "airlineValues": {
-    "AF": 1.3, "AV": 1.5, "AM": 1.0, "VS": 1.4, "QR": 1.3, "BA": 1.25,
-    "EI": 1.2, "CX": 1.3, "NH": 1.4, "G3": 1.1, "LA": 1.0, "AD": 1.2
+    "AF": 1.3,
+    "AV": 1.3,
+    "AM": 0.8,
+    "VS": 1.5,
+    "QR": 1.4,
+    "BA": 1.1,
+    "EI": 1.4,
+    "CX": 1.1,
+    "NH": 1.4,
+    "G3": 0.41,
+    "LA": 0.57,
+    "AD": 0.34,
+    "BR": 1.3,
+    "QF": 1.3,
+    "JL": 1.3,
+    "LH": 1.3,
+    "AS": 1.5,
+    "AA": 1.4,
+    "AC": 1.4,
+    "TK": 1.1,
+    "EK": 1.2,
+    "SQ": 1.3
+  },
+  "airlineValueMeta": {
+    "AF": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "AV": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "VS": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "BA": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "CX": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "QF": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "LH": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "note": "FM lists this as \"Miles & More (Lufthansa)\""
+    },
+    "AS": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "note": "FM lists this as \"Atmos Rewards (Alaska/Hawaiian)\""
+    },
+    "AA": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "AC": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "QR": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+    },
+    "EI": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+    },
+    "G3": {
+      "currency": "BRL",
+      "asOf": "2026-07-24",
+      "source": "derived:operator-redemption-value",
+      "note": "Smiles (GOL): R$0.02100 per point (R$21.00/1,000) — a REDEMPTION value, not an acquisition price. Converted at USD/BRL 5.074167 on 2026-07-24. Not covered by Frequent Miler RRV (US-market measure) nor TPG.",
+      "sourceValue": 0.021,
+      "sourceCurrency": "BRL",
+      "fxRate": 5.074167
+    },
+    "LA": {
+      "currency": "BRL",
+      "asOf": "2026-07-24",
+      "source": "derived:operator-redemption-value",
+      "note": "LATAM Pass: R$0.02895 per point (R$28.95/1,000) — a REDEMPTION value, not an acquisition price. Converted at USD/BRL 5.074167 on 2026-07-24. Not covered by Frequent Miler RRV (US-market measure) nor TPG.",
+      "sourceValue": 0.02895,
+      "sourceCurrency": "BRL",
+      "fxRate": 5.074167
+    },
+    "AD": {
+      "currency": "BRL",
+      "asOf": "2026-07-24",
+      "source": "derived:operator-redemption-value",
+      "note": "Azul Fidelidade: R$0.01750 per point (R$17.50/1,000) — a REDEMPTION value, not an acquisition price. Converted at USD/BRL 5.074167 on 2026-07-24. Not covered by Frequent Miler RRV (US-market measure) nor TPG.",
+      "sourceValue": 0.0175,
+      "sourceCurrency": "BRL",
+      "fxRate": 5.074167
+    },
+    "AM": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: Aeromexico Rewards 0.8c. Not in Frequent Miler RRV."
+    },
+    "NH": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: ANA Mileage Club 1.4c. Not in Frequent Miler RRV."
+    },
+    "BR": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "derived:peer-estimate",
+      "note": "ESTIMATE — absent from both Frequent Miler RRV and TPG. Third-party sources quote 1.3-5.3c for EVA Air Infinity MileageLands, but the upper end is premium-cabin best-case. 1.3c is the conservative floor, consistent with same-alliance peers in TPG (Singapore 1.3 / Turkish 1.1 / Cathay 1.3 / Qantas 1.3).",
+      "estimate": true
+    },
+    "JL": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "derived:peer-estimate",
+      "note": "ESTIMATE — absent from both Frequent Miler RRV and TPG. Third-party sources quote 1.2-2.5c for JAL Mileage Bank, but the upper end is premium-cabin best-case. 1.3c is the conservative floor, consistent with same-alliance peers in TPG (Singapore 1.3 / Turkish 1.1 / Cathay 1.3 / Qantas 1.3).",
+      "estimate": true
+    },
+    "TK": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: Turkish Airlines Miles&Smiles 1.1c. Not in Frequent Miler RRV."
+    },
+    "EK": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: Emirates Skywards 1.2c. Not in Frequent Miler RRV."
+    },
+    "SQ": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: Singapore KrisFlyer 1.3c. Not in Frequent Miler RRV."
+    }
+  },
+  "transferTimes": {
+    "AMEX": {
+      "EI": "INSTANT",
+      "AM": "INSTANT",
+      "AC": "INSTANT",
+      "AF": "INSTANT",
+      "NH": "~1 DAY",
+      "AV": "INSTANT",
+      "BA": "INSTANT",
+      "CX": "4–8 HOURS",
+      "EK": "INSTANT",
+      "QF": "INSTANT",
+      "QR": "12–24 HOURS",
+      "SQ": "12–24 HOURS",
+      "VS": "INSTANT"
+    },
+    "CHASE": {
+      "EI": "INSTANT",
+      "AC": "INSTANT",
+      "AF": "INSTANT",
+      "BA": "INSTANT",
+      "QR": "INSTANT",
+      "SQ": "~1 DAY",
+      "VS": "INSTANT"
+    },
+    "CITI": {
+      "EI": "~1 DAY",
+      "AF": "INSTANT",
+      "AA": "INSTANT",
+      "AV": "INSTANT",
+      "BA": "~1 DAY",
+      "CX": "INSTANT",
+      "EK": "INSTANT",
+      "BR": "INSTANT",
+      "QF": "~1 DAY",
+      "QR": "~1 DAY",
+      "SQ": "~1 DAY",
+      "TK": "12–24 HOURS",
+      "VS": "INSTANT"
+    },
+    "C1": {
+      "EI": "INSTANT",
+      "AM": "INSTANT",
+      "AC": "INSTANT",
+      "AF": "INSTANT",
+      "AV": "INSTANT",
+      "BA": "INSTANT",
+      "CX": "1–2 DAYS",
+      "EK": "INSTANT",
+      "BR": "~1 DAY",
+      "JL": "INSTANT",
+      "QF": "~1 DAY",
+      "QR": "INSTANT",
+      "SQ": "12–24 HOURS",
+      "TK": "INSTANT",
+      "VS": "INSTANT"
+    },
+    "BILT": {
+      "EI": "INSTANT",
+      "AC": "INSTANT",
+      "AF": "INSTANT",
+      "AS": "INSTANT",
+      "AV": "INSTANT",
+      "BA": "INSTANT",
+      "CX": "INSTANT",
+      "EK": "INSTANT",
+      "JL": "INSTANT",
+      "QR": "INSTANT",
+      "TK": "INSTANT",
+      "VS": "INSTANT"
+    },
+    "WF": {
+      "EI": "INSTANT",
+      "AF": "INSTANT",
+      "AV": "INSTANT",
+      "BA": "INSTANT",
+      "CX": "INSTANT",
+      "QR": "INSTANT",
+      "VS": "INSTANT"
+    }
   },
   "directory": {
     "AMEX": {
       "air": [
-        ["Aer Lingus AerClub", "1:1"], ["Aeromexico Rewards", "1:1.6"], ["Air Canada Aeroplan", "1:1"],
-        ["Air France / KLM Flying Blue", "1:1"], ["ANA Mileage Club", "1:1"], ["Avianca LifeMiles", "1:1"],
-        ["British Airways Avios", "1:1"], ["Cathay Pacific Asia Miles", "1:1"], ["Delta SkyMiles", "1:1"],
-        ["Emirates Skywards", "1:1"], ["Etihad Guest", "1:1"], ["Iberia Avios", "1:1"],
-        ["JetBlue TrueBlue", "1:0.8"], ["Qantas Frequent Flyer", "1:1"], ["Qatar Airways Avios", "1:1"],
-        ["Singapore KrisFlyer", "1:1"], ["Virgin Atlantic Flying Club", "1:1"]
+        [
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
+        [
+          "Aeromexico Rewards",
+          "1:1.6"
+        ],
+        [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "ANA Mileage Club",
+          "1:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:0.8"
+        ],
+        [
+          "Delta SkyMiles",
+          "1:1"
+        ],
+        [
+          "Emirates Skywards",
+          "1:0.8"
+        ],
+        [
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "JetBlue TrueBlue",
+          "1:0.8"
+        ],
+        [
+          "Qantas Frequent Flyer",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Avios",
+          "1:1"
+        ],
+        [
+          "Singapore KrisFlyer",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Choice Privileges", "1:1"], ["Hilton Honors", "1:2"], ["Marriott Bonvoy", "1:1"]
+        [
+          "Choice Privileges",
+          "1:1"
+        ],
+        [
+          "Hilton Honors",
+          "1:2"
+        ],
+        [
+          "Marriott Bonvoy",
+          "1:1"
+        ]
       ]
     },
     "CHASE": {
       "air": [
-        ["Aer Lingus AerClub", "1:1"], ["Air Canada Aeroplan", "1:1"], ["Air France / KLM Flying Blue", "1:1"],
-        ["British Airways Avios", "1:1"], ["Emirates Skywards", "1:1"], ["Iberia Avios", "1:1"],
-        ["JetBlue TrueBlue", "1:1"], ["Singapore KrisFlyer", "1:1"], ["Southwest Rapid Rewards", "1:1"],
-        ["United MileagePlus", "1:1"], ["Virgin Atlantic Flying Club", "1:1"]
+        [
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
+        [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "JetBlue TrueBlue",
+          "1:1"
+        ],
+        [
+          "Singapore KrisFlyer",
+          "1:1"
+        ],
+        [
+          "Southwest Rapid Rewards",
+          "1:1"
+        ],
+        [
+          "United MileagePlus",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Hyatt World of Hyatt", "1:1"], ["IHG One Rewards", "1:1"], ["Marriott Bonvoy", "1:1"]
+        [
+          "Hyatt World of Hyatt",
+          "1:1"
+        ],
+        [
+          "IHG One Rewards",
+          "1:1"
+        ],
+        [
+          "Marriott Bonvoy",
+          "1:1"
+        ],
+        [
+          "Wyndham Rewards",
+          "1:1"
+        ]
       ]
     },
     "CITI": {
       "air": [
-        ["Aeromexico Rewards", "1:1"], ["Air France / KLM Flying Blue", "1:1"], ["Avianca LifeMiles", "1:1"],
-        ["Cathay Pacific Asia Miles", "1:1"], ["Emirates Skywards", "1:1"], ["Etihad Guest", "1:1"],
-        ["EVA Infinity MileageLands", "1:1"], ["JetBlue TrueBlue", "1:1"], ["Qantas Frequent Flyer", "1:1"],
-        ["Qatar Airways Avios", "1:1"], ["Singapore KrisFlyer", "1:1"], ["Thai Royal Orchid Plus", "1:1"],
-        ["Turkish Miles&Smiles", "1:1"], ["Virgin Atlantic Flying Club", "1:1"]
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "American Airlines AAdvantage",
+          "1:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Emirates Skywards",
+          "1:1"
+        ],
+        [
+          "Etihad Guest",
+          "1:1"
+        ],
+        [
+          "EVA Infinity MileageLands",
+          "1:1"
+        ],
+        [
+          "JetBlue TrueBlue",
+          "1:1"
+        ],
+        [
+          "Qantas Frequent Flyer",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Avios",
+          "1:1"
+        ],
+        [
+          "Singapore KrisFlyer",
+          "1:1"
+        ],
+        [
+          "Thai Royal Orchid Plus",
+          "1:1"
+        ],
+        [
+          "Turkish Miles&Smiles",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Accor Live Limitless", "2:1"], ["Choice Privileges", "1:2"], ["Wyndham Rewards", "1:1"]
+        [
+          "Accor Live Limitless",
+          "2:1"
+        ],
+        [
+          "Choice Privileges",
+          "1:1.5"
+        ],
+        [
+          "Wyndham Rewards",
+          "1:1"
+        ]
       ]
     },
     "C1": {
       "air": [
-        ["Aeromexico Rewards", "1:1"], ["Air Canada Aeroplan", "1:1"], ["Air France / KLM Flying Blue", "1:1"],
-        ["Avianca LifeMiles", "1:1"], ["British Airways Avios", "1:1"], ["Cathay Pacific Asia Miles", "1:1"],
-        ["Emirates Skywards", "1:1"], ["Etihad Guest", "1:1"], ["EVA Infinity MileageLands", "2:1.5"],
-        ["Finnair Plus", "1:1"], ["Qantas Frequent Flyer", "1:1"], ["Singapore KrisFlyer", "1:1"],
-        ["TAP Miles&Go", "1:1"], ["Turkish Miles&Smiles", "1:1"], ["Virgin Red", "1:1"]
+        [
+          "Aeromexico Rewards",
+          "1:1"
+        ],
+        [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Emirates Skywards",
+          "2:1.5"
+        ],
+        [
+          "Etihad Guest",
+          "1:1"
+        ],
+        [
+          "EVA Infinity MileageLands",
+          "2:1.5"
+        ],
+        [
+          "Finnair Plus",
+          "1:1"
+        ],
+        [
+          "Japan Airlines Mileage Bank",
+          "2:1.5"
+        ],
+        [
+          "JetBlue TrueBlue",
+          "5:3"
+        ],
+        [
+          "Qantas Frequent Flyer",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Privilege Club",
+          "1:1"
+        ],
+        [
+          "Singapore KrisFlyer",
+          "1:1"
+        ],
+        [
+          "TAP Miles&Go",
+          "1:1"
+        ],
+        [
+          "Turkish Miles&Smiles",
+          "1:1"
+        ],
+        [
+          "Virgin Red",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Accor Live Limitless", "2:1"], ["Choice Privileges", "1:1"], ["Wyndham Rewards", "1:1"]
+        [
+          "Accor Live Limitless",
+          "2:1"
+        ],
+        [
+          "Choice Privileges",
+          "1:1"
+        ],
+        [
+          "I Prefer Hotel Rewards",
+          "1:2"
+        ],
+        [
+          "Wyndham Rewards",
+          "1:1"
+        ]
       ]
     },
     "BILT": {
       "air": [
-        ["Aer Lingus AerClub", "1:1"], ["Air Canada Aeroplan", "1:1"], ["Air France / KLM Flying Blue", "1:1"],
-        ["Alaska Mileage Plan", "1:1"], ["American AAdvantage", "1:1"], ["Avianca LifeMiles", "1:1"],
-        ["British Airways Avios", "1:1"], ["Cathay Pacific Asia Miles", "1:1"], ["Emirates Skywards", "1:1"],
-        ["Iberia Avios", "1:1"], ["TAP Miles&Go", "1:1"], ["Turkish Miles&Smiles", "1:1"],
-        ["United MileagePlus", "1:1"], ["Virgin Atlantic Flying Club", "1:1"]
+        [
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
+        [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "Alaska Atmos Rewards",
+          "1:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Emirates Skywards",
+          "1:1"
+        ],
+        [
+          "Etihad Guest",
+          "1:1"
+        ],
+        [
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "Japan Airlines (JAL Mileage Bank)",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Privilege Club",
+          "1:1"
+        ],
+        [
+          "Southwest Rapid Rewards",
+          "1:1"
+        ],
+        [
+          "TAP Miles&Go",
+          "1:1"
+        ],
+        [
+          "Turkish Miles&Smiles",
+          "1:1"
+        ],
+        [
+          "United MileagePlus",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Accor Live Limitless", "3:2"], ["Hilton Honors", "1:1"], ["Hyatt World of Hyatt", "1:1"],
-        ["IHG One Rewards", "1:1"], ["Marriott Bonvoy", "1:1"]
+        [
+          "Accor Live Limitless",
+          "3:2"
+        ],
+        [
+          "Hilton Honors",
+          "1:1"
+        ],
+        [
+          "Hyatt World of Hyatt",
+          "1:1"
+        ],
+        [
+          "IHG One Rewards",
+          "1:1"
+        ],
+        [
+          "Marriott Bonvoy",
+          "1:1"
+        ],
+        [
+          "Wyndham Rewards",
+          "1:1"
+        ]
       ]
     },
     "WF": {
       "air": [
-        ["Aer Lingus AerClub", "1:1"], ["Air France / KLM Flying Blue", "1:1"], ["Avianca LifeMiles", "1:1"],
-        ["British Airways Avios", "1:1"], ["Iberia Avios", "1:1"], ["Virgin Atlantic Flying Club", "1:1"]
+        [
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "JetBlue TrueBlue",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
       ],
       "hotel": [
-        ["Choice Privileges", "1:2"]
+        [
+          "Choice Privileges",
+          "1:2"
+        ],
+        [
+          "Wyndham Rewards",
+          "1:2"
+        ]
       ]
     },
     "ESF": {
       "air": [
-        ["Smiles (GOL)", "1:1"], ["LATAM Pass", "1:1"], ["TAP Miles&Go", "1:1"],
-        ["American AAdvantage", "1:1"], ["Air France / KLM Flying Blue", "1:1"]
+        [
+          "Smiles (GOL)",
+          "1:1"
+        ],
+        [
+          "LATAM Pass",
+          "1:1"
+        ],
+        [
+          "Azul Fidelidade",
+          "1:1"
+        ],
+        [
+          "TAP Miles&Go",
+          "2.2:1"
+        ],
+        [
+          "American AAdvantage",
+          "3.5:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "3:1"
+        ]
       ],
-      "hotel": []
+      "hotel": [
+        [
+          "IHG One Rewards",
+          "2:1"
+        ],
+        [
+          "Accor Live Limitless",
+          "3.5:1"
+        ]
+      ]
     },
     "LIV": {
       "air": [
-        ["Smiles (GOL)", "1:1"], ["LATAM Pass", "1:1"], ["Azul Fidelidade", "1:1"],
-        ["TAP Miles&Go", "1:1"], ["Iberia Avios", "1:1"], ["Qatar Airways Avios", "1:1"]
+        [
+          "Smiles (GOL)",
+          "1:1"
+        ],
+        [
+          "LATAM Pass",
+          "1:1"
+        ],
+        [
+          "Azul Fidelidade",
+          "1:1"
+        ],
+        [
+          "TAP Miles&Go",
+          "1:1"
+        ],
+        [
+          "Iberia Avios",
+          "3.5:1"
+        ],
+        [
+          "British Airways Executive Club",
+          "3.5:1"
+        ]
       ],
       "hotel": [
-        ["Accor Live Limitless", "2:1"]
+        [
+          "Accor Live Limitless",
+          "3.5:1"
+        ]
       ]
     }
   }

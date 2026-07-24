@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio';
+import { recordHistory } from '../history.mjs';
 
 // DOM verified live on 2026-07-24 against
 // https://frequentmiler.com/current-point-transfer-bonuses/ (HTTP 200).
@@ -35,6 +36,91 @@ function findBonusTable($) {
   return null;
 }
 
+// The archive table (`#tablepress-33-no-6` today) sits under an
+// <h3>Expired Transfer Bonuses</h3> heading and carries ~463 rows in the same
+// 4-column shape. Same reasoning as findBonusTable: ids get regenerated on
+// re-save, so locate by heading first, then by structure — of the TablePress
+// tables that are NOT the current-bonus table, the archive is by far the
+// largest (463 rows vs 6). If neither signal fires we return null and simply
+// publish no history: degraded, never wrong.
+function findHistoryTable($, currentTable) {
+  const currentEl = currentTable?.[0];
+
+  const heading = $('h1,h2,h3,h4,h5,h6')
+    .filter((_, el) => /expired|past\s+transfer|previous\s+transfer/i.test($(el).text()))
+    .first();
+  if (heading.length) {
+    const table = heading.nextAll('table').first();
+    // guard: if the heading somehow leads back to the current-bonus table,
+    // fall through rather than ingest live bonuses as "history"
+    if (table.length && table[0] !== currentEl) return table;
+  }
+
+  let best = null;
+  let bestRows = 0;
+  $('table.tablepress').each((_, el) => {
+    if (el === currentEl) return;
+    const rows = $(el).find('tr').length;
+    if (rows > bestRows) {
+      best = $(el);
+      bestRows = rows;
+    }
+  });
+  return best;
+}
+
+// Both tables hide a numeric sort-serial in the date cells, e.g.
+// <p style='display:none'>46233</p>07/30/26 — without stripping it the text
+// reads "4623307/30/26".
+function cellText($, td) {
+  const $c = $(td).clone();
+  $c.find('p').remove();
+  return $c.text().trim();
+}
+
+const DETAILS_RE = /(\d+)%\s*transfer bonus\s+from\s+(.+?)\s+to\s+(.+)/i;
+
+// Parses the historical archive out of the SAME html the current-bonus parse
+// already has — no second HTTP request. Silent by design: ~300 of the 463 rows
+// are banks/partners this product doesn't track (Marriott, Hilton, JetBlue…)
+// and warning on each would drown the log (and the current-table warning
+// contract other tests assert on).
+function parseHistoryFrom($) {
+  const out = [];
+  const table = findHistoryTable($, findBonusTable($));
+  if (!table) return out;
+
+  table.find('tr').each((_, el) => {
+    const cells = $(el).find('td');
+    if (cells.length < 4) return; // header / layout rows
+    const details = cellText($, cells[1]);
+    // "[Targeted]" rows are offers mailed to selected cardholders, not public
+    // windows — counting them would inflate the odds an ordinary user ever
+    // sees a bonus on that route (27 of 462 archive rows on 2026-07-24).
+    // They already fail alias resolution because of the suffix; excluding them
+    // here makes that deliberate instead of accidental.
+    if (/\[\s*targeted\s*\]/i.test(details)) return;
+    const match = details.match(DETAILS_RE);
+    if (!match) return; // non-percentage promos ("5,000 bonus points…")
+    out.push({
+      bankName: cellText($, cells[0]),
+      partnerName: match[3].trim(),
+      pct: Number(match[1]),
+      startDateRaw: cellText($, cells[2]),
+      endDateRaw: cellText($, cells[3]),
+    });
+  });
+
+  return out;
+}
+
+// Exported for tests and for a future publish.mjs that collects history
+// explicitly instead of via the history.mjs store (see the ponytail note
+// there). Same html in, raw windows out.
+export function parseHistory(html) {
+  return parseHistoryFrom(cheerio.load(html));
+}
+
 export const source = {
   id: 'frequentmiler',
   url: 'https://frequentmiler.com/current-point-transfer-bonuses/',
@@ -42,6 +128,10 @@ export const source = {
     const $ = cheerio.load(html);
     const out = [];
     const table = findBonusTable($);
+
+    // Hand the archive off before parsing current bonuses: the loop below
+    // mutates date cells (find('p').remove()) on this same document.
+    recordHistory(source.id, parseHistoryFrom($));
 
     if (!table) {
       console.warn('[frequentmiler] could not locate the current/upcoming bonus table');

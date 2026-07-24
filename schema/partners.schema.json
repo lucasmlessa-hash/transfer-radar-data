@@ -3,45 +3,155 @@
   "$id": "https://transfer-radar/schema/partners.schema.json",
   "title": "Transfer Radar partner directory",
   "type": "object",
-  "required": ["version", "banks", "airlineDomains", "bankDomains", "airlineValues", "directory"],
+  "required": [
+    "version",
+    "banks",
+    "airlineDomains",
+    "bankDomains",
+    "airlineValues",
+    "directory"
+  ],
   "additionalProperties": false,
   "properties": {
-    "version": { "const": 1 },
+    "version": {
+      "const": 1
+    },
     "banks": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["name", "short", "bg", "fg"],
+        "required": [
+          "name",
+          "short",
+          "bg",
+          "fg"
+        ],
         "additionalProperties": false,
         "properties": {
-          "name": { "type": "string" },
-          "short": { "type": "string" },
-          "bg": { "type": "string" },
-          "fg": { "type": "string" }
+          "name": {
+            "type": "string"
+          },
+          "short": {
+            "type": "string"
+          },
+          "bg": {
+            "type": "string"
+          },
+          "fg": {
+            "type": "string"
+          }
         }
       }
     },
     "airlineDomains": {
       "type": "object",
-      "additionalProperties": { "type": "string" }
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "airlineIconUrls": {
+      "description": "OPTIONAL. Airline code -> absolute logo URL, overriding the favicon URL the client would otherwise build from airlineDomains. Present only for airlines whose favicon service result is wrong or missing.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      }
+    },
+    "transferTimes": {
+      "description": "OPTIONAL. Bank code -> airline code -> transfer speed display string (e.g. \"INSTANT\", \"~1 DAY\"). Keyed by both because speed varies by bank for the same airline. A missing pair means no published figure; the feed falls back to an em dash.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    },
+    "airlineValueMeta": {
+      "description": "OPTIONAL. Airline code -> provenance for the matching airlineValues entry. `currency` names the market the valuation came from (BRL-denominated programs are converted to USD cents so airlineValues stays one comparable unit). `source` is a citation URL, a \"derived:*\" slug, or \"unsourced\" for a placeholder that was never researched. When a value originates in a non-USD market, sourceValue/sourceCurrency/fxRate record the native figure and the rate used, so it can be re-converted instead of silently drifting. estimate:true marks a value no published source covers.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "currency",
+          "asOf",
+          "source"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "enum": [
+              "USD",
+              "BRL"
+            ]
+          },
+          "asOf": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "note": {
+            "type": "string"
+          },
+          "sourceValue": {
+            "type": "number",
+            "description": "OPTIONAL. The value as published in its native currency (e.g. BRL per point), so the USD figure can be re-derived when the FX rate moves."
+          },
+          "sourceCurrency": {
+            "enum": [
+              "USD",
+              "BRL"
+            ],
+            "description": "OPTIONAL. Currency of sourceValue."
+          },
+          "fxRate": {
+            "type": "number",
+            "description": "OPTIONAL. USD/BRL rate used to convert sourceValue into the USD cents stored in airlineValues, captured on asOf."
+          },
+          "estimate": {
+            "type": "boolean",
+            "description": "OPTIONAL. true when no published source covers this programme and the value is a reasoned estimate — the client should present it as such."
+          }
+        }
+      }
     },
     "bankDomains": {
       "type": "object",
-      "additionalProperties": { "type": "string" }
+      "additionalProperties": {
+        "type": "string"
+      }
     },
     "airlineValues": {
       "type": "object",
-      "additionalProperties": { "type": "number" }
+      "additionalProperties": {
+        "type": "number"
+      }
     },
     "directory": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["air", "hotel"],
+        "required": [
+          "air",
+          "hotel"
+        ],
         "additionalProperties": false,
         "properties": {
-          "air": { "type": "array", "items": { "$ref": "#/$defs/partnerTuple" } },
-          "hotel": { "type": "array", "items": { "$ref": "#/$defs/partnerTuple" } }
+          "air": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/partnerTuple"
+            }
+          },
+          "hotel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/partnerTuple"
+            }
+          }
         }
       }
     }
@@ -52,8 +162,12 @@
       "minItems": 2,
       "maxItems": 2,
       "items": [
-        { "type": "string" },
-        { "type": "string" }
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
       ]
     }
   }

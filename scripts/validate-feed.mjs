@@ -109,7 +109,10 @@ function validatePartnerTuple(t, ctx) {
 function validatePartners(doc) {
   if (!isPlainObject(doc)) fail('partners: must be an object');
   const required = ['version', 'banks', 'airlineDomains', 'bankDomains', 'airlineValues', 'directory'];
-  checkKeys(doc, required, required, 'partners');
+  // Curated extras, all optional: per-airline logo overrides, per-bank transfer
+  // speeds, and provenance for each airlineValues number.
+  const optional = ['airlineIconUrls', 'transferTimes', 'airlineValueMeta'];
+  checkKeys(doc, required, [...required, ...optional], 'partners');
   if (doc.version !== 1) fail(`partners.version: must be 1, got ${JSON.stringify(doc.version)}`);
 
   if (!isPlainObject(doc.banks)) fail('partners.banks: must be an object');
@@ -132,6 +135,59 @@ function validatePartners(doc) {
   if (!isPlainObject(doc.airlineValues)) fail('partners.airlineValues: must be an object');
   for (const [k, v] of Object.entries(doc.airlineValues)) {
     if (typeof v !== 'number') fail(`partners.airlineValues.${k}: must be a number`);
+  }
+
+  // A code typo in any of these three maps degrades silently (a wrong
+  // transferTimes key just means the route shows "—" forever), so each key is
+  // checked against the map it is supposed to shadow.
+  if ('airlineIconUrls' in doc) {
+    if (!isPlainObject(doc.airlineIconUrls)) fail('partners.airlineIconUrls: must be an object');
+    for (const [k, v] of Object.entries(doc.airlineIconUrls)) {
+      const ctx = `partners.airlineIconUrls.${k}`;
+      if (!(k in doc.airlineDomains)) fail(`${ctx}: unknown airline code`);
+      if (typeof v !== 'string' || !v.startsWith('https://')) fail(`${ctx}: must be an https:// URL, got ${JSON.stringify(v)}`);
+    }
+  }
+
+  if ('transferTimes' in doc) {
+    if (!isPlainObject(doc.transferTimes)) fail('partners.transferTimes: must be an object');
+    for (const [bank, byCode] of Object.entries(doc.transferTimes)) {
+      const ctx = `partners.transferTimes.${bank}`;
+      if (!isPlainObject(byCode)) fail(`${ctx}: must be an object`);
+      if (!(bank in doc.banks)) fail(`${ctx}: unknown bank code`);
+      for (const [code, v] of Object.entries(byCode)) {
+        if (!(code in doc.airlineDomains)) fail(`${ctx}.${code}: unknown airline code`);
+        if (typeof v !== 'string' || v === '') fail(`${ctx}.${code}: must be a non-empty string`);
+      }
+    }
+  }
+
+  if ('airlineValueMeta' in doc) {
+    if (!isPlainObject(doc.airlineValueMeta)) fail('partners.airlineValueMeta: must be an object');
+    for (const [code, m] of Object.entries(doc.airlineValueMeta)) {
+      const ctx = `partners.airlineValueMeta.${code}`;
+      if (!isPlainObject(m)) fail(`${ctx}: must be an object`);
+      checkKeys(m, ['currency', 'asOf', 'source'],
+        ['currency', 'asOf', 'source', 'note', 'sourceValue', 'sourceCurrency', 'fxRate', 'estimate'], ctx);
+      if (!(code in doc.airlineValues)) fail(`${ctx}: no matching airlineValues entry`);
+      if (m.currency !== 'USD' && m.currency !== 'BRL') fail(`${ctx}.currency: must be "USD" or "BRL", got ${JSON.stringify(m.currency)}`);
+      if (typeof m.asOf !== 'string' || !ISO_DATE.test(m.asOf)) fail(`${ctx}.asOf: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(m.asOf)}`);
+      for (const f of ['source', 'note']) {
+        if (f in m && (typeof m[f] !== 'string' || m[f] === '')) fail(`${ctx}.${f}: must be a non-empty string`);
+      }
+      // A non-USD valuation must carry enough to re-derive it when FX moves, rather than
+      // silently drifting: the native figure, its currency, and the rate used on asOf.
+      for (const f of ['sourceValue', 'fxRate']) {
+        if (f in m && (typeof m[f] !== 'number' || !(m[f] > 0))) fail(`${ctx}.${f}: must be a positive number`);
+      }
+      if ('sourceCurrency' in m && m.sourceCurrency !== 'USD' && m.sourceCurrency !== 'BRL') {
+        fail(`${ctx}.sourceCurrency: must be "USD" or "BRL", got ${JSON.stringify(m.sourceCurrency)}`);
+      }
+      if ('estimate' in m && typeof m.estimate !== 'boolean') fail(`${ctx}.estimate: must be a boolean`);
+      if (m.currency === 'BRL' && !('sourceValue' in m && 'fxRate' in m)) {
+        fail(`${ctx}: a BRL-denominated value must record sourceValue and fxRate so it can be re-converted`);
+      }
+    }
   }
 
   if (!isPlainObject(doc.directory)) fail('partners.directory: must be an object');

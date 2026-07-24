@@ -143,17 +143,33 @@ test('Air France / KLM Flying Blue resolves to AF whether or not the slash is pr
   assert.equal(routes[0].code, 'AF');
 });
 
-test('untracked real-world banks/partners land in unmapped, never an invented code', () => {
-  const { routes, unmapped } = normalize(
-    [
-      { bankName: 'Rove Miles', partnerName: 'Frontier Miles', pct: 25, endDateRaw: '07/31/26', sourceUrl: 'https://fm.example/' },
-      { bankName: 'PAYBACK', partnerName: 'Lufthansa (Miles and More)', pct: 10, endDateRaw: 'July 31, 2026', sourceUrl: 'https://aw.example/' },
-      { bankName: 'Chase Ultimate Rewards', partnerName: 'IHG', pct: 100, endDateRaw: '07/30/26', sourceUrl: 'https://fm.example/' },
-      { bankName: 'Capital One', partnerName: 'EVA Air (Infinity MileageLands)', pct: 30, endDateRaw: 'July 31, 2026', sourceUrl: 'https://aw.example/' },
-      { bankName: 'Rove', partnerName: 'Qantas (Frequent Flyer)', pct: 50, endDateRaw: 'August 14, 2026', sourceUrl: 'https://aw.example/' },
-    ],
-    NOW,
-  );
-  assert.equal(routes.length, 0, 'none of these are tracked banks/partners - no route should be invented');
-  assert.equal(unmapped.length, 5);
+test('an untracked bank, or a hotel partner, never becomes a route', () => {
+  // Real rows the live sources return. Every one is half-tracked on purpose, so
+  // this keeps biting as alias coverage grows rather than decaying into a list
+  // of names someone will legitimately add one day: Lufthansa and Qantas ARE
+  // tracked airlines (LH, QF) and Chase IS a tracked bank. What must keep each
+  // row out of `routes` is the untracked *other* half - an unknown bank, or a
+  // hotel program, which is never an airline route no matter who the bank is.
+  const cases = [
+    [{ bankName: 'Rove Miles', partnerName: 'Frontier Miles', pct: 25, endDateRaw: '07/31/26', sourceUrl: 'https://fm.example/' }, /unknown bank/],
+    [{ bankName: 'PAYBACK', partnerName: 'Lufthansa (Miles and More)', pct: 10, endDateRaw: 'July 31, 2026', sourceUrl: 'https://aw.example/' }, /unknown bank/],
+    [{ bankName: 'Rove', partnerName: 'Qantas (Frequent Flyer)', pct: 50, endDateRaw: 'August 14, 2026', sourceUrl: 'https://aw.example/' }, /unknown bank/],
+    [{ bankName: 'Chase Ultimate Rewards', partnerName: 'IHG', pct: 100, endDateRaw: '07/30/26', sourceUrl: 'https://fm.example/' }, /unknown partner/],
+  ];
+
+  const { routes, unmapped } = normalize(cases.map(([raw]) => raw), NOW);
+  assert.equal(routes.length, 0, `no route may be invented, got: [${routes.map((r) => r.id).join(', ')}]`);
+  assert.equal(unmapped.length, cases.length);
+  // reason per row, not just a count: if one of these names ever does become
+  // tracked, this fails loudly at the exact row instead of silently shifting.
+  cases.forEach(([raw, reason], i) => {
+    assert.equal(unmapped[i].bankName, raw.bankName);
+    assert.match(unmapped[i].reason, reason);
+  });
+
+  // Proof the fixture isn't vacuously empty: the same Lufthansa row under a
+  // TRACKED bank does resolve, so it really is the bank check doing the work
+  // above - not a normalize() that stopped emitting routes altogether.
+  const { routes: withTrackedBank } = normalize([{ ...cases[1][0], bankName: 'Amex' }], NOW);
+  assert.deepEqual(withTrackedBank.map((r) => r.id), ['amex-lh']);
 });

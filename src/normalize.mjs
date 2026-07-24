@@ -3,33 +3,47 @@
 // RawBonus = { bankName, partnerName, pct, endDateRaw, sourceUrl }
 
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
+
 import { resolveBank, resolvePartner, partnerDisplayName } from './aliases.mjs';
+import { deriveHistory } from './history.mjs';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// ponytail: mp/hist/typical/time aren't derivable from a scraped bonus row —
-// they're historical/curated data. Plan 005 will replace this with a real
-// static seed file; for now the plan-001 sample feed IS the seed, keyed by
-// route id. Ids the pipeline discovers that aren't in the seed yet get the
-// documented defaults below.
-let SEED_BY_ID = null;
-function loadSeed() {
-  if (SEED_BY_ID) return SEED_BY_ID;
-  SEED_BY_ID = new Map();
-  try {
-    const raw = readFileSync(path.join(__dirname, '..', 'sample', 'feed.json'), 'utf8');
-    const doc = JSON.parse(raw);
-    for (const r of doc.routes ?? []) SEED_BY_ID.set(r.id, r);
-  } catch {
-    // no seed available - defaults below cover every route
-  }
-  return SEED_BY_ID;
-}
-
+// mp/hist/typical used to be seeded by copying them out of sample/feed.json
+// whenever a route id matched. sample/feed.json is SIMULATED demo data, so the
+// public feed was shipping invented past bonus windows as if they were real —
+// and the extension's quality badge ("BEST EVER", "ALL-TIME HIGH") was being
+// computed from them. That seeding is gone and must never come back: the only
+// admissible source of history is a real scraped archive (see history.mjs).
+// A route with no archived window gets hist: [], mp: all zeros, no `next`.
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-const DEFAULT_MP = Array(12).fill(0.05);
+
+// "we have no evidence", not "it's unlikely" - zeros, not a nonzero guess.
+const NO_HISTORY_MP = Array(12).fill(0);
+
+// Forecast-only routes are capped so the feed can't balloon as the archive
+// grows; the highest-confidence ones survive.
+const MAX_FORECAST_ROUTES = 25;
+
+// `time` (transfer speed) is curated partner metadata, not something any
+// source publishes per bonus. It used to come from the simulated sample feed;
+// it now has a real home in sample/partners.json `transferTimes`, transcribed
+// from Frequent Miler's published per-bank transfer-time tables.
+//
+// The map is keyed bank -> airline code because speed genuinely varies by bank
+// for the same airline: Amex->Cathay is 4-8 hours while Capital One->Cathay is
+// 1-2 days, and Citi reaches Avios programs via Qatar (~1 day) where every
+// other bank is instant. A per-airline map would have to pick one and be wrong
+// for the rest.
+//
+// A pair with no published figure is deliberately absent (Livelo/Esfera -> the
+// Brazilian carriers are not covered by any source we trust) and falls back to
+// the em dash the client already renders for unknown values. An honest blank
+// beats an invented "INSTANT" that makes someone miss a transfer deadline.
+const UNKNOWN_TIME = '—';
+const TRANSFER_TIMES = JSON.parse(
+  readFileSync(new URL('../sample/partners.json', import.meta.url), 'utf8'),
+).transferTimes ?? {};
+
+const transferTime = (bank, code) => TRANSFER_TIMES[bank]?.[code] ?? UNKNOWN_TIME;
 
 function monthIndex(name) {
   const idx = MONTHS.indexOf(name.slice(0, 3).toLowerCase());
@@ -112,10 +126,11 @@ export function parseEndDate(raw, now = new Date()) {
 /**
  * @param {Array<{bankName:string, partnerName:string, pct:number, endDateRaw:string, sourceUrl:string}>} rawBonuses
  * @param {Date} now
+ * @param {Map<string, object>} history derived real history, keyed by route id
+ *   (defaults to whatever the sources recorded this run - see history.mjs)
  * @returns {{ routes: object[], unmapped: object[], sourceUrlsById: Record<string,string[]> }}
  */
-export function normalize(rawBonuses, now = new Date()) {
-  const seed = loadSeed();
+export function normalize(rawBonuses, now = new Date(), history = deriveHistory(now)) {
   const unmapped = [];
   const byId = new Map(); // id -> { route: {..., pct, endDate}, sourceUrls: Set }
 
@@ -140,16 +155,16 @@ export function normalize(rawBonuses, now = new Date()) {
       continue;
     }
 
-    const seedRoute = seed.get(id);
+    const h = history.get(id);
     const route = {
       id,
       bank: bankCode,
-      airline: seedRoute?.airline ?? partnerDisplayName(airCode),
+      airline: partnerDisplayName(airCode),
       code: airCode,
-      time: seedRoute?.time ?? '—',
-      typical: seedRoute?.typical ?? '—',
-      mp: seedRoute?.mp ?? DEFAULT_MP,
-      hist: seedRoute?.hist ?? [],
+      time: transferTime(bankCode, airCode),
+      typical: h?.typical ?? '—',
+      mp: h?.mp ?? NO_HISTORY_MP,
+      hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
     };
@@ -170,6 +185,32 @@ export function normalize(rawBonuses, now = new Date()) {
     routes.push(out);
     sourceUrlsById[id] = [...sourceUrls];
   }
+
+  // Forecast rows: routes with real archived history but no bonus running
+  // right now. Without these the client's Forecast tab has nothing to render.
+  // `next` is deliberately NOT attached to routes that are live - per
+  // CONTRACT.md a route carries `active` alone or `next` alone.
+  const forecasts = [];
+  for (const [id, h] of history) {
+    if (byId.has(id) || !h.next) continue;
+    forecasts.push({
+      id,
+      bank: h.bank,
+      airline: partnerDisplayName(h.code),
+      code: h.code,
+      time: transferTime(h.bank, h.code),
+      typical: h.typical,
+      mp: h.mp,
+      hist: h.hist,
+      next: h.next,
+    });
+  }
+  forecasts.sort((a, b) => b.next.prob - a.next.prob);
+  const dropped = forecasts.slice(MAX_FORECAST_ROUTES);
+  if (dropped.length) {
+    console.log(`[normalize] forecast cap ${MAX_FORECAST_ROUTES}: dropped ${dropped.length} lower-probability route(s): ${dropped.map((r) => `${r.id}@${r.next.prob}%`).join(', ')}`);
+  }
+  routes.push(...forecasts.slice(0, MAX_FORECAST_ROUTES));
 
   return { routes, unmapped, sourceUrlsById };
 }
