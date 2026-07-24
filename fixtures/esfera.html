@@ -1,38 +1,21 @@
 <!--
-  Hand-authored fixture: proves the parser's shape logic against a
-  representative BR card-listing layout ("until Mon DD" dates), not the live
-  DOM. Selectors are finalized against the real page at go-live (see
-  GO-LIVE.md).
+  Minimal excerpt retained for parser testing only.
+  Source: https://www.esfera.com.vc/
+  Captured: 2026-07-24
+  Keeps 4 of the homepage hero-carousel <img alt="..."> banners, verbatim,
+  each still wrapped in its real <a href="/p/<slug>/..."> product link (with
+  the <picture>/<source> responsive-image variants removed — the parser only
+  reads the <img alt> text and the closest a[href*="/p/"]):
+    - Azul: the one real transfer-bonus banner (matches).
+    - Extra, Magalu: earn-points banners with no "% de bônus" (non-matching).
+    - Decolar: an earn-points banner whose alt text contains "Transfers e
+      Seguro Viagem" — the parser's TRANSFER_CTA regex deliberately does not
+      treat "Transfers" as a match for "transferir/transfira/transferência",
+      so this must stay excluded too.
+  All other carousel banners, nav, header, footer, scripts, and styles have
+  been removed.
 -->
-<section class="ofertas-esfera">
-  <div class="card-oferta">
-    <h3 class="banco">Esfera</h3>
-    <p class="parceiro">Avianca LifeMiles</p>
-    <p class="bonus">Bônus de 35%</p>
-    <p class="prazo">Until Jul 25</p>
-  </div>
-  <div class="card-oferta">
-    <h3 class="banco">Esfera</h3>
-    <p class="parceiro">LATAM Pass</p>
-    <p class="bonus">Bônus de 50%</p>
-    <p class="prazo">Until Aug 1</p>
-  </div>
-  <div class="card-oferta">
-    <h3 class="banco">Esfera</h3>
-    <p class="parceiro">Qatar Airways Avios</p>
-    <p class="bonus">Bônus de 30%</p>
-    <p class="prazo"></p>
-  </div>
-  <div class="card-oferta">
-    <h3 class="banco">Esfera</h3>
-    <p class="parceiro">TAP Miles&amp;Go</p>
-    <p class="bonus">Bônus de 40%</p>
-    <p class="prazo">Until Jul 28</p>
-  </div>
-  <div class="card-oferta">
-    <h3 class="banco">Esfera</h3>
-    <p class="parceiro">Air France / KLM Flying Blue</p>
-    <p class="bonus">Confira condições</p>
-    <p class="prazo">Until Aug 5</p>
-  </div>
-</section>
+<a href="/p/azul-fidelidade/e000100002" class="carousel-item slider--image relative size-full flex"><picture class="banner-box"><img alt="Os textos “Só até 26/07: Ganhe até 115% de bônus! Cadastre-se na promoção e transfira pontos.”, a marca da Azul e o botão “Transferir”." loading="lazy" width="1920" height="570" decoding="async" style="color:transparent" sizes="100vw" src="/_next/image?url=https%3A%2F%2Fimages.contentstack.io%2Fv3%2Fassets%2Fblt94de8ad7892ab8c4%2Fbltbb5026d6aca7509c%2F6a60a6f260036fd4a6163f70%2F20260722_homepts_rsgt_azul_desk.png%3Fbranch%3Dprd&amp;w=3840&amp;q=75"></picture></a>
+<a href="/p/extracom/e000100178" class="carousel-item slider--image relative size-full flex"><picture class="banner-box"><img alt="Os textos “Só até 24/07: 5 pontos a cada R$ 1 em Automotivos, Beleza &amp; Saúde, Eletroportáteis e Ferramentas e 3 pontos a cada R$ 1 no restante do site.”, a marca do Extra e o botão “Compre e pontue”." loading="lazy" width="1920" height="570" decoding="async" style="color:transparent" sizes="100vw" src="/_next/image?url=https%3A%2F%2Fimages.contentstack.io%2Fv3%2Fassets%2Fblt94de8ad7892ab8c4%2Fblt3b89b91eccf823db%2F6a57cab64e1f9e44a3f52dca%2F20260720_homepts_acml_extra_desk.png%3Fbranch%3Dprd&amp;w=3840&amp;q=75"></picture></a>
+<a href="/p/magalu/e000100100" class="carousel-item slider--image relative size-full flex"><picture class="banner-box"><img alt="Os textos “Só até 24/07: 4 pontos a cada R$ 1 em produtos selecionados!”, a marca do Magalu e o botão “Compre e pontue”." loading="lazy" width="1920" height="570" decoding="async" style="color:transparent" sizes="100vw" src="/_next/image?url=https%3A%2F%2Fimages.contentstack.io%2Fv3%2Fassets%2Fblt94de8ad7892ab8c4%2Fblt12824a3c054449e4%2F6a5a73a8b7e70753ed019f7e%2F20260721_homepts_acml_magalu_desk.gif%3Fbranch%3Dprd&amp;w=3840&amp;q=75"></picture></a>
+<a href="/p/decolar/e000100402" class="carousel-item slider--image relative size-full flex"><picture class="banner-box"><img alt="Os textos “Só até 26/07: 10 pontos só para o Clube Esfera e 8 pontos para demais clientes a cada R$ 1 em Transfers e Seguro Viagem!”, a marca da Decolar e o botão “Compre e pontue”." loading="lazy" width="1920" height="570" decoding="async" style="color:transparent" sizes="100vw" src="/_next/image?url=https%3A%2F%2Fimages.contentstack.io%2Fv3%2Fassets%2Fblt94de8ad7892ab8c4%2Fbltafc6ba6feffda596%2F6a5fb19f5210c70b88a26560%2F20260724_homepts_acml_decolar_desk.png%3Fbranch%3Dprd&amp;w=3840&amp;q=75"></picture></a>

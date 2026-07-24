@@ -1,45 +1,40 @@
 <!--
-  Hand-authored fixture: proves the parser's shape logic against a
-  representative "bank/partner/bonus/expires" table, not the live DOM.
-  Selectors are finalized against the real page at go-live (see GO-LIVE.md).
+  Real markup, fetched live from https://frequentmiler.com/current-point-transfer-bonuses/
+  on 2026-07-24 (curl -A "Mozilla/5.0 ... Chrome/120.0 Safari/537.36").
+  This is the "Current and Upcoming Transfer Bonuses" heading plus the
+  tablepress-33-no-5 table that follows it (the CURRENT/upcoming bonus
+  table). The page also contains a tablepress-33-no-6 historical archive
+  table elsewhere, which is intentionally NOT included here — the parser
+  must not pick that one up, and this fixture has no such table to
+  accidentally match against, so the id/heading-based selection strategy
+  is exercised for real.
 -->
-<article>
-  <h1>Current Transfer Bonuses</h1>
-  <table class="bonus-table">
-    <thead>
-      <tr><th>Bank</th><th>Partner</th><th>Bonus</th><th>Expires</th></tr>
-    </thead>
-    <tbody>
-      <tr class="bonus-row">
-        <td class="bank">Amex Membership Rewards</td>
-        <td class="partner">Avianca LifeMiles</td>
-        <td class="pct">+25%</td>
-        <td class="expires">July 29, 2026</td>
-      </tr>
-      <tr class="bonus-row">
-        <td class="bank">Chase Ultimate Rewards</td>
-        <td class="partner">Air France / KLM Flying Blue</td>
-        <td class="pct">+30%</td>
-        <td class="expires">August 5, 2026</td>
-      </tr>
-      <tr class="bonus-row">
-        <td class="bank">Bilt Rewards</td>
-        <td class="partner">Avianca LifeMiles</td>
-        <td class="pct">+100%</td>
-        <td class="expires"></td>
-      </tr>
-      <tr class="bonus-row">
-        <td class="bank">Citi ThankYou</td>
-        <td class="partner">Norse Atlantic Rewards</td>
-        <td class="pct">+20%</td>
-        <td class="expires">July 31, 2026</td>
-      </tr>
-      <tr class="bonus-row">
-        <td class="bank">Wells Fargo</td>
-        <td class="partner">Avianca LifeMiles</td>
-        <td class="pct">n/a</td>
-        <td class="expires">July 20, 2026</td>
-      </tr>
-    </tbody>
-  </table>
-</article>
+<h3>Current and Upcoming Transfer Bonuses</h3>
+
+<table id="tablepress-33-no-5" class="tablepress tablepress-id-33">
+<thead>
+<tr class="row-1">
+	<th class="column-1">Transfer From</th><th class="column-2">Transfer Bonus Details</th><th class="column-3">Start Date</th><th class="column-4">End Date</th>
+</tr>
+</thead>
+<tbody class="row-hover">
+<tr class="row-2">
+	<td class="column-1">Chase Ultimate Rewards</td><td class="column-2"><a href='https://frequentmiler.com/chase-is-offering-a-70-100-transfer-bonus-to-ihg-one-rewards-give-it-a-miss/' target='_blank' rel='noopener noreferrer'>100% transfer bonus from Chase Ultimate Rewards to IHG</a></td><td class="column-3"><p style='display: none;'>46218</p>07/15/26</td><td class="column-4"><p style='display: none;'>46233</p>07/30/26</td>
+</tr>
+<tr class="row-3">
+	<td class="column-1">Rove Miles</td><td class="column-2"><a href='https://frequentmiler.com/frontier-added-as-a-rove-transfer-partner-get-25-transfer-bonus-through-7-31-26/' target='_blank' rel='noopener noreferrer'>25% transfer bonus from Rove Miles to Frontier Miles</a></td><td class="column-3"><p style='display: none;'>46204</p>07/01/26</td><td class="column-4"><p style='display: none;'>46234</p>07/31/26</td>
+</tr>
+<tr class="row-4">
+	<td class="column-1">Capital One Miles</td><td class="column-2"><a href='https://frequentmiler.com/30-transfer-bonus-capital-one-miles-eva-air/' target='_blank' rel='noopener noreferrer'>30% transfer bonus from Capital One Miles to EVA Air Infinity MileageLands</a></td><td class="column-3"><p style='display: none;'>46204</p>07/01/26</td><td class="column-4"><p style='display: none;'>46234</p>07/31/26</td>
+</tr>
+<tr class="row-5">
+	<td class="column-1">Amex Membership Rewards</td><td class="column-2"><a href='https://frequentmiler.com/30-percent-transfer-bonus-american-express-membership-rewards-virgin-atlantic/' target='_blank' rel='noopener noreferrer'>30% transfer bonus from Amex Membership Rewards to Virgin Atlantic Flying Club</a></td><td class="column-3"><p style='display: none;'>46204</p>07/01/26</td><td class="column-4"><p style='display: none;'>46234</p>07/31/26</td>
+</tr>
+<tr class="row-6">
+	<td class="column-1">Rove Miles</td><td class="column-2"><a href='https://frequentmiler.com/rove-adds-qantas-as-transfer-partner-launches-with-50-transfer-bonus/' target='_blank' rel='noopener noreferrer'>50% transfer bonus from Rove Miles to Qantas Frequent Flyer</a></td><td class="column-3"><p style='display: none;'>46218</p>07/15/26</td><td class="column-4"><p style='display: none;'>46248</p>08/14/26</td>
+</tr>
+<tr class="row-7">
+	<td class="column-1">Citi ThankYou Rewards</td><td class="column-2"><a href='https://frequentmiler.com/citi-thankyou-air-france-klm-flying-blue-20-percent-transfer-bonus/' target='_blank' rel='noopener noreferrer'>20% transfer bonus from Citi ThankYou Rewards to Air France KLM Flying Blue</a></td><td class="column-3"><p style='display: none;'>46222</p>07/19/26</td><td class="column-4"><p style='display: none;'>46256</p>08/22/26</td>
+</tr>
+</tbody>
+</table>

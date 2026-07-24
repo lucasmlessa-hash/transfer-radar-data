@@ -49,8 +49,30 @@ const PARTNER_DISPLAY_NAMES = {
   AD: 'Azul Fidelidade',
 };
 
+// Real sources spell the same bank/partner a dozen ways: a trailing
+// "(Program Name)" suffix (awardwallet: "Amex (Membership Rewards)"), and
+// slashes/ampersands/dashes standing in for spaces (frequentmiler:
+// "Air France / KLM Flying Blue"). `norm` folds punctuation and whitespace;
+// `nameCandidates` additionally peels off a trailing parenthetical and
+// offers its inner content as a second, independent name to try — so
+// "Japan Airlines (JMB)" can match either an alias for "japan airlines" or
+// one for "jmb".
 function norm(s) {
-  return s.trim().toLowerCase().replace(/\s+/g, ' ');
+  return s
+    .toLowerCase()
+    .replace(/[/&.,-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// "Amex (Membership Rewards)" -> ["amex", "membership rewards"]
+// "Air France KLM Flying Blue" -> ["air france klm flying blue"] (no parens)
+function nameCandidates(raw) {
+  const s = String(raw ?? '').trim();
+  if (!s) return [];
+  const m = s.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  if (!m) return [norm(s)];
+  return [norm(m[1]), norm(m[2])];
 }
 
 function buildLookup(aliasMap) {
@@ -65,14 +87,20 @@ function buildLookup(aliasMap) {
 const BANK_LOOKUP = buildLookup(BANK_ALIASES);
 const PARTNER_LOOKUP = buildLookup(PARTNER_ALIASES);
 
+function resolve(lookup, name) {
+  for (const candidate of nameCandidates(name)) {
+    const code = lookup.get(candidate);
+    if (code) return code;
+  }
+  return null;
+}
+
 export function resolveBank(name) {
-  if (!name) return null;
-  return BANK_LOOKUP.get(norm(name)) ?? null;
+  return resolve(BANK_LOOKUP, name);
 }
 
 export function resolvePartner(name) {
-  if (!name) return null;
-  return PARTNER_LOOKUP.get(norm(name)) ?? null;
+  return resolve(PARTNER_LOOKUP, name);
 }
 
 export function partnerDisplayName(code) {

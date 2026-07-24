@@ -1,38 +1,18 @@
 <!--
-  Hand-authored fixture: proves the parser's shape logic against a
-  representative BR promo-list layout (Portuguese, D/M dates), not the live
-  DOM. Selectors are finalized against the real page at go-live (see
-  GO-LIVE.md).
+  Minimal excerpt retained for parser testing only.
+  Source: https://www.livelo.com.br/ofertas
+  Captured: 2026-07-24
+  The parser reads the __NEXT_DATA__ JSON payload and recursively walks it
+  for any node shaped { status: { variations: [...] } }. The full payload
+  (~940 KB parsed page + all offer components) has been pruned to just the
+  two real "cbc_previsibility" components (props.pageProps.page.components)
+  that carry the Hilton Honors transfer-bonus card, each reduced to its one
+  matching card.children[] entry -- the same card is genuinely repeated
+  across two carousels on the live page, which is why the parser dedupes by
+  partner+pct, and both copies are kept here to exercise that. All sibling
+  component metadata, the other 15 non-transfer offer components, user/device
+  state, script loader config, and everything else in the SSR payload has
+  been removed. The retained JSON values are byte-for-byte the real payload
+  values -- only the surrounding structure was pruned.
 -->
-<ul class="promocoes">
-  <li class="oferta">
-    <span class="banco">Livelo</span> transfere para
-    <span class="parceiro">Smiles (GOL)</span> com
-    <span class="bonus">+80%</span> até
-    <span class="ate">25/07</span>
-  </li>
-  <li class="oferta">
-    <span class="banco">Livelo</span> transfere para
-    <span class="parceiro">LATAM Pass</span> com
-    <span class="bonus">+60%</span> até
-    <span class="ate">01/08</span>
-  </li>
-  <li class="oferta">
-    <span class="banco">Livelo</span> transfere para
-    <span class="parceiro">Azul Fidelidade</span> com
-    <span class="bonus">+50%</span> até
-    <span class="ate"></span>
-  </li>
-  <li class="oferta">
-    <span class="banco">Livelo</span> transfere para
-    <span class="parceiro">Iberia Avios</span> com
-    <span class="bonus">+45%</span> até
-    <span class="ate">30/07</span>
-  </li>
-  <li class="oferta">
-    <span class="banco">Livelo</span> transfere para
-    <span class="parceiro">Smiles (GOL)</span> com
-    <span class="bonus">promoção especial</span> até
-    <span class="ate">15/08</span>
-  </li>
-</ul>
+<script id="__NEXT_DATA__" type="application/json">{"props":{"pageProps":{"page":{"components":[{"type":"cbc_previsibility","props":{"ContentTypeUid":"cbc_previsibility","card":{"children":[{"ContentTypeUid":"cb_previsibility","uid":"blt8ac5d30c615e2165","Version":4,"countdown":{"startDate":null,"endDate":null},"status":{"closed":{"badgesSelect":[]},"variations":[{"status":"Vigente","title":"Ganhe 50% de bônus na transferência de pontos Livelo para o Hilton Honors","Metadata":{"uid":"cs3a08a425a7d43935"},"description":"<p>Reserve as melhores hospedagens!</p>","image":{"uid":"blt0b16164b8e25196d","filename":"03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp","title":"03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp","updatedAt":"2026-07-03T17:20:26.711Z","url":"https://images.contentstack.io/v3/assets/blt2aea50371ca8d246/blt0b16164b8e25196d/6a47ef5a9f122134ad3dd25e/03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp"},"imageAppDisabled":{"uid":"blt3eeb5d9a27fa3efa","filename":"03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp","title":"03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp","updatedAt":"2026-07-03T17:20:36.616Z","url":"https://images.contentstack.io/v3/assets/blt2aea50371ca8d246/blt3eeb5d9a27fa3efa/6a47ef64b40d1343c38335b4/03072026-513-306x154-vitrine-previsibilidade-app-webp-hilton1.webp"},"imagePosition":"center","badgesSelect":[],"button":{"redirectText":"Transferir","redirectLink":"https://www.livelo.com.br/livelo-para-parceiros/hilton-honors/HILTransfer","iconPosition":"right","icon":null,"tagging":{"customTitle":"Hilton-01-07-26","customIdmkt":"viagens-CDC10689"}},"buttonApp":[{"text":"Transferir","Metadata":{"uid":"cs00914219b1f57777"},"redirect":"/transferencia/partnerTransferDetailsV2/HILTrasnfer","iconPosition":"right","icon":null,"tagging":{"customTitle":"Hilton-01-07-26","customIdmkt":"viagens-CDC10689"}}]}]},"tags":[],"taxonomies":[],"title":"[AP] Previsibilidade - Hilton 50% (CDC10689)","updatedAt":"2026-07-03T17:37:28.580Z"}]}}},{"type":"cbc_previsibility","props":{"ContentTypeUid":"cbc_previsibility","card":{"children":[{"ContentTypeUid":"cb_previsibility","uid":"blt10b9de6d7bd6c96a","Version":2,"countdown":{"startDate":null,"endDate":null},"status":{"closed":{"badgesSelect":[]},"variations":[{"status":"Vigente","title":"Ganhe 50% de bônus na transferência de pontos Livelo para o Hilton Honors","description":"<p>Reserve as melhores hospedagens!</p>","image":{"uid":"blt77eb4f4e46a0fdf0","filename":"306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp","title":"306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp","updatedAt":"2026-06-30T17:49:46.031Z","url":"https://images.contentstack.io/v3/assets/blt2aea50371ca8d246/blt77eb4f4e46a0fdf0/6a4401ba4946d31dd023bcf2/306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp"},"imageAppDisabled":{"uid":"bltc4f1e7598bb1df88","filename":"306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp","title":"306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp","updatedAt":"2026-06-30T17:49:51.880Z","url":"https://images.contentstack.io/v3/assets/blt2aea50371ca8d246/bltc4f1e7598bb1df88/6a4401bf9bb8194bade38124/306x154-vitrine-previsibilidade-app-webp-hilton--300626.webp"},"imagePosition":"center","badgesSelect":[],"button":{"redirectText":"Transferir","redirectLink":"https://www.livelo.com.br/livelo-para-parceiros/hilton-honors/HILTransfer","iconPosition":"right","icon":null,"tagging":{"customTitle":"Hilton-01-07-26","customIdmkt":"viagens-CDC10689"}},"buttonApp":[{"text":"Transferir","redirect":"/transferencia/partnerTransferDetailsV2/HILTrasnfer","iconPosition":"right","icon":null,"tagging":{"customTitle":"Hilton-01-07-26","customIdmkt":"viagens-CDC10689"},"Metadata":{"uid":"cs741f88a32d513751"}}],"Metadata":{"uid":"cs19ef5481ebd271e3"}}]},"tags":[],"taxonomies":[],"title":"[AP] Previsibilidade - Hilton (CDC10689)","updatedAt":"2026-06-30T17:50:18.179Z"}]}}}]}}}}</script>

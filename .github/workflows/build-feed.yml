@@ -1,3 +1,8 @@
+# out/ is intentionally gitignored and is never committed to the repository.
+# The generated feed reaches users exclusively through the GitHub Pages
+# deployment artifact (upload-pages-artifact / deploy-pages below), not via
+# a git commit. Branch-based Pages can't serve a /out subdirectory anyway,
+# so committing build output would be both wrong and unnecessary.
 name: Build feed
 
 on:
@@ -6,8 +11,14 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
   issues: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -27,17 +38,12 @@ jobs:
         run: npm run build
 
       - name: Validate output
-        if: success()
         run: node scripts/validate-feed.mjs out/feed.json
 
-      - name: Commit and push feed
-        if: success()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add out
-          git commit -m "feed: $(date -u +%FT%TZ)" || true
-          git push
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
 
       - name: Open issue on failure
         if: failure()
@@ -52,3 +58,18 @@ jobs:
           else
             echo "An open pipeline-failure issue already exists - skipping to avoid spam."
           fi
+
+  # deploy needs: build, so a failed/aborted build (invalid data, >50% source
+  # failure) never reaches deploy-pages and the previously published feed
+  # stays live untouched. Do not add `if: always()` here - that would deploy
+  # on build failure and defeat the fail-safe.
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
