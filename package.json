@@ -1,0 +1,18 @@
+{
+  "name": "transfer-radar-data",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scheduled pipeline: parses public transfer-bonus listings, normalizes them into the Transfer Radar feed contract, and publishes feed.json.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build": "node src/publish.mjs",
+    "build:fixtures": "node src/publish.mjs --fixtures"
+  },
+  "devDependencies": {
+    "cheerio": "^1.2.0"
+  }
+}
