@@ -60,6 +60,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # The label may not exist yet; creating it must not itself fail the
+          # step, or the alert about the real failure never gets filed.
+          gh label create br-ratios-failure --color B60205 --description "Weekly BR ratio refresh failed" 2>/dev/null || true
           if ! gh issue list --label br-ratios-failure --state open --json number --jq '.[0]' | grep -q .; then
             gh issue create \
               --title "BR ratio refresh failed: $(date -u +%F)" \
