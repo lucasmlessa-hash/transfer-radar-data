@@ -16,12 +16,17 @@
 // per run is rude at 48 runs a day for numbers that change maybe twice a year.
 // See .github/workflows/refresh-br-ratios.yml.
 
-const RE_LIVELO = /([\d.,]+)\s*pontos?\s+Livelo\s*(?:=|para|por)\s*([\d.,]+)\s*(?:pontos?|milhas?|Avios)?/i;
-// Esfera states it inside the terms-and-conditions blob in __NEXT_DATA__, and
-// the wording varies by partner: "=", "para", or "por". Anchored on a leading
-// digit so the UI label templates ("esferaPoint2Text":" ponto Esfera =") can
-// never match — they carry no number.
-const RE_ESFERA = /([\d.,]+)\s*[Pp]ontos?\s+Esfera\s*(?:=|para|por)\s*([\d.,]+)\s*(?:[Pp]ontos?|[Mm]ilhas?|Avios)/g;
+// The connector wording is not standardised — across partner pages it appears
+// as "=", "para", "por" and "equivalem a". Each one was found only by a rate
+// coming back null for a partner that clearly publishes one, so the set is
+// empirical: widen it when the next silent gap turns up, do not assume it is
+// complete.
+const CONNECTOR = '(?:=|para|por|equivale[m]?\\s+a|vale[m]?)';
+const RE_LIVELO = new RegExp(`([\\d.,]+)\\s*pontos?\\s+Livelo\\s*${CONNECTOR}\\s*([\\d.,]+)\\s*(?:pontos?|milhas?|Avios)?`, 'i');
+// Esfera states it inside the terms-and-conditions blob in __NEXT_DATA__.
+// Anchored on a leading digit so the UI label templates ("esferaPoint2Text":
+// " ponto Esfera =") can never match — they carry no number.
+const RE_ESFERA = new RegExp(`([\\d.,]+)\\s*[Pp]ontos?\\s+Esfera\\s*${CONNECTOR}\\s*([\\d.,]+)\\s*(?:[Pp]ontos?|[Mm]ilhas?|Avios)`, 'gi');
 // An Esfera regulation can carry several rates for one partner along TWO axes:
 //
 //   who  — the standard rate, and a better one for Clube Esfera subscribers
@@ -150,7 +155,18 @@ const stripTags = (html) => html
 
 const nextData = (html) => {
   const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-  return m ? m[1] : '';
+  if (!m) return '';
+  // The regulation ships as HTML inside a JSON string, so its tags arrive
+  // escaped: "3 pontos\\u003c/strong\\u003e Esfera equivalem a ...". Left as
+  // is, a </strong> sitting between "pontos" and "Esfera" breaks the pattern
+  // and the rate reads as absent — which is exactly how Copa's 3:1 went
+  // missing while the page stated it plainly.
+  return m[1]
+    .replace(/\\u003c[\s\S]*?\\u003e/g, ' ')
+    .replace(/\\u0026nbsp;/gi, ' ')
+    .replace(/\\u0026amp;/gi, '&')
+    .replace(/\\[nrt]/g, ' ')
+    .replace(/\s+/g, ' ');
 };
 
 /**
