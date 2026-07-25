@@ -20,3 +20,18 @@ test('shared-currency and out-of-scope names still refuse to resolve', () => {
   assert.ok(!resolveBank('Rove'), 'untracked transferable currency');
   assert.ok(!resolveBank('PAYBACK'), 'untracked transferable currency');
 });
+
+test('the four new airlines resolve from the names real sources use', () => {
+  assert.equal(resolvePartner('United MileagePlus'), 'UA');
+  assert.equal(resolvePartner('JetBlue TrueBlue'), 'B6');
+  assert.equal(resolvePartner('JetBlue'), 'B6');
+  assert.equal(resolvePartner('Etihad Guest'), 'EY');
+  assert.equal(resolvePartner('Iberia Avios'), 'IB');
+  assert.equal(resolvePartner('Iberia Plus'), 'IB');
+});
+
+test('display names exist for the new codes', () => {
+  for (const c of ['UA', 'B6', 'EY', 'IB']) {
+    assert.notEqual(partnerDisplayName(c), c, c + ' must have a hand-written display name');
+  }
+});

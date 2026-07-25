@@ -43,6 +43,10 @@ export const PARTNER_ALIASES = {
   TK: ['turkish', 'turkish airlines', 'miles smiles', 'turkish miles smiles'],
   EK: ['emirates', 'skywards', 'emirates skywards'],
   SQ: ['singapore', 'singapore airlines', 'krisflyer', 'singapore krisflyer'],
+  UA: ['united', 'united airlines', 'united mileageplus', 'mileageplus'],
+  B6: ['jetblue', 'jetblue airways', 'jetblue trueblue', 'trueblue'],
+  EY: ['etihad', 'etihad airways', 'etihad guest'],
+  IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club'],
 };
 
 // Display name used for a route's `airline` field when no seed route already
@@ -70,6 +74,10 @@ const PARTNER_DISPLAY_NAMES = {
   TK: 'Turkish Miles&Smiles',
   EK: 'Emirates Skywards',
   SQ: 'Singapore KrisFlyer',
+  UA: 'United MileagePlus',
+  B6: 'JetBlue TrueBlue',
+  EY: 'Etihad Guest',
+  IB: 'Iberia Avios',
 };
 
 // Real sources spell the same bank/partner a dozen ways: a trailing
