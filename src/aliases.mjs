@@ -48,7 +48,7 @@ export const PARTNER_ALIASES = {
   B6: ['jetblue', 'jetblue airways', 'jetblue trueblue', 'trueblue'],
   EY: ['etihad', 'etihad airways', 'etihad guest'],
   IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club'],
-  CM: ['copa', 'copa airlines', 'connectmiles', 'copa connectmiles', 'copa connect miles', 'copa airlines connectmiles'],
+  CM: ['copa', 'copa airlines', 'connectmiles', 'connect miles', 'copa connectmiles', 'copa connect miles', 'copa airlines connectmiles'],
   TP: ['tap', 'tap air portugal', 'tap portugal', 'miles&go', 'tap miles&go', 'tap miles & go', 'tap miles and go', 'miles and go'],
 };
 
@@ -96,19 +96,32 @@ const PARTNER_DISPLAY_NAMES = {
 function norm(s) {
   return s
     .toLowerCase()
+    // Strip diacritics before anything else: the Brazilian sources spell it
+    // "Aeroméxico" while every US source writes "Aeromexico", and without this
+    // the same programme resolves from one source and not the other -- which
+    // is how a partner ends up listed twice under two spellings.
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[/&.,-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
-// "Amex (Membership Rewards)" -> ["amex", "membership rewards"]
-// "Air France KLM Flying Blue" -> ["air france klm flying blue"] (no parens)
+// "Amex (Membership Rewards)"      -> ["amex", "membership rewards"]
+// "Connect Miles - Copa Airlines"  -> ["connect miles copa airlines", "connect miles", "copa airlines"]
+// "Air France KLM Flying Blue"     -> ["air france klm flying blue"]
+//
+// The dash split exists because Esfera titles its pages "<Programme> - <Airline>"
+// while every other source names one or the other. Whole string first, so a
+// programme whose real name contains a dash still wins outright; halves only as
+// a fallback, and each half must match an alias exactly to resolve.
 function nameCandidates(raw) {
   const s = String(raw ?? '').trim();
   if (!s) return [];
-  const m = s.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
-  if (!m) return [norm(s)];
-  return [norm(m[1]), norm(m[2])];
+  const paren = s.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  if (paren) return [norm(paren[1]), norm(paren[2])];
+  const out = [norm(s)];
+  if (/\s-\s/.test(s)) for (const half of s.split(/\s-\s/)) out.push(norm(half));
+  return out;
 }
 
 function buildLookup(aliasMap) {

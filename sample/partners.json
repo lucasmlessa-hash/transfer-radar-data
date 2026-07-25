@@ -912,6 +912,10 @@
     "ESF": {
       "air": [
         [
+          "Aeromexico Rewards",
+          "—"
+        ],
+        [
           "Air France / KLM Flying Blue",
           "3:1"
         ],
@@ -924,8 +928,12 @@
           "—"
         ],
         [
-          "Iberia Avios",
+          "Etihad Guest",
           "—"
+        ],
+        [
+          "Iberia Avios",
+          "2:1"
         ],
         [
           "LATAM Pass",
@@ -938,24 +946,32 @@
         [
           "TAP Miles&Go",
           "2.2:1"
+        ],
+        [
+          "Turkish Miles&Smiles",
+          "—"
         ]
       ],
       "hotel": [
         [
           "ALL Accor Live Limitless",
           "3.5:1"
+        ],
+        [
+          "IHG One Rewards",
+          "—"
         ]
       ]
     },
     "LIV": {
       "air": [
         [
-          "Aeroméxico Rewards",
-          "—"
+          "Aeromexico Rewards",
+          "3.5:1"
         ],
         [
           "Air France / KLM Flying Blue",
-          "—"
+          "3.5:1"
         ],
         [
           "Azul Fidelidade",
@@ -963,15 +979,15 @@
         ],
         [
           "British Airways Avios",
-          "—"
+          "3.5:1"
         ],
         [
           "Copa ConnectMiles",
-          "—"
+          "3:1"
         ],
         [
           "Etihad Guest",
-          "—"
+          "3.5:1"
         ],
         [
           "Iberia Avios",
@@ -987,7 +1003,7 @@
         ],
         [
           "United MileagePlus",
-          "—"
+          "4:1"
         ]
       ],
       "hotel": [
@@ -997,11 +1013,11 @@
         ],
         [
           "Hilton Honors",
-          "—"
+          "2:1"
         ],
         [
           "IHG One Rewards",
-          "—"
+          "2:1"
         ]
       ]
     },

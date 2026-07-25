@@ -53,7 +53,7 @@ const HOTEL_CANON = [
 // partners the directory should show even though no valuation tracks them).
 // This is also what retired the duplicate-spelling bugs: every source's
 // spelling of the same programme lands on one canonical string.
-const canonical = (name) => {
+export const canonical = (name) => {
   const code = resolvePartner(name);
   if (code) return partnerDisplayName(code);
   const hotel = HOTEL_CANON.find(([re]) => re.test(name));
@@ -168,8 +168,15 @@ export function mergeDirectory(curated, scrapedByBank) {
   return out;
 }
 
+// Esfera is deliberately absent from this list. Its listing page carries only
+// product ids, and resolving them to names needs one fetch per partner — too
+// much for a 30-minute build. Reading the navigation menu instead is what this
+// source used to do, and it silently missed four real partners (Aeromexico,
+// Etihad, IHG, Turkish) because the menu shows 8 of 19. Esfera's directory is
+// now owned by scripts/refresh-br-ratios.mjs on a weekly schedule, which walks
+// every showcase id properly. Livelo stays here: its listing already carries
+// both name and status, so it costs one request.
 export const DIRECTORY_SOURCES = [
   { id: 'fm-directory', url: 'https://frequentmiler.com/transfer-partner-master-list/', fixture: 'partner-fm.html', parse: parseFmDirectory, banks: ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'ROVE'] },
   { id: 'livelo-directory', url: 'https://www.livelo.com.br/livelo-para-parceiros', fixture: 'partner-livelo.html', parse: (html) => ({ LIV: parseLiveloDirectory(html) }), banks: ['LIV'] },
-  { id: 'esfera-directory', url: 'https://www.esfera.com.vc/programas-parceiros', fixture: 'partner-esfera.html', parse: (html) => ({ ESF: parseEsferaDirectory(html) }), banks: ['ESF'] },
 ];

@@ -1,0 +1,68 @@
+# Weekly refresh of the Brazilian programmes' partner lists and conversion
+# rates. Separate from build-feed.yml because it walks ~34 partner pages: at
+# the feed's 30-minute cadence that would be thousands of requests a day for
+# numbers that change maybe twice a year.
+name: Refresh BR ratios
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays, off the hour to avoid the crowded :00 slot
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: br-ratios
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+
+      # The script is fail-safe on its own: an unreachable page, a rate it
+      # cannot parse, or a listing that comes back empty leaves the existing
+      # value alone. It can add and correct, never blank out. So a bad network
+      # day produces an empty diff rather than a wrecked Partners tab.
+      - name: Refresh partner ratios
+        run: node scripts/refresh-br-ratios.mjs
+
+      # The tests are the gate, not the commit: bundled-partners-sync and the
+      # canonical-name guard both read sample/partners.json, so a scrape that
+      # introduced a duplicate or a non-canonical name fails here and never
+      # reaches main.
+      - name: Verify
+        run: |
+          node scripts/validate-feed.mjs sample/partners.json --schema partners
+          npm test
+
+      - name: Commit if anything changed
+        run: |
+          if [ -z "$(git status --porcelain -- sample/partners.json)" ]; then
+            echo "no ratio changes this week"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add sample/partners.json
+            git commit -m "chore(data): refresh BR partner ratios $(date -u +%F)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      - name: Open issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh issue list --label br-ratios-failure --state open --json number --jq '.[0]' | grep -q .; then
+            gh issue create \
+              --title "BR ratio refresh failed: $(date -u +%F)" \
+              --label br-ratios-failure \
+              --body "See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. The curated ratios in sample/partners.json are untouched — the script only ever adds or corrects."
+          fi

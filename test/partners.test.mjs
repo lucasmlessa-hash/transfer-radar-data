@@ -173,7 +173,16 @@ test('added and departed partners match the official pages', () => {
   // partners that left really leave — the whole point of a dynamic directory
   assert.ok(!air('ESF').has('American AAdvantage') && ![...air('ESF').keys()].some((n) => /American/.test(n)),
     'AAdvantage left Esfera');
-  assert.ok(!hotel('ESF').has('IHG One Rewards'), 'IHG left Esfera');
+
+  // This assertion used to read "IHG left Esfera". It was wrong: IHG is on
+  // Esfera's showcase list and has a live partner page — it was simply absent
+  // from the navigation menu, which was the only thing being scraped at the
+  // time. The old test encoded a hole in our scraping as a fact about the
+  // world, which is the failure mode a directory test exists to prevent.
+  assert.ok(hotel('ESF').has('IHG One Rewards'), 'IHG is an Esfera partner (showcase id e000100736)');
+  for (const name of ['Etihad Guest', 'Turkish Miles&Smiles', 'Aeromexico Rewards']) {
+    assert.ok(air('ESF').has(name), `${name} is an Esfera partner the menu-only scrape missed`);
+  }
 });
 
 // Transfer speed is keyed bank -> airline because it genuinely differs by bank
