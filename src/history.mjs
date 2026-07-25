@@ -35,7 +35,10 @@ const DAY_MS = 86400000;
 // Archive dates are US M/D/YY (verified against all 463 rows of Frequent
 // Miler's "Expired Transfer Bonuses" table on 2026-07-24, years 2017..2026).
 // Anything else is dropped rather than guessed at.
-function parseMDY(raw) {
+// Exported for scripts/backtest.mjs, which must slice the archive by date with
+// the SAME parser production uses -- a second date parser would let the
+// backtest accept rows the model drops, silently skewing every score.
+export function parseMDY(raw) {
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(String(raw ?? '').trim());
   if (!m) return null;
   let year = Number(m[3]);
