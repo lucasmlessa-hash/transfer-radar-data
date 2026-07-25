@@ -85,6 +85,10 @@ test('every directory ratio is a well-formed "<points>:<miles>" string', () => {
   for (const [bank, lists] of Object.entries(P.directory)) {
     for (const kind of ['air', 'hotel']) {
       for (const [name, ratio] of lists[kind]) {
+        // '—' is legal since the directory went dynamic (2026-07-25): a
+        // scraped partner whose page publishes no rate is shown unranked
+        // rather than with an invented ratio.
+        if (ratio === '—') continue;
         assert.match(ratio, /^\d+(\.\d+)?:\d+(\.\d+)?$/, `${bank}/${name}: bad ratio "${ratio}"`);
         const [a, b] = ratio.split(':').map(Number);
         assert.ok(a > 0 && b > 0, `${bank}/${name}: zero side in "${ratio}"`);
@@ -123,43 +127,53 @@ test('dead partnerships stay removed from the directory', () => {
   assert.equal(air('LIV').has('Qatar Airways Avios'), false, 'no direct Livelo->Qatar partnership');
 });
 
+// The hand-audit of 2026-07-25 predates the dynamic directory. Its surviving
+// value: the FM scrape must agree with the audited devaluations (it does —
+// 1000:800 IS 1:0.8), and curated BR ratios must survive the merge by
+// canonical name. Names here are the CANONICAL spellings the dynamic
+// directory emits; the audit's old spellings are what §1 retired.
 test('devalued and corrected ratios match the audit', () => {
   const expected = [
-    ['AMEX', 'air', 'Emirates Skywards', '1:0.8'],
-    ['AMEX', 'air', 'Cathay Pacific Asia Miles', '1:0.8'],
+    ['AMEX', 'air', 'Emirates Skywards', '1000:800'],
+    ['AMEX', 'air', 'Cathay Pacific Asia Miles', '1000:800'],
     ['CITI', 'hotel', 'Choice Privileges', '1:1.5'],
-    ['C1', 'air', 'Emirates Skywards', '2:1.5'],
+    ['C1', 'air', 'Emirates Skywards', '1000:750'],
     ['BILT', 'air', 'Alaska Atmos Rewards', '1:1'],
-    // Esfera was optimistic by 2-3x across the board
+    // Esfera was optimistic by 2-3x across the board (curated, inherited by merge)
     ['ESF', 'air', 'TAP Miles&Go', '2.2:1'],
-    ['ESF', 'air', 'American AAdvantage', '3.5:1'],
     ['ESF', 'air', 'Air France / KLM Flying Blue', '3:1'],
-    ['ESF', 'hotel', 'Accor Live Limitless', '3.5:1'],
+    ['ESF', 'hotel', 'ALL Accor Live Limitless', '3.5:1'],
     ['LIV', 'air', 'Iberia Avios', '3.5:1'],
-    ['LIV', 'air', 'British Airways Executive Club', '3.5:1'],
-    ['LIV', 'hotel', 'Accor Live Limitless', '3.5:1'],
+    ['LIV', 'hotel', 'ALL Accor Live Limitless', '3.5:1'],
   ];
   for (const [bank, kind, name, ratio] of expected) {
     const list = kind === 'air' ? air(bank) : hotel(bank);
     assert.equal(list.get(name), ratio, `${bank}/${kind}/${name}`);
   }
+  const ratios = (a, b) => Number(a.split(':')[1]) / Number(a.split(':')[0]) === b;
+  assert.ok(ratios(air('AMEX').get('Emirates Skywards'), 0.8), 'FM 1000:800 is the audited 1:0.8');
 });
 
-test('added partners are present', () => {
+test('added and departed partners match the official pages', () => {
   const added = [
     ['CHASE', 'hotel', 'Wyndham Rewards'], ['CITI', 'air', 'American Airlines AAdvantage'],
-    ['C1', 'air', 'Japan Airlines Mileage Bank'], ['C1', 'air', 'Qatar Airways Privilege Club'],
-    ['C1', 'air', 'JetBlue TrueBlue'], ['C1', 'hotel', 'I Prefer Hotel Rewards'],
+    ['C1', 'air', 'Japan Airlines (JAL Mileage Bank)'], ['C1', 'air', 'Qatar Airways Avios'],
+    ['C1', 'air', 'JetBlue TrueBlue'], ['C1', 'hotel', 'Preferred Hotels I Prefer'],
     ['BILT', 'air', 'Etihad Guest'], ['BILT', 'air', 'Japan Airlines (JAL Mileage Bank)'],
-    ['BILT', 'air', 'Qatar Airways Privilege Club'], ['BILT', 'air', 'Southwest Rapid Rewards'],
+    ['BILT', 'air', 'Qatar Airways Avios'], ['BILT', 'air', 'Southwest Rapid Rewards'],
     ['BILT', 'hotel', 'Wyndham Rewards'], ['WF', 'air', 'JetBlue TrueBlue'],
     ['WF', 'air', 'Cathay Pacific Asia Miles'], ['WF', 'hotel', 'Wyndham Rewards'],
-    ['ESF', 'air', 'Azul Fidelidade'], ['ESF', 'hotel', 'IHG One Rewards'],
+    ['ESF', 'air', 'Azul Fidelidade'], ['ESF', 'air', 'Copa ConnectMiles'],
+    ['LIV', 'air', 'United MileagePlus'], ['LIV', 'air', 'Etihad Guest'],
   ];
   for (const [bank, kind, name] of added) {
     const list = kind === 'air' ? air(bank) : hotel(bank);
     assert.ok(list.has(name), `${bank}/${kind}: missing "${name}"`);
   }
+  // partners that left really leave — the whole point of a dynamic directory
+  assert.ok(!air('ESF').has('American AAdvantage') && ![...air('ESF').keys()].some((n) => /American/.test(n)),
+    'AAdvantage left Esfera');
+  assert.ok(!hotel('ESF').has('IHG One Rewards'), 'IHG left Esfera');
 });
 
 // Transfer speed is keyed bank -> airline because it genuinely differs by bank

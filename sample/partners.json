@@ -82,10 +82,14 @@
     "UA": "united.com",
     "B6": "jetblue.com",
     "EY": "etihad.com",
-    "IB": "iberia.com"
+    "IB": "iberia.com",
+    "CM": "copaair.com",
+    "TP": "flytap.com"
   },
   "airlineIconUrls": {
-    "AD": "https://icons.duckduckgo.com/ip3/voeazul.com.br.ico"
+    "AD": "https://icons.duckduckgo.com/ip3/voeazul.com.br.ico",
+    "BR": "https://icons.duckduckgo.com/ip3/www.evaair.com.ico",
+    "JL": "https://icons.duckduckgo.com/ip3/www.jal.co.jp.ico"
   },
   "bankDomains": {
     "AMEX": "americanexpress.com",
@@ -124,7 +128,9 @@
     "UA": 1.3,
     "B6": 1.3,
     "EY": 1.2,
-    "IB": 1.4
+    "IB": 1.4,
+    "CM": 1.4,
+    "TP": 1.1
   },
   "airlineValueMeta": {
     "AF": {
@@ -283,6 +289,18 @@
       "asOf": "2026-07-24",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+    },
+    "CM": {
+      "currency": "USD",
+      "asOf": "2026-07-25",
+      "source": "https://awardwallet.com/airlines/copa-connectmiles/",
+      "note": "AwardWallet guide: 1.4-2.1c typical range; conservative low end used. Not in Frequent Miler RRV."
+    },
+    "TP": {
+      "currency": "USD",
+      "asOf": "2026-07-25",
+      "source": "https://thepointsguy.com/loyalty-programs/the-ultimate-guide-to-earning-and-redeeming-tap-milesgo/",
+      "note": "TPG/10xTravel guides: 1.0-1.3c typical; midpoint used. Not in Frequent Miler RRV."
     }
   },
   "transferTimes": {
@@ -374,7 +392,7 @@
           "1:1"
         ],
         [
-          "Aeromexico Rewards",
+          "AeroMexico ClubPremier",
           "1:1.6"
         ],
         [
@@ -399,7 +417,7 @@
         ],
         [
           "Cathay Pacific Asia Miles",
-          "1:0.8"
+          "1000:800"
         ],
         [
           "Delta SkyMiles",
@@ -407,7 +425,11 @@
         ],
         [
           "Emirates Skywards",
-          "1:0.8"
+          "1000:800"
+        ],
+        [
+          "Finnair Plus+",
+          "1:1"
         ],
         [
           "Iberia Avios",
@@ -415,7 +437,7 @@
         ],
         [
           "JetBlue TrueBlue",
-          "1:0.8"
+          "250:200"
         ],
         [
           "Qantas Frequent Flyer",
@@ -426,7 +448,7 @@
           "1:1"
         ],
         [
-          "Singapore KrisFlyer",
+          "Singapore Airlines KrisFlyer",
           "1:1"
         ],
         [
@@ -468,6 +490,10 @@
           "1:1"
         ],
         [
+          "Finnair Plus+",
+          "1:1"
+        ],
+        [
           "Iberia Avios",
           "1:1"
         ],
@@ -476,7 +502,11 @@
           "1:1"
         ],
         [
-          "Singapore KrisFlyer",
+          "Qatar Airways Avios",
+          "1:1"
+        ],
+        [
+          "Singapore Airlines KrisFlyer",
           "1:1"
         ],
         [
@@ -494,16 +524,16 @@
       ],
       "hotel": [
         [
-          "Hyatt World of Hyatt",
-          "1:1"
-        ],
-        [
           "IHG One Rewards",
           "1:1"
         ],
         [
           "Marriott Bonvoy",
           "1:1"
+        ],
+        [
+          "World of Hyatt",
+          "4:3"
         ],
         [
           "Wyndham Rewards",
@@ -513,6 +543,10 @@
     },
     "CITI": {
       "air": [
+        [
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
         [
           "Air France / KLM Flying Blue",
           "1:1"
@@ -526,12 +560,16 @@
           "1:1"
         ],
         [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
           "Cathay Pacific Asia Miles",
           "1:1"
         ],
         [
           "Emirates Skywards",
-          "1:1"
+          "1000:800"
         ],
         [
           "Etihad Guest",
@@ -542,7 +580,23 @@
           "1:1"
         ],
         [
+          "Finnair Plus+",
+          "1:1"
+        ],
+        [
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "Jet Airways InterMiles",
+          "1:1"
+        ],
+        [
           "JetBlue TrueBlue",
+          "1:1"
+        ],
+        [
+          "Malaysia Enrich",
           "1:1"
         ],
         [
@@ -554,11 +608,11 @@
           "1:1"
         ],
         [
-          "Singapore KrisFlyer",
+          "Singapore Airlines KrisFlyer",
           "1:1"
         ],
         [
-          "Thai Royal Orchid Plus",
+          "Thai Airways Royal Orchid Plus",
           "1:1"
         ],
         [
@@ -572,12 +626,20 @@
       ],
       "hotel": [
         [
-          "Accor Live Limitless",
-          "2:1"
+          "ALL Accor Live Limitless",
+          "1000:500"
         ],
         [
           "Choice Privileges",
           "1:1.5"
+        ],
+        [
+          "Leading Hotels Leaders Club",
+          "—"
+        ],
+        [
+          "Preferred Hotels I Prefer",
+          "1:2"
         ],
         [
           "Wyndham Rewards",
@@ -588,7 +650,11 @@
     "C1": {
       "air": [
         [
-          "Aeromexico Rewards",
+          "Aer Lingus AerClub",
+          "1:1"
+        ],
+        [
+          "AeroMexico ClubPremier",
           "1:1"
         ],
         [
@@ -613,7 +679,7 @@
         ],
         [
           "Emirates Skywards",
-          "2:1.5"
+          "1000:750"
         ],
         [
           "Etihad Guest",
@@ -621,30 +687,34 @@
         ],
         [
           "EVA Infinity MileageLands",
-          "2:1.5"
+          "1000:750"
         ],
         [
-          "Finnair Plus",
+          "Finnair Plus+",
           "1:1"
         ],
         [
-          "Japan Airlines Mileage Bank",
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "Japan Airlines (JAL Mileage Bank)",
           "2:1.5"
         ],
         [
           "JetBlue TrueBlue",
-          "5:3"
+          "1000:600"
         ],
         [
           "Qantas Frequent Flyer",
           "1:1"
         ],
         [
-          "Qatar Airways Privilege Club",
+          "Qatar Airways Avios",
           "1:1"
         ],
         [
-          "Singapore KrisFlyer",
+          "Singapore Airlines KrisFlyer",
           "1:1"
         ],
         [
@@ -656,21 +726,21 @@
           "1:1"
         ],
         [
-          "Virgin Red",
+          "Virgin Atlantic Flying Club",
           "1:1"
         ]
       ],
       "hotel": [
         [
-          "Accor Live Limitless",
-          "2:1"
+          "ALL Accor Live Limitless",
+          "1000:500"
         ],
         [
           "Choice Privileges",
           "1:1"
         ],
         [
-          "I Prefer Hotel Rewards",
+          "Preferred Hotels I Prefer",
           "1:2"
         ],
         [
@@ -718,6 +788,10 @@
           "1:1"
         ],
         [
+          "Finnair Plus+",
+          "1:1"
+        ],
+        [
           "Iberia Avios",
           "1:1"
         ],
@@ -726,7 +800,7 @@
           "1:1"
         ],
         [
-          "Qatar Airways Privilege Club",
+          "Qatar Airways Avios",
           "1:1"
         ],
         [
@@ -752,15 +826,11 @@
       ],
       "hotel": [
         [
-          "Accor Live Limitless",
+          "ALL Accor Live Limitless",
           "3:2"
         ],
         [
           "Hilton Honors",
-          "1:1"
-        ],
-        [
-          "Hyatt World of Hyatt",
           "1:1"
         ],
         [
@@ -769,6 +839,14 @@
         ],
         [
           "Marriott Bonvoy",
+          "1:1"
+        ],
+        [
+          "Preferred Hotels I Prefer",
+          "1:2"
+        ],
+        [
+          "World of Hyatt",
           "1:1"
         ],
         [
@@ -800,11 +878,19 @@
           "1:1"
         ],
         [
+          "Finnair Plus+",
+          "1:1"
+        ],
+        [
           "Iberia Avios",
           "1:1"
         ],
         [
           "JetBlue TrueBlue",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Avios",
           "1:1"
         ],
         [
@@ -826,37 +912,37 @@
     "ESF": {
       "air": [
         [
-          "Smiles (GOL)",
-          "1:1"
-        ],
-        [
-          "LATAM Pass",
-          "1:1"
+          "Air France / KLM Flying Blue",
+          "3:1"
         ],
         [
           "Azul Fidelidade",
           "1:1"
         ],
         [
+          "Copa ConnectMiles",
+          "—"
+        ],
+        [
+          "Iberia Avios",
+          "—"
+        ],
+        [
+          "LATAM Pass",
+          "1:1"
+        ],
+        [
+          "Smiles (GOL)",
+          "1:1"
+        ],
+        [
           "TAP Miles&Go",
           "2.2:1"
-        ],
-        [
-          "American AAdvantage",
-          "3.5:1"
-        ],
-        [
-          "Air France / KLM Flying Blue",
-          "3:1"
         ]
       ],
       "hotel": [
         [
-          "IHG One Rewards",
-          "2:1"
-        ],
-        [
-          "Accor Live Limitless",
+          "ALL Accor Live Limitless",
           "3.5:1"
         ]
       ]
@@ -864,45 +950,69 @@
     "LIV": {
       "air": [
         [
-          "Smiles (GOL)",
-          "1:1"
+          "Aeroméxico Rewards",
+          "—"
         ],
         [
-          "LATAM Pass",
-          "1:1"
+          "Air France / KLM Flying Blue",
+          "—"
         ],
         [
           "Azul Fidelidade",
           "1:1"
         ],
         [
-          "TAP Miles&Go",
-          "1:1"
+          "British Airways Avios",
+          "—"
+        ],
+        [
+          "Copa ConnectMiles",
+          "—"
+        ],
+        [
+          "Etihad Guest",
+          "—"
         ],
         [
           "Iberia Avios",
           "3.5:1"
         ],
         [
-          "British Airways Executive Club",
-          "3.5:1"
+          "LATAM Pass",
+          "1:1"
+        ],
+        [
+          "Smiles (GOL)",
+          "1:1"
+        ],
+        [
+          "United MileagePlus",
+          "—"
         ]
       ],
       "hotel": [
         [
-          "Accor Live Limitless",
+          "ALL Accor Live Limitless",
           "3.5:1"
+        ],
+        [
+          "Hilton Honors",
+          "—"
+        ],
+        [
+          "IHG One Rewards",
+          "—"
         ]
       ]
     },
     "ROVE": {
       "air": [
         [
-          "Air Canada Aeroplan",
+          "Aer Lingus AerClub",
           "1:1"
         ],
         [
-          "Aeromexico Rewards",
+          "AeroMexico ClubPremier",
           "1:1"
         ],
         [
@@ -914,6 +1024,10 @@
           "1:1"
         ],
         [
+          "British Airways Avios",
+          "1:1"
+        ],
+        [
           "Cathay Pacific Asia Miles",
           "1:1"
         ],
@@ -922,7 +1036,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus",
+          "Finnair Plus+",
           "1:1"
         ],
         [
@@ -930,11 +1044,15 @@
           "1:1"
         ],
         [
-          "Hainan Airlines Fortune Wings Club",
+          "Hainan Airlines",
           "1:1"
         ],
         [
-          "Japan Airlines Mileage Bank",
+          "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "Japan Airlines (JAL Mileage Bank)",
           "1:1"
         ],
         [
@@ -946,15 +1064,15 @@
           "1:1"
         ],
         [
-          "Qatar Airways Privilege Club",
+          "Qatar Airways Avios",
           "1:1"
         ],
         [
-          "SAS EuroBonus",
+          "Scandinavian Airlines (SAS) EuroBonus",
           "1:1"
         ],
         [
-          "Thai Royal Orchid Plus",
+          "Thai Airways Royal Orchid Plus",
           "1:1"
         ],
         [
@@ -962,7 +1080,7 @@
           "1:1"
         ],
         [
-          "Vietnam Airlines Lotusmiles",
+          "Vietnam Airlines LotusMiles",
           "1:1"
         ],
         [
@@ -972,12 +1090,8 @@
       ],
       "hotel": [
         [
-          "Accor Live Limitless",
-          "1.5:1"
-        ],
-        [
-          "Virgin Red",
-          "1:1"
+          "ALL Accor Live Limitless",
+          "3:2"
         ]
       ]
     }

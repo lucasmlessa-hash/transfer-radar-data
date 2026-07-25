@@ -20,8 +20,11 @@ const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', '
 const NO_HISTORY_MP = Array(12).fill(0);
 
 // Forecast-only routes are capped so the feed can't balloon as the archive
-// grows; the highest-confidence ones survive.
-const MAX_FORECAST_ROUTES = 25;
+// grows. 60 comfortably fits every real bank x airline pair with >=2 archived
+// windows (37 as of 2026-07-25) — the old cap of 25 silently dropped routes
+// like c1-af and bilt-vs, so the client's by-airline cards showed an airline
+// with HALF its banks missing, which reads as "this bank never bonuses here".
+const MAX_FORECAST_ROUTES = 60;
 
 // `time` (transfer speed) is curated partner metadata, not something any
 // source publishes per bonus. It used to come from the simulated sample feed;

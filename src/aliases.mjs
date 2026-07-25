@@ -48,6 +48,8 @@ export const PARTNER_ALIASES = {
   B6: ['jetblue', 'jetblue airways', 'jetblue trueblue', 'trueblue'],
   EY: ['etihad', 'etihad airways', 'etihad guest'],
   IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club'],
+  CM: ['copa', 'copa airlines', 'connectmiles', 'copa connectmiles', 'copa connect miles', 'copa airlines connectmiles'],
+  TP: ['tap', 'tap air portugal', 'tap portugal', 'miles&go', 'tap miles&go', 'tap miles & go', 'tap miles and go', 'miles and go'],
 };
 
 // Display name used for a route's `airline` field when no seed route already
@@ -79,6 +81,8 @@ const PARTNER_DISPLAY_NAMES = {
   B6: 'JetBlue TrueBlue',
   EY: 'Etihad Guest',
   IB: 'Iberia Avios',
+  CM: 'Copa ConnectMiles',
+  TP: 'TAP Miles&Go',
 };
 
 // Real sources spell the same bank/partner a dozen ways: a trailing

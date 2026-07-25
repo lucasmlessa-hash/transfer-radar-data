@@ -14,6 +14,7 @@ import { source as esfera } from './sources/esfera.mjs';
 import { normalize } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
+import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -202,7 +203,30 @@ export async function runPipeline({
   }
 
   writeFileSync(path.join(outDir, 'feed.json'), JSON.stringify(candidate, null, 2));
-  writeFileSync(path.join(outDir, 'partners.json'), readFileSync(path.join(ROOT, 'sample', 'partners.json'), 'utf8'));
+
+  // Partner directory refreshed from the official pages on every build —
+  // partners join and leave (Esfera dropped AAdvantage; Livelo added United).
+  // Failures here never abort the publish and never count toward the source
+  // failure guard above: mergeDirectory keeps the curated lists for any bank
+  // whose scrape failed, so the worst case is yesterday's directory.
+  const partnersDoc = JSON.parse(readFileSync(path.join(ROOT, 'sample', 'partners.json'), 'utf8'));
+  const scrapedDir = {};
+  for (const src of DIRECTORY_SOURCES) {
+    try {
+      const html = fixtures
+        ? readFileSync(path.join(fixturesDir, src.fixture), 'utf8')
+        : await (async () => {
+          const res = await fetch(src.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' }, signal: AbortSignal.timeout(20000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.text();
+        })();
+      Object.assign(scrapedDir, src.parse(html));
+    } catch (e) {
+      console.warn(`[publish] directory source "${src.id}" failed (${e.message}) — curated lists kept for ${src.banks.join(', ')}`);
+    }
+  }
+  partnersDoc.directory = mergeDirectory(partnersDoc.directory, scrapedDir);
+  writeFileSync(path.join(outDir, 'partners.json'), JSON.stringify(partnersDoc, null, 2));
 
   const activeCount = candidateRoutes.filter((r) => r.active).length;
   const unmappedNames = unmapped.map((u) => u.partnerName || u.bankName);
