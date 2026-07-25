@@ -83,19 +83,19 @@ test('deriveHistory drops untracked banks/partners instead of inventing codes', 
 
 test('mp is the shrunk per-occurrence frequency — with evidence, never a raw 0 or 1', () => {
   // Two windows: Jun 14 -> Jul 18 2026 and Jun 2 2025. Observation runs from
-  // Jun 2025 (first archived month) through Jun 2026 — 13 month-occurrences;
-  // Jul 2026 is in progress at NOW, so the Jul 18 2026 tail is clipped out of
-  // both numerator and denominator. Base rate = 2 hit-months / 13 = 2/13.
-  //   June:  k=2 of n=2 -> (2 + 2*(2/13)) / (2+2) = 0.577  (never 1.0 off n=2)
-  //   July:  k=0 of n=1 -> (0 + 2*(2/13)) / (1+2) = 0.103  (never 0 either)
-  // Every other month has the same k=0, n=1 -> the same 0.103 floor.
+  // Jun 2025 (first archived month) through Jun 2026; Jul 2026 is in progress
+  // at NOW, so the Jul 18 2026 tail is clipped out of numerator AND
+  // denominator. Year decay (half-life 3y) weighs 2025 months at
+  // 0.5^(1/3)=0.7937 and 2026 months at 1:
+  //   base rate = 1.7937 hit-mass / 11.556 occurrence-mass = 0.15522
+  //   June (hit both years): (1.7937 + 2*0.15522) / (1.7937+2) = 0.555
+  //   2025-only months (Jul..Dec): (0 + 0.31044) / (0.7937+2)  = 0.111
+  //   2026-only months (Jan..May): (0 + 0.31044) / (1+2)       = 0.103
   const mp = deriveHistory(NOW, parseHistory(PAGE)).get('citi-av').mp;
   assert.equal(mp.length, 12);
-  assert.equal(mp[5], 0.577); // June
-  assert.deepEqual(
-    mp.filter((_, i) => i !== 5),
-    Array(11).fill(0.103),
-  );
+  assert.equal(mp[5], 0.555); // June
+  assert.deepEqual(mp.slice(6), Array(6).fill(0.111), 'Jul..Dec observed only in the decayed 2025');
+  assert.deepEqual(mp.slice(0, 5), Array(5).fill(0.103), 'Jan..May observed only in full-weight 2026');
   for (const v of mp) assert.ok(v > 0 && v < 1, `with evidence, mp must stay strictly inside (0,1): ${v}`);
 });
 
@@ -132,12 +132,11 @@ test('next picks the highest-probability month ahead and stays a valid probabili
   }));
   const entry = deriveHistory(NOW, marchEveryYear).get('amex-av');
   assert.equal(entry.next.label, 'Mar 2027');
-  // Observation Mar 2024..Jun 2026 = 28 month-occurrences, 3 hit-months, so
-  // base rate 3/28. mp[Mar] = (3 + 2*(3/28)) / (3+2) = 0.643; last window
-  // ended 03/31/26, under 12 months before NOW -> recency 1.0 -> 64.
-  // Three observed years no longer buy the 95 cap: that cap is now reachable
-  // only with the years of evidence it always should have required.
-  assert.equal(entry.next.prob, 64);
+  // Decay weights: 2024 -> 0.630, 2025 -> 0.794, 2026 -> 1. Hit-mass for
+  // March = 2.4237 (all three years), occurrence-mass 2.4237 of 21.824 total
+  // -> base rate 0.1111. mp[Mar] = (2.4237 + 0.2221)/(2.4237+2) = 0.598;
+  // recency 1.0 -> 60. Three observed years no longer buy the 95 cap.
+  assert.equal(entry.next.prob, 60);
   assert.ok(Number.isInteger(entry.next.prob) && entry.next.prob >= 0 && entry.next.prob <= 100);
 });
 
@@ -150,10 +149,12 @@ test('a route that stopped running bonuses years ago is damped, not dropped', ()
     endDateRaw: `03/31/${yy}`,
   }));
   const entry = deriveHistory(NOW, stale).get('amex-av');
-  // Observation Mar 2017..Jun 2026 = 112 month-occurrences, 2 hit-months.
-  // mp[Mar] = (2 + 2*(2/112)) / (10+2) = 0.17 (Mar observed 10 times);
-  // last window ended >24 months ago -> recency 0.5 -> round(8.5) = 9%.
-  assert.equal(entry.next.prob, 9);
+  // With 3y-half-life decay, 2017/2018 hits carry weight 0.125+0.157=0.282
+  // against a March occurrence-mass of 4.366 (2017..2026) and a total mass of
+  // 46.15: mp[Mar] = (0.282 + 2*0.0061)/(4.366+2) = 0.046; recency 0.5 ->
+  // round(2.3) = 2%. Ancient one-off routes now fade toward the floor instead
+  // of holding a double-digit forecast for a decade.
+  assert.equal(entry.next.prob, 2);
 });
 
 test('malformed archive rows are skipped, not guessed at', () => {

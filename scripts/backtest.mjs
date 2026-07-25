@@ -80,6 +80,65 @@ function candidate(ws, t1, t2, cutAmi, clim) {
   return (k + TAU * clim) / (n + TAU);
 }
 
+// --- candidate refinements under test (2026-07-25 second round) -------------
+// Exponential year decay: the 2020-22 promo regime (3 windows/yr on routes
+// that now run ~1/yr) must not weigh like the present. Half-life fixed a
+// priori at 3 years.
+const HALF_LIFE_Y = 3;
+const yw = (cutAmi, m) => 0.5 ** ((Math.floor(cutAmi / 12) - Math.floor(m / 12)) / HALF_LIFE_Y);
+
+function climatologyW(ws, cutAmi) {
+  const first = Math.min(...ws.map((w) => w.s));
+  let hits = 0, n = 0;
+  for (let t = first; t + 1 <= cutAmi - 1; t += 1) {
+    const w = yw(cutAmi, t);
+    n += w;
+    if (ws.some((x) => overlaps2(x, t, t + 1))) hits += w;
+  }
+  return n ? hits / n : 0.5;
+}
+
+function candidateW(ws, t1, t2, cutAmi, clim) {
+  const first = Math.min(...ws.map((w) => w.s));
+  let k = 0, n = 0;
+  for (let a1 = t1 - 12, a2 = t2 - 12; a1 >= first && a2 <= cutAmi - 1; a1 -= 12, a2 -= 12) {
+    const w = yw(cutAmi, a1);
+    n += w;
+    if (ws.some((x) => overlaps2(x, a1, a2))) k += w;
+  }
+  return (k + TAU * clim) / (n + TAU);
+}
+
+// Pooled refractory hazard: how likely a NEW window is to start, by months
+// elapsed since the route's last window ended — estimated from the training
+// slice only (no leakage), pooled across routes because 5-10 windows per
+// route cannot support per-route conditioning. EB-smoothed toward the
+// overall rate with 24 pseudo-months per bucket.
+const BUCKETS = [[0, 2], [3, 5], [6, 11], [12, Infinity]];
+const bucketOf = (t) => BUCKETS.findIndex(([lo, hi]) => t >= lo && t <= hi);
+function refractoryMults(byIdTrain, cutAmi) {
+  const starts = [0, 0, 0, 0], months = [0, 0, 0, 0];
+  let allStarts = 0, allMonths = 0;
+  for (const ws of byIdTrain.values()) {
+    if (!ws.length) continue;
+    const sorted = ws.slice().sort((a, b) => a.s - b.s);
+    for (let m = sorted[0].e + 1; m < cutAmi; m += 1) {
+      const prevEnds = sorted.filter((w) => w.e < m).map((w) => w.e);
+      if (!prevEnds.length) continue;
+      const b = bucketOf(m - Math.max(...prevEnds));
+      months[b] += 1; allMonths += 1;
+      if (sorted.some((w) => w.s === m)) { starts[b] += 1; allStarts += 1; }
+    }
+  }
+  const hAll = allMonths ? allStarts / allMonths : 0;
+  return BUCKETS.map((_, b) => {
+    const h = (starts[b] + 24 * hAll) / (months[b] + 24);
+    return hAll ? h / hAll : 1;
+  });
+}
+// A multiplier on the hazard maps to probabilities as p -> 1-(1-p)^mult.
+const applyMult = (p, mult) => 1 - (1 - Math.min(p, 0.999)) ** mult;
+
 const brier = (rows, key) => rows.reduce((s, r) => s + (r[key] - r.y) ** 2, 0) / rows.length;
 const logloss = (rows, key) => rows.reduce((s, r) => {
   const p = Math.min(0.999, Math.max(0.001, r[key])); // model emits exact 0s
@@ -137,18 +196,30 @@ for (let cutAmi = ami(2024, 0); cutAmi <= ami(2026, 3); cutAmi += 1) {
   // information set at T: windows that had ended before T
   const trainRaw = raw.filter((w) => { const e = parseMDY(w.endDateRaw); return e && e < T; });
   const derived = deriveHistory(T, trainRaw);
+  const byIdTrain = new Map();
+  for (const [id, ws] of byId) {
+    const train = ws.filter((w) => w.end < T);
+    if (train.length) byIdTrain.set(id, train);
+  }
+  const mults = refractoryMults(byIdTrain, cutAmi);
   for (const [id, entry] of derived) {
     if (!entry.next) continue; // product's own guard: <2 windows never surfaces
     const ws = byId.get(id) ?? [];
     if (ws.some((w) => w.s <= cutAmi && w.e >= cutAmi)) continue; // live at T -> not Forecast's problem
-    const train = ws.filter((w) => w.end < T);
+    const train = byIdTrain.get(id) ?? [];
     if (!train.length) continue;
     const m1 = t1 % 12, m2 = t2 % 12;
     const model = 1 - (1 - entry.mp[m1]) * (1 - entry.mp[m2]);
     const cl = climatology(train, cutAmi);
     const cand = candidate(train, t1, t2, cutAmi, cl.p);
+    const clW = climatologyW(train, cutAmi);
+    const candD = candidateW(train, t1, t2, cutAmi, clW);
+    const lastEnd = Math.max(...train.map((w) => w.e));
+    const mult = mults[bucketOf(Math.max(0, cutAmi - lastEnd))];
+    const candR = applyMult(cand, mult);
+    const candDR = applyMult(candD, mult);
     const y = ws.some((w) => overlaps2(w, t1, t2)) ? 1 : 0;
-    rows.push({ id, T: T.toISOString().slice(0, 7), model, clim: cl.p, cand, y });
+    rows.push({ id, T: T.toISOString().slice(0, 7), model, clim: cl.p, cand, candD, candR, candDR, y });
   }
 }
 
@@ -157,13 +228,13 @@ const n = rows.length, base = rows.reduce((s, r) => s + r.y, 0) / n;
 console.log(`\n${n} route-cutoff predictions, ${Math.round(base * 100)}% base event rate\n`);
 console.log('predictor   Brier    log-loss   skill vs clim');
 const bClim = brier(rows, 'clim');
-for (const key of ['model', 'clim', 'cand']) {
+for (const key of ['model', 'clim', 'cand', 'candD', 'candR', 'candDR']) {
   const b = brier(rows, key);
   const skill = key === 'clim' ? '—' : ((1 - b / bClim) * 100).toFixed(1) + '%';
   console.log(`${key.padEnd(10)} ${b.toFixed(4)}   ${logloss(rows, key).toFixed(4)}     ${skill}`);
 }
 
-for (const key of ['model', 'cand']) {
+for (const key of ['cand', 'candDR']) {
   console.log(`\ncalibration — ${key} (predicted decile -> what actually happened)`);
   console.log('bin        n     mean p   observed');
   for (let b = 0; b < 10; b += 1) {

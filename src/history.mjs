@@ -73,6 +73,44 @@ const round3 = (x) => Math.round(x * 1000) / 1000;
 // absolute month index - the currency all the observation-window math uses
 const ami = (d) => d.getUTCFullYear() * 12 + d.getUTCMonth();
 
+// Exponential year decay, half-life 3 years. The 2020-22 promo regime was an
+// artifact of nobody flying — routes that ran 3 windows/year then run ~1 now
+// (amex-af: Jul/Sep/Nov 2021, May/Sep/Nov 2022, then one-a-year since) — and
+// unweighted counting lets that dead regime outvote the present. Backtested
+// 2026-07-25: decay alone lifts Brier skill from +1.8% to +5.6%.
+const HALF_LIFE_Y = 3;
+const yearWeight = (nowAmi, m) => 0.5 ** ((Math.floor(nowAmi / 12) - Math.floor(m / 12)) / HALF_LIFE_Y);
+
+// Refractory effect: issuers do not run the same route back-to-back — pooled
+// across the whole archive, only ~8% of inter-window gaps are <= 2 months, and
+// post-2022 regimes stretch that further. The hazard of a NEW window starting,
+// bucketed by months since the route's last window ended, is estimated across
+// ALL routes (5-10 windows per route cannot support per-route conditioning)
+// and EB-smoothed toward the overall rate with 24 pseudo-months. Applied to
+// p2 as p -> 1-(1-p)^mult. Backtested: refractory alone +4.1%, both +7.1%.
+const BUCKETS = [[0, 2], [3, 5], [6, 11], [12, Infinity]];
+const bucketOf = (t) => BUCKETS.findIndex(([lo, hi]) => t >= lo && t <= hi);
+function refractoryMults(allSpans, nowAmi) {
+  const starts = [0, 0, 0, 0], months = [0, 0, 0, 0];
+  let allStarts = 0, allMonths = 0;
+  for (const spans of allSpans) {
+    if (!spans.length) continue;
+    const sorted = spans.slice().sort((a, b) => a.s - b.s);
+    for (let m = sorted[0].e + 1; m < nowAmi; m += 1) {
+      const prevEnds = sorted.filter((w) => w.e < m).map((w) => w.e);
+      if (!prevEnds.length) continue;
+      const b = bucketOf(m - Math.max(...prevEnds));
+      months[b] += 1; allMonths += 1;
+      if (sorted.some((w) => w.s === m)) { starts[b] += 1; allStarts += 1; }
+    }
+  }
+  const hAll = allMonths ? allStarts / allMonths : 0;
+  return BUCKETS.map((_, b) => {
+    if (!hAll) return 1;
+    return ((starts[b] + 24 * hAll) / (months[b] + 24)) / hAll;
+  });
+}
+
 /**
  * Seasonality estimates for one route, from its archived windows:
  *
@@ -102,35 +140,36 @@ const ami = (d) => d.getUTCFullYear() * 12 + d.getUTCMonth();
 function seasonality(windows, now) {
   if (!windows.length) return { mp: Array(12).fill(0), p2: Array(12).fill(0) };
 
-  const yearsSeenPerMonth = Array.from({ length: 12 }, () => new Set());
   let firstAmi = Infinity;
   const spans = windows.map((w) => {
     firstAmi = Math.min(firstAmi, ami(w.start));
     return { s: ami(w.start), e: ami(w.end) };
   });
   const nowAmi = ami(now); // current month is in progress, not yet observed
-  for (const { s, e } of spans) {
-    // clip hits to observed months: a window still touching the in-progress
-    // month must not put a hit in the numerator while the month is excluded
-    // from the denominator (k > n would follow). It counts next month.
-    for (let m = s; m <= e && m < nowAmi; m += 1) yearsSeenPerMonth[((m % 12) + 12) % 12].add(Math.floor(m / 12));
-  }
+  const wOf = (m) => yearWeight(nowAmi, m);
   const observed = (m) => m >= firstAmi && m < nowAmi;
   const hit1 = (m) => spans.some(({ s, e }) => s <= m && e >= m);
   const hit2 = (m) => hit1(m) || hit1(m + 1);
 
-  // per-calendar-month occurrence counts and the route's base monthly rate
-  const n1 = Array(12).fill(0);
-  for (let m = firstAmi; m < nowAmi; m += 1) n1[((m % 12) + 12) % 12] += 1;
-  const totalK = yearsSeenPerMonth.reduce((s, y) => s + y.size, 0);
+  // decay-weighted hit mass and occurrence mass per calendar month. Hits are
+  // clipped to observed months: a window still touching the in-progress month
+  // must not put weight in the numerator while the month sits outside the
+  // denominator (k > n would follow). It counts next month.
+  const k1 = Array(12).fill(0), n1 = Array(12).fill(0);
+  for (let m = firstAmi; m < nowAmi; m += 1) {
+    const cal = ((m % 12) + 12) % 12;
+    n1[cal] += wOf(m);
+    if (hit1(m)) k1[cal] += wOf(m);
+  }
+  const totalK = k1.reduce((s, x) => s + x, 0);
   const totalN = n1.reduce((s, x) => s + x, 0);
   const prior1 = totalN ? totalK / totalN : 0;
 
-  const mp = yearsSeenPerMonth.map((years, cal) => round3((years.size + TAU * prior1) / (n1[cal] + TAU)));
+  const mp = k1.map((k, cal) => round3((k + TAU * prior1) / (n1[cal] + TAU)));
 
-  // stretch climatology: fraction of ALL observed sliding 2-month stretches hit
+  // stretch climatology: decay-weighted share of observed 2-month stretches hit
   let sHits = 0, sN = 0;
-  for (let m = firstAmi; m + 1 < nowAmi; m += 1) { sN += 1; if (hit2(m)) sHits += 1; }
+  for (let m = firstAmi; m + 1 < nowAmi; m += 1) { const w = wOf(m); sN += w; if (hit2(m)) sHits += w; }
   const prior2 = sN ? sHits / sN : 0;
 
   const p2 = Array.from({ length: 12 }, (_, cal) => {
@@ -140,8 +179,8 @@ function seasonality(windows, now) {
     for (let y = firstYear; y <= lastYear; y += 1) {
       const m = y * 12 + cal;
       if (!observed(m) || !observed(m + 1)) continue;
-      n += 1;
-      if (hit2(m)) k += 1;
+      n += wOf(m);
+      if (hit2(m)) k += wOf(m);
     }
     return round3((k + TAU * prior2) / (n + TAU));
   });
@@ -220,10 +259,33 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
     byId.get(id).windows.push({ start, end, pct });
   }
 
+  // Pooled refractory hazard from every route's windows, then applied to each
+  // route's p2 by how long ago ITS last window ended. This bakes "now" into
+  // p2 — the published number is a genuine forecast, not pure seasonality —
+  // which is safe because the feed rebuilds every 30 minutes. mp stays purely
+  // seasonal: the sparkline answers "when does this route cluster", the
+  // verdict answers "should you wait", and those are different questions.
+  const nowAmi = ami(now);
+  const mults = refractoryMults(
+    [...byId.values()].map(({ windows }) => windows.map((w) => ({ s: ami(w.start), e: ami(w.end) }))),
+    nowAmi,
+  );
+
   const out = new Map();
   for (const [id, { bank, code, windows }] of byId) {
     windows.sort((a, b) => b.start - a.start); // most recent first
-    const { mp, p2 } = seasonality(windows, now);
+    const { mp, p2: p2Seasonal } = seasonality(windows, now);
+    const lastEnd = Math.max(...windows.map((w) => ami(w.end)));
+    const p2 = p2Seasonal.map((p, cal) => {
+      // the next occurrence of this calendar month, as the client will read it
+      let m = Math.floor(nowAmi / 12) * 12 + cal;
+      if (m <= nowAmi) m += 12;
+      const mult = mults[bucketOf(Math.max(0, m - lastEnd))];
+      // capped at .95 for the same reason next.prob is: a forecast from a
+      // handful of years is never a certainty, and mult > 1 could compound
+      // a strong seasonal into one.
+      return round3(Math.min(0.95, 1 - (1 - Math.min(p, 0.999)) ** mult));
+    });
     const next = forecastNext(windows, mp, now);
     const entry = {
       bank,
