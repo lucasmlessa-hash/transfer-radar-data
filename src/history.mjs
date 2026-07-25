@@ -62,49 +62,99 @@ function lengthLabel(start, end) {
   return `${days} day${days === 1 ? '' : 's'}`;
 }
 
+// Beta-Binomial shrinkage strength, in pseudo-years. Chosen a priori during the
+// 2026-07-25 analysis; the walk-forward backtest (scripts/backtest.mjs, 767
+// predictions over 2024-01..2026-04) then measured the raw-frequency model at
+// -4.4% Brier skill vs per-route climatology and this estimator at +2.3%
+// (tau=4 scored +3.6%, but that number came from sweeping tau on the same
+// evaluation set - kept at the pre-registered 2 rather than chasing it).
+const TAU = 2;
+const round3 = (x) => Math.round(x * 1000) / 1000;
+// absolute month index - the currency all the observation-window math uses
+const ami = (d) => d.getUTCFullYear() * 12 + d.getUTCMonth();
+
 /**
- * mp[m] = the empirical frequency that this route had a bonus RUNNING at some
- * point during calendar month m.
+ * Seasonality estimates for one route, from its archived windows:
  *
- *   numerator   = number of distinct years in which a window of this route
- *                 overlapped month m (a Jun 14 -> Jul 18 window counts for
- *                 both June and July of that year)
- *   denominator = number of calendar years this route's archive spans, from
- *                 its earliest window's start year through the current year,
- *                 inclusive
+ *   mp[m] = P(a bonus runs at some point during calendar month m)
+ *   p2[m] = P(a bonus runs during the 2-month stretch starting at month m)
  *
- * That's it — no smoothing, no decay, no model. Caveat worth knowing: a route
- * whose archive starts this year has a denominator of 1, so a single observed
- * month reads as 1.0. `next` guards against acting on that by requiring at
- * least 2 windows.
+ * Both are shrunk empirical frequencies:
+ *
+ *   numerator   = years in which a window overlapped the month/stretch
+ *   denominator = OCCURRENCES of that month/stretch actually observed - from
+ *                 the route's first archived month up to (not including) the
+ *                 current month. The old year-span denominator counted months
+ *                 that hadn't happened yet this year, biasing every
+ *                 not-yet-reached month down by ~1/span (measured in the
+ *                 backtest: 320 of 767 predictions were an exact 0%, and 9%
+ *                 of those "impossible" bonuses happened).
+ *   shrinkage   = (k + TAU*prior) / (n + TAU), prior = the route's own base
+ *                 rate. Kills both pathologies of raw frequencies at n<=6:
+ *                 the overconfident exact 0 and the span-1 route reading 1.0.
+ *
+ * p2 exists so the client's 2-month verdict never composes mp months by
+ * independence: a single Jun 14 -> Jul 18 window feeds BOTH mp[Jun] and
+ * mp[Jul], so 1-(1-mp)(1-mp) double-counts it; p2 counts the stretch once.
+ * A route with no archive gets zeros (see normalize.mjs - "no evidence" is
+ * zeros, not a guess; only routes WITH evidence earn the smoothed floor).
  */
-function monthlyProbabilities(windows, now) {
+function seasonality(windows, now) {
+  if (!windows.length) return { mp: Array(12).fill(0), p2: Array(12).fill(0) };
+
   const yearsSeenPerMonth = Array.from({ length: 12 }, () => new Set());
-  let firstYear = Infinity;
-
-  for (const w of windows) {
-    firstYear = Math.min(firstYear, w.start.getUTCFullYear());
-    // walk month by month from start to end, inclusive
-    const cursor = new Date(Date.UTC(w.start.getUTCFullYear(), w.start.getUTCMonth(), 1));
-    const last = new Date(Date.UTC(w.end.getUTCFullYear(), w.end.getUTCMonth(), 1));
-    while (cursor <= last) {
-      yearsSeenPerMonth[cursor.getUTCMonth()].add(cursor.getUTCFullYear());
-      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
-    }
+  let firstAmi = Infinity;
+  const spans = windows.map((w) => {
+    firstAmi = Math.min(firstAmi, ami(w.start));
+    return { s: ami(w.start), e: ami(w.end) };
+  });
+  const nowAmi = ami(now); // current month is in progress, not yet observed
+  for (const { s, e } of spans) {
+    // clip hits to observed months: a window still touching the in-progress
+    // month must not put a hit in the numerator while the month is excluded
+    // from the denominator (k > n would follow). It counts next month.
+    for (let m = s; m <= e && m < nowAmi; m += 1) yearsSeenPerMonth[((m % 12) + 12) % 12].add(Math.floor(m / 12));
   }
+  const observed = (m) => m >= firstAmi && m < nowAmi;
+  const hit1 = (m) => spans.some(({ s, e }) => s <= m && e >= m);
+  const hit2 = (m) => hit1(m) || hit1(m + 1);
 
-  if (firstYear === Infinity) return Array(12).fill(0);
-  const span = Math.max(1, now.getUTCFullYear() - firstYear + 1);
-  // rounded to 3dp purely to keep the feed small - the client renders these
-  // as whole percents anyway
-  return yearsSeenPerMonth.map((years) => Math.min(1, Math.round((years.size / span) * 1000) / 1000));
+  // per-calendar-month occurrence counts and the route's base monthly rate
+  const n1 = Array(12).fill(0);
+  for (let m = firstAmi; m < nowAmi; m += 1) n1[((m % 12) + 12) % 12] += 1;
+  const totalK = yearsSeenPerMonth.reduce((s, y) => s + y.size, 0);
+  const totalN = n1.reduce((s, x) => s + x, 0);
+  const prior1 = totalN ? totalK / totalN : 0;
+
+  const mp = yearsSeenPerMonth.map((years, cal) => round3((years.size + TAU * prior1) / (n1[cal] + TAU)));
+
+  // stretch climatology: fraction of ALL observed sliding 2-month stretches hit
+  let sHits = 0, sN = 0;
+  for (let m = firstAmi; m + 1 < nowAmi; m += 1) { sN += 1; if (hit2(m)) sHits += 1; }
+  const prior2 = sN ? sHits / sN : 0;
+
+  const p2 = Array.from({ length: 12 }, (_, cal) => {
+    let k = 0, n = 0;
+    // every occurrence of the (cal, cal+1) stretch with both months observed
+    const firstYear = Math.floor(firstAmi / 12), lastYear = Math.floor(nowAmi / 12);
+    for (let y = firstYear; y <= lastYear; y += 1) {
+      const m = y * 12 + cal;
+      if (!observed(m) || !observed(m + 1)) continue;
+      n += 1;
+      if (hit2(m)) k += 1;
+    }
+    return round3((k + TAU * prior2) / (n + TAU));
+  });
+
+  return { mp, p2 };
 }
 
 /**
  * next = the highest-probability month among the NEXT 12 calendar months
  * (starting the month after `now` — a window opening in the current month is
  * either already live or already missed), damped by how recently this route
- * last ran a bonus:
+ * last ran a bonus. Reads the SMOOTHED mp, so a span-1 route can no longer
+ * hit the 95 cap off a single observed year:
  *
  *   prob = round(100 * mp[bestMonth] * recency), capped at 95
  *   recency = 1.00 if the last window ended  < 12 months ago
@@ -173,12 +223,13 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
   const out = new Map();
   for (const [id, { bank, code, windows }] of byId) {
     windows.sort((a, b) => b.start - a.start); // most recent first
-    const mp = monthlyProbabilities(windows, now);
+    const { mp, p2 } = seasonality(windows, now);
     const next = forecastNext(windows, mp, now);
     const entry = {
       bank,
       code,
       mp,
+      p2,
       typical: typicalRange(windows.map((w) => w.pct)),
       hist: windows.map((w) => ({ w: windowLabel(w.start), pct: w.pct, len: lengthLabel(w.start, w.end) })),
     };

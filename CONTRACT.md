@@ -27,6 +27,7 @@ Schemas: `schema/feed.schema.json` and `schema/partners.schema.json`
       "time": "INSTANT",          // "INSTANT" | "~1 DAY" | "~2 DAYS" | free text — transfer speed to the partner
       "typical": "+75–100%",      // free-text typical bonus range, display-only
       "mp": [0.7,0.5,0.5,0.6,0.5,0.7,0.6,0.7,0.5,0.7,0.5,0.8],  // ALWAYS length 12, Jan..Dec, each a probability 0..1
+      "p2": [0.8,0.6,0.6,0.7,0.7,0.8,0.8,0.8,0.7,0.8,0.7,0.9],  // OPTIONAL, length 12: P(bonus during the 2-month stretch starting at that month)
       "active":  { "pct": 75, "endDate": "2026-07-25" },        // OPTIONAL, present iff a bonus is live right now
       "ended":   { "pct": 25, "endedAt": "2026-07-14" },        // OPTIONAL, present iff a bonus just ended
       "next":    { "label": "Sep 2026", "prob": 82 },           // OPTIONAL, forecast rows: next likely window + confidence 0..100
@@ -55,6 +56,15 @@ Field notes:
 - `mp` (monthly probability) is always exactly 12 numbers in `0..1`, index 0
   = January, index 11 = December, representing the historical likelihood a
   bonus is live that calendar month.
+- `p2` (optional; emitted by every build since 2026-07-25) is 12 numbers in
+  `0..1`: index `m` is the probability a bonus runs at some point during the
+  2-month stretch starting at month `m` (Dec wraps into Jan). It is computed
+  from the archive as an empirical union, NOT derived from `mp` — a client
+  wanting a 2-month probability must read `p2[m]`, never compose
+  `1-(1-mp[m])(1-mp[m+1])`: a single window spanning both months feeds both
+  `mp` entries, and the independence product double-counts it. When `p2` is
+  absent (pre-2026-07-25 cached feeds), that composition is the least-bad
+  fallback.
 - `next.prob` is an integer `0..100` (percent confidence).
 - No extra keys are allowed on a route object beyond the ones listed above.
 

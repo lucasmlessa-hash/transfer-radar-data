@@ -81,19 +81,38 @@ test('deriveHistory drops untracked banks/partners instead of inventing codes', 
   assert.deepEqual([...derived.keys()], ['citi-av']);
 });
 
-test('mp is the empirical per-month frequency across the years covered', () => {
-  // One route, two windows: Jun 14 2026 -> Jul 18 2026 and Jun 2 2025.
-  // Span = 2025..2026 = 2 years. June seen in 2 of those years -> 1.0.
-  // July seen in 1 (2026) -> 0.5. Every other month -> 0.
+test('mp is the shrunk per-occurrence frequency — with evidence, never a raw 0 or 1', () => {
+  // Two windows: Jun 14 -> Jul 18 2026 and Jun 2 2025. Observation runs from
+  // Jun 2025 (first archived month) through Jun 2026 — 13 month-occurrences;
+  // Jul 2026 is in progress at NOW, so the Jul 18 2026 tail is clipped out of
+  // both numerator and denominator. Base rate = 2 hit-months / 13 = 2/13.
+  //   June:  k=2 of n=2 -> (2 + 2*(2/13)) / (2+2) = 0.577  (never 1.0 off n=2)
+  //   July:  k=0 of n=1 -> (0 + 2*(2/13)) / (1+2) = 0.103  (never 0 either)
+  // Every other month has the same k=0, n=1 -> the same 0.103 floor.
   const mp = deriveHistory(NOW, parseHistory(PAGE)).get('citi-av').mp;
   assert.equal(mp.length, 12);
-  assert.equal(mp[5], 1); // June
-  assert.equal(mp[6], 0.5); // July
+  assert.equal(mp[5], 0.577); // June
   assert.deepEqual(
-    mp.filter((_, i) => i !== 5 && i !== 6),
-    Array(10).fill(0),
+    mp.filter((_, i) => i !== 5),
+    Array(11).fill(0.103),
   );
-  for (const v of mp) assert.ok(v >= 0 && v <= 1, `mp value ${v} outside 0..1`);
+  for (const v of mp) assert.ok(v > 0 && v < 1, `with evidence, mp must stay strictly inside (0,1): ${v}`);
+});
+
+test('p2 counts a 2-month stretch once — a spanning window is not double-counted', () => {
+  // Same fixture. The Jun 14 -> Jul 18 window overlaps BOTH June and July;
+  // composing mp by independence would count it twice, p2 counts stretches.
+  //   May-Jun stretch: 2025 hit, 2026 hit -> k=2 of n=2 occurrences
+  //   Stretch climatology: 12 sliding stretches (Jun25..May26 starts), hits =
+  //   those touching Jun25 or Jun26 = 3 (May26-Jun26 start is the 12th) -> let
+  //   the assertion pin the exact shrunk value instead of restating all terms:
+  //   p2[Apr] (Apr-May, k=0 of n=1) must sit at the smoothed floor, below 0.2,
+  //   and p2[May] (May-Jun) must dominate every other stretch.
+  const { p2 } = deriveHistory(NOW, parseHistory(PAGE)).get('citi-av');
+  assert.equal(p2.length, 12);
+  assert.ok(p2[4] === Math.max(...p2), 'May-Jun stretch (covering both June hits) is the peak');
+  assert.ok(p2[3] > 0 && p2[3] < 0.2, 'no-hit stretch sits at the smoothed floor, not 0: ' + p2[3]);
+  for (const v of p2) assert.ok(v > 0 && v < 1, `with evidence, p2 stays strictly inside (0,1): ${v}`);
 });
 
 test('a single archived window yields history but never a forecast', () => {
@@ -113,9 +132,12 @@ test('next picks the highest-probability month ahead and stays a valid probabili
   }));
   const entry = deriveHistory(NOW, marchEveryYear).get('amex-av');
   assert.equal(entry.next.label, 'Mar 2027');
-  // mp[Mar] = 3 years seen / 3 years spanned = 1.0; last window ended
-  // 03/31/26, under 12 months before NOW -> recency 1.0; capped at 95.
-  assert.equal(entry.next.prob, 95);
+  // Observation Mar 2024..Jun 2026 = 28 month-occurrences, 3 hit-months, so
+  // base rate 3/28. mp[Mar] = (3 + 2*(3/28)) / (3+2) = 0.643; last window
+  // ended 03/31/26, under 12 months before NOW -> recency 1.0 -> 64.
+  // Three observed years no longer buy the 95 cap: that cap is now reachable
+  // only with the years of evidence it always should have required.
+  assert.equal(entry.next.prob, 64);
   assert.ok(Number.isInteger(entry.next.prob) && entry.next.prob >= 0 && entry.next.prob <= 100);
 });
 
@@ -128,9 +150,10 @@ test('a route that stopped running bonuses years ago is damped, not dropped', ()
     endDateRaw: `03/31/${yy}`,
   }));
   const entry = deriveHistory(NOW, stale).get('amex-av');
-  // mp[Mar] = 2 years seen / (2017..2026 = 10 years spanned) = 0.2,
-  // last window ended >24 months ago -> recency 0.5 -> 10%
-  assert.equal(entry.next.prob, 10);
+  // Observation Mar 2017..Jun 2026 = 112 month-occurrences, 2 hit-months.
+  // mp[Mar] = (2 + 2*(2/112)) / (10+2) = 0.17 (Mar observed 10 times);
+  // last window ended >24 months ago -> recency 0.5 -> round(8.5) = 9%.
+  assert.equal(entry.next.prob, 9);
 });
 
 test('malformed archive rows are skipped, not guessed at', () => {

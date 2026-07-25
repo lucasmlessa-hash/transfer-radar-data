@@ -34,7 +34,10 @@ function validateRoute(r, i) {
   const ctx = `routes[${i}]`;
   if (!isPlainObject(r)) fail(`${ctx}: must be an object`);
   const required = ['id', 'bank', 'airline', 'code', 'time', 'typical', 'mp', 'hist'];
-  const allowed = [...required, 'active', 'ended', 'next', 'summary'];
+  // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
+  // routes from feeds that predate it, and a required key would turn a source
+  // outage into a publish abort. New builds always emit it (see normalize.mjs).
+  const allowed = [...required, 'p2', 'active', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
 
   for (const k of ['id', 'bank', 'airline', 'code', 'time', 'typical']) {
@@ -45,6 +48,13 @@ function validateRoute(r, i) {
   r.mp.forEach((v, j) => {
     if (typeof v !== 'number' || v < 0 || v > 1) fail(`${ctx}.mp[${j}]: must be a number in 0..1`);
   });
+
+  if ('p2' in r) {
+    if (!Array.isArray(r.p2) || r.p2.length !== 12) fail(`${ctx}.p2: must be an array of length 12`);
+    r.p2.forEach((v, j) => {
+      if (typeof v !== 'number' || v < 0 || v > 1) fail(`${ctx}.p2[${j}]: must be a number in 0..1`);
+    });
+  }
 
   if (!Array.isArray(r.hist)) fail(`${ctx}.hist: must be an array`);
   r.hist.forEach((h, j) => {

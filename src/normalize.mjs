@@ -164,6 +164,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       time: transferTime(bankCode, airCode),
       typical: h?.typical ?? '—',
       mp: h?.mp ?? NO_HISTORY_MP,
+      p2: h?.p2 ?? NO_HISTORY_MP,
       hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
@@ -201,6 +202,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       time: transferTime(h.bank, h.code),
       typical: h.typical,
       mp: h.mp,
+      p2: h.p2,
       hist: h.hist,
       next: h.next,
     });
