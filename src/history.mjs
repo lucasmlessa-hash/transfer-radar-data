@@ -91,17 +91,30 @@ const yearWeight = (nowAmi, m) => 0.5 ** ((Math.floor(nowAmi / 12) - Math.floor(
 // as noisy as the thing it is supposed to stabilise. The bank is a low-variance
 // estimator of the LEVEL a route sits at.
 //
-// What this is NOT: it is not a "bank wave" effect. That hypothesis was tested
-// and failed — given a sibling route of the same bank ran a bonus this month,
-// the lift for this route is 1.95pp with a CI spanning zero. The seasonal
-// version of the bank prior (which would borrow calendar SHAPE) measured worse
-// than production. The bank helps as a level, not as a synchrony signal; do not
-// let anyone re-justify this with a story the data does not support.
+// TWO THINGS THIS IS NOT, both tested and both failed:
 //
-// Backtested 2026-07-25 over 795 walk-forward predictions: production 3.68%
-// Brier skill vs per-route climatology, this 7.54%, and it is the first
-// variant whose advantage excludes zero in BOTH clustered bootstrap schemes
-// (P(dBrier<=0) = 0.002 by cutoff, 0.004 by route).
+//  - Not a "bank wave" effect. Given a sibling route of the same bank ran a
+//    bonus this month, the lift here is 1.95pp with a CI spanning zero. The
+//    seasonal bank prior (which would borrow calendar SHAPE) measured worse.
+//  - Not established as a BANK axis at all. A globally pooled prior — every
+//    route, no bank structure — scores 6.64% against this 7.54%, and the
+//    difference is not established (P(dBrier<=0) = 0.152 by cutoff, 0.078 by
+//    route). The sustained finding is "shrink toward a POOLED prior instead of
+//    the route's own rate"; the bank is a plausible grouping, not a measured
+//    one. Keeping it costs nothing and the point estimate favours it, but do
+//    not defend the bank axis as if it had been demonstrated.
+//
+// Backtested 2026-07-25 over 795 walk-forward predictions: 7.54% Brier skill
+// vs per-route climatology (P(dBrier<=0) = 0.002 by cutoff, 0.004 by route),
+// against 5.60% for the route-only prior.
+//
+// AND THE GAIN IS FADING. Measured against the route-only prior by cutoff
+// year: 2024 +0.0033 (P=0.029), 2025 +0.0044 (P=0.011), 2026 -0.0026
+// (P=0.694). That is the mechanism working as designed — pooling only pays
+// where a route has no base of its own, and every route thickens with time.
+// It keeps earning its place because thin routes keep ARRIVING (Esfera,
+// Livelo and Rove have almost no archive), but the headline number is
+// retrospective. Do not quote 7.54% as a forward expectation.
 const K_HIER = 5;
 
 /**
