@@ -15,6 +15,7 @@ const BANK_ALIASES = {
   WF: ['wells fargo', 'wells fargo rewards', 'wells'],
   ESF: ['esfera', 'banco do brasil esfera', 'bb esfera'],
   LIV: ['livelo', 'livelo pontos'],
+  ROVE: ['rove', 'rove miles', 'rove rewards'],
 };
 
 export const PARTNER_ALIASES = {
@@ -35,12 +36,12 @@ export const PARTNER_ALIASES = {
   // partners.json's airlineDomains + airlineValues (see CONTRACT.md).
   BR: ['eva', 'eva air', 'eva airways', 'infinity mileagelands', 'eva air infinity mileagelands', 'eva infinity mileagelands'],
   QF: ['qantas', 'qantas frequent flyer'],
-  JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank'],
+  JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank', 'jal (japan airlines) mileage bank'],
   LH: ['lufthansa', 'miles and more', 'miles more', 'lufthansa miles and more', 'lufthansa miles more'],
   AS: ['alaska', 'alaska airlines', 'atmos rewards', 'alaska atmos rewards', 'alaska mileage plan', 'mileage plan'],
   AA: ['american', 'american airlines', 'aadvantage', 'american aadvantage', 'american airlines aadvantage'],
   AC: ['air canada', 'aeroplan', 'air canada aeroplan'],
-  TK: ['turkish', 'turkish airlines', 'miles smiles', 'turkish miles smiles'],
+  TK: ['turkish', 'turkish airlines', 'miles smiles', 'turkish miles smiles', 'turkish airlines miles & smiles'],
   EK: ['emirates', 'skywards', 'emirates skywards'],
   SQ: ['singapore', 'singapore airlines', 'krisflyer', 'singapore krisflyer'],
   UA: ['united', 'united airlines', 'united mileageplus', 'mileageplus'],

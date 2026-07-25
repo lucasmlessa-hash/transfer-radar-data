@@ -48,6 +48,12 @@
       "short": "Livelo",
       "bg": "#F7E6EE",
       "fg": "#A81D5E"
+    },
+    "ROVE": {
+      "name": "Rove Miles",
+      "short": "Rove",
+      "bg": "#EAEAEC",
+      "fg": "#1A1A1E"
     }
   },
   "airlineDomains": {
@@ -89,7 +95,8 @@
     "BILT": "biltrewards.com",
     "WF": "wellsfargo.com",
     "ESF": "esfera.com.vc",
-    "LIV": "livelo.com.br"
+    "LIV": "livelo.com.br",
+    "ROVE": "rovemiles.com"
   },
   "airlineValues": {
     "AF": 1.3,
@@ -885,6 +892,92 @@
         [
           "Accor Live Limitless",
           "3.5:1"
+        ]
+      ]
+    },
+    "ROVE": {
+      "air": [
+        [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
+          "Aeromexico Rewards",
+          "1:1"
+        ],
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "Air India Maharaja Club",
+          "1:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Etihad Guest",
+          "1:1"
+        ],
+        [
+          "Finnair Plus",
+          "1:1"
+        ],
+        [
+          "Frontier Miles",
+          "1:1"
+        ],
+        [
+          "Hainan Airlines Fortune Wings Club",
+          "1:1"
+        ],
+        [
+          "Japan Airlines Mileage Bank",
+          "1:1"
+        ],
+        [
+          "Lufthansa Miles & More",
+          "1:1"
+        ],
+        [
+          "Qantas Frequent Flyer",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Privilege Club",
+          "1:1"
+        ],
+        [
+          "SAS EuroBonus",
+          "1:1"
+        ],
+        [
+          "Thai Royal Orchid Plus",
+          "1:1"
+        ],
+        [
+          "Turkish Miles&Smiles",
+          "1:1"
+        ],
+        [
+          "Vietnam Airlines Lotusmiles",
+          "1:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "1:1"
+        ]
+      ],
+      "hotel": [
+        [
+          "Accor Live Limitless",
+          "1.5:1"
+        ],
+        [
+          "Virgin Red",
+          "1:1"
         ]
       ]
     }

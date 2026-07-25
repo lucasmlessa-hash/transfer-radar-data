@@ -17,8 +17,21 @@ test('shared-currency and out-of-scope names still refuse to resolve', () => {
   assert.ok(!resolvePartner('Avios'), 'bare currency name is ambiguous across BA/QR/EI/IB');
   assert.ok(!resolvePartner('Marriott Bonvoy'), 'hotels are reference data, never routes');
   assert.ok(!resolvePartner('IHG'), 'hotels are reference data, never routes');
-  assert.ok(!resolveBank('Rove'), 'untracked transferable currency');
   assert.ok(!resolveBank('PAYBACK'), 'untracked transferable currency');
+});
+
+// Rove Miles: appears repeatedly in the scraped `unmapped` list and now has
+// live bonuses the product can't show without a tracked bank code.
+test('Rove Miles resolves as a bank', () => {
+  assert.equal(resolveBank('Rove Miles'), 'ROVE');
+  assert.equal(resolveBank('Rove'), 'ROVE');
+});
+
+// Archive spellings that don't match the current-bonus table's convention:
+// spaced ampersand (Turkish) and an inverted parenthetical (JAL).
+test('archive spelling variants resolve to already-tracked codes', () => {
+  assert.equal(resolvePartner('Turkish Airlines Miles & Smiles'), 'TK');
+  assert.equal(resolvePartner('JAL (Japan Airlines) Mileage Bank'), 'JL');
 });
 
 // Documents the exact spellings observed in real sources (Frequent Miler's
