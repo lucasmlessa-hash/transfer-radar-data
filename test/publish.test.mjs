@@ -66,8 +66,13 @@ test('happy path: hotels/currencies/airlines outside the tracked set stay unmapp
     const unmappedNames = result.unmapped.map((u) => u.bankName + '|' + u.partnerName);
     // These are real names the live sources return today (2026-07-24) for
     // banks/partners this product doesn't track - they must never resolve to
-    // a route, only ever appear here.
-    const mustStayUnmapped = ['IHG', 'Frontier Miles', 'Qantas', 'Rove', 'PAYBACK'];
+    // a route, only ever appear here. Picked on purpose, not because coverage
+    // happens to be incomplete: 'Qantas' and 'Rove' used to be on this list
+    // until Rove was added as a tracked bank (rove-qf is now a correct, live
+    // route) - if a future coverage expansion tracks one of the names below
+    // too, re-point it at another name still outside the model rather than
+    // deleting the check.
+    const mustStayUnmapped = ['IHG', 'Frontier Miles', 'PAYBACK'];
     for (const name of mustStayUnmapped) {
       assert.ok(
         unmappedNames.some((n) => n.includes(name)),
