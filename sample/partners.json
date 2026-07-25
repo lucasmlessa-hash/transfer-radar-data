@@ -255,10 +255,28 @@
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "note": "TPG July 2026 valuation: Singapore KrisFlyer 1.3c. Not in Frequent Miler RRV."
     },
-    "UA": { "currency": "USD", "asOf": "2026-07-24", "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/", "note": "Frequent Miler RRV: United MileagePlus 1.3." },
-    "B6": { "currency": "USD", "asOf": "2026-07-24", "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/", "note": "Frequent Miler RRV: JetBlue TrueBlue 1.3." },
-    "EY": { "currency": "USD", "asOf": "2026-07-24", "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/", "note": "TPG July 2026: Etihad Guest 1.2. Not in Frequent Miler RRV." },
-    "IB": { "currency": "USD", "asOf": "2026-07-24", "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/", "note": "TPG July 2026 lists unified 'Avios' at 1.4. Per-programme values are intentional: each Avios airline has its own award chart (FM lists only British Airways Avios, at 1.1)." }
+    "UA": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "B6": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+    },
+    "EY": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 valuation: Etihad Guest 1.2c. Not in Frequent Miler RRV."
+    },
+    "IB": {
+      "currency": "USD",
+      "asOf": "2026-07-24",
+      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+    }
   },
   "transferTimes": {
     "AMEX": {
