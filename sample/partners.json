@@ -52,8 +52,8 @@
     "ROVE": {
       "name": "Rove Miles",
       "short": "Rove",
-      "bg": "#EAEAEC",
-      "fg": "#1A1A1E"
+      "bg": "#E6F0EC",
+      "fg": "#1F5C46"
     }
   },
   "airlineDomains": {
