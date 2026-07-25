@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolvePartner, resolveBank, partnerDisplayName } from '../src/aliases.mjs';
+import { resolvePartner, resolveBank, partnerDisplayName, PARTNER_ALIASES } from '../src/aliases.mjs';
 
 // The FM historical archive uses a different naming convention than the
 // current-bonus table the alias map was originally calibrated against.
@@ -21,6 +21,9 @@ test('shared-currency and out-of-scope names still refuse to resolve', () => {
   assert.ok(!resolveBank('PAYBACK'), 'untracked transferable currency');
 });
 
+// Documents the exact spellings observed in real sources (Frequent Miler's
+// archive, AwardWallet) — why these particular variants exist, not just that
+// coverage is complete (the loop below owns completeness).
 test('the four new airlines resolve from the names real sources use', () => {
   assert.equal(resolvePartner('United MileagePlus'), 'UA');
   assert.equal(resolvePartner('JetBlue TrueBlue'), 'B6');
@@ -33,5 +36,15 @@ test('the four new airlines resolve from the names real sources use', () => {
 test('display names exist for the new codes', () => {
   for (const c of ['UA', 'B6', 'EY', 'IB']) {
     assert.notEqual(partnerDisplayName(c), c, c + ' must have a hand-written display name');
+  }
+});
+
+// Complete by construction: every variant we hand-type for these codes is
+// exercised, so adding one later cannot silently go unverified.
+test('every new-airline alias variant resolves to its code', () => {
+  for (const code of ['UA', 'B6', 'EY', 'IB']) {
+    for (const variant of PARTNER_ALIASES[code]) {
+      assert.equal(resolvePartner(variant), code, `${code}: "${variant}" must resolve`);
+    }
   }
 });
