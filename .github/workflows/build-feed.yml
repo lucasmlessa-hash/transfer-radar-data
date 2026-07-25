@@ -10,8 +10,9 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch: {}
 
+# contents: write exists solely for the observed-windows ledger commit below.
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
   issues: write
@@ -78,6 +79,28 @@ jobs:
 
       - name: Validate output
         run: node scripts/validate-feed.mjs out/feed.json
+
+      # The pipeline's own memory (src/observed.mjs): live bonuses it saw are
+      # appended to a day-granular ledger so Esfera/Livelo/Rove — which no
+      # public archive covers — accumulate real history. Day granularity means
+      # this commits at most ~once a day despite the */30 cron. Only after the
+      # feed validated: a build that failed or shipped garbage must not advance
+      # the ledger either. Push conflicts (operator pushed meanwhile) fail the
+      # step and open the pipeline-failure issue — by design, never force.
+      - name: Persist observed-windows ledger
+        run: |
+          # status --porcelain, not diff --quiet: the latter is blind to an
+          # untracked file, and the ledger's very first appearance is one.
+          if [ -z "$(git status --porcelain -- data/observed-windows.json)" ]; then
+            echo "ledger unchanged"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/observed-windows.json
+            git commit -m "chore(data): observed-windows ledger $(date -u +%F)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

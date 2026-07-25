@@ -58,3 +58,17 @@ against the real pages is an operator step, done here.
   pipeline discovers that aren't already in `sample/feed.json` default to
   `'—'` — fill these in by hand (or via a future static seed file, see plan
   005) once real data is flowing.
+
+## Syncing this repo with the monorepo (post-ledger)
+
+Since 2026-07-25 the CI workflow itself commits to this repo: the
+`observed-windows` ledger (`data/observed-windows.json`) advances ~once a
+day. The public repo is therefore no longer a pure mirror of the monorepo's
+subtree. Before any `git subtree push` from the monorepo, pull the CI
+commits back first:
+
+    git subtree pull --prefix=transfer-radar-data radar-data main
+
+A rejected subtree push is this in action, not corruption. Never force-push
+over `main`: that erases ledger history the pipeline cannot regenerate —
+those windows were observed live and exist nowhere else.

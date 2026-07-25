@@ -12,6 +12,8 @@ import { source as awardwallet } from './sources/awardwallet.mjs';
 import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
 import { normalize } from './normalize.mjs';
+import { recordHistory, rawHistory } from './history.mjs';
+import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -84,6 +86,10 @@ export async function runPipeline({
   outDir = path.join(ROOT, 'out'),
   now = new Date(),
   injectBadRoute = false,
+  // The self-archived history ledger (see observed.mjs). Default null — inert —
+  // so tests importing runPipeline can never touch the real committed ledger;
+  // the CLI entrypoint below is what passes the production path.
+  ledgerPath = null,
 } = {}) {
   mkdirSync(outDir, { recursive: true });
 
@@ -120,7 +126,35 @@ export async function runPipeline({
     return { ok: false, reason };
   }
 
+  // Feed the self-archived ledger into history BEFORE normalize derives it.
+  // Order matters: the FM source records its archive during parse (above), and
+  // toRawWindows dedupes against exactly that, so a window FM also archived is
+  // counted once. An unreadable ledger contributes nothing and (crucially) is
+  // never overwritten below.
+  const ledger = ledgerPath ? loadLedger(ledgerPath) : { ok: false, windows: [] };
+  // Always re-record, even with nothing to feed: the history store is
+  // replace-by-source, so an unconditional call is what clears a previous
+  // in-process run's observed windows instead of leaking them into this one.
+  const observedRaw = ledger.ok ? toRawWindows(ledger.windows, rawHistory()) : [];
+  recordHistory('observed', observedRaw);
+  if (ledger.windows.length) {
+    console.log(`[observed] ledger: ${ledger.windows.length} window(s), ${observedRaw.length} feeding history after FM dedupe`);
+  }
+
   const { routes: candidateRoutes, unmapped } = normalize(raw, now);
+
+  // Fold THIS run's live sightings into the ledger — before the stale-route
+  // merge below, which would otherwise advance lastSeen on bonuses nobody
+  // actually saw this run. Day-granular, so the file only changes ~once a day.
+  if (ledgerPath && ledger.ok) {
+    const updated = updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10));
+    if (JSON.stringify(updated) !== JSON.stringify(ledger.windows)) {
+      mkdirSync(path.dirname(ledgerPath), { recursive: true });
+      writeFileSync(ledgerPath, JSON.stringify({ version: 1, windows: updated }, null, 2) + '\n');
+      console.log(`[observed] ledger updated: ${updated.length} window(s)`);
+    }
+  }
+
   const previous = readPreviousFeed(outDir);
 
   // ponytail: a route in the contract carries no source tag, so a failed
@@ -188,7 +222,10 @@ export async function runPipeline({
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const fixtures = process.argv.includes('--fixtures');
-  runPipeline({ fixtures }).then((result) => {
+  // Real builds (CI cron and operator runs) maintain the ledger; fixture runs
+  // must not pollute it with fixture sightings.
+  const ledgerPath = fixtures ? null : path.join(ROOT, 'data', 'observed-windows.json');
+  runPipeline({ fixtures, ledgerPath }).then((result) => {
     process.exit(result.ok ? 0 : 2);
   });
 }
