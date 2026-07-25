@@ -81,35 +81,28 @@ const ami = (d) => d.getUTCFullYear() * 12 + d.getUTCMonth();
 const HALF_LIFE_Y = 3;
 const yearWeight = (nowAmi, m) => 0.5 ** ((Math.floor(nowAmi / 12) - Math.floor(m / 12)) / HALF_LIFE_Y);
 
-// Refractory effect: issuers do not run the same route back-to-back — pooled
-// across the whole archive, only ~8% of inter-window gaps are <= 2 months, and
-// post-2022 regimes stretch that further. The hazard of a NEW window starting,
-// bucketed by months since the route's last window ended, is estimated across
-// ALL routes (5-10 windows per route cannot support per-route conditioning)
-// and EB-smoothed toward the overall rate with 24 pseudo-months. Applied to
-// p2 as p -> 1-(1-p)^mult. Backtested: refractory alone +4.1%, both +7.1%.
-const BUCKETS = [[0, 2], [3, 5], [6, 11], [12, Infinity]];
-const bucketOf = (t) => BUCKETS.findIndex(([lo, hi]) => t >= lo && t <= hi);
-function refractoryMults(allSpans, nowAmi) {
-  const starts = [0, 0, 0, 0], months = [0, 0, 0, 0];
-  let allStarts = 0, allMonths = 0;
-  for (const spans of allSpans) {
-    if (!spans.length) continue;
-    const sorted = spans.slice().sort((a, b) => a.s - b.s);
-    for (let m = sorted[0].e + 1; m < nowAmi; m += 1) {
-      const prevEnds = sorted.filter((w) => w.e < m).map((w) => w.e);
-      if (!prevEnds.length) continue;
-      const b = bucketOf(m - Math.max(...prevEnds));
-      months[b] += 1; allMonths += 1;
-      if (sorted.some((w) => w.s === m)) { starts[b] += 1; allStarts += 1; }
-    }
-  }
-  const hAll = allMonths ? allStarts / allMonths : 0;
-  return BUCKETS.map((_, b) => {
-    if (!hAll) return 1;
-    return ((starts[b] + 24 * hAll) / (months[b] + 24)) / hAll;
-  });
-}
+// Hierarchical shrinkage: how strongly a route's own base rate outweighs its
+// BANK's when they are blended into the p2 prior. weight = n/(n+K_HIER) over
+// the route's archived windows, so a 2-window route leans on its bank and a
+// 15-window route is essentially on its own.
+//
+// Why a bank prior at all: with a median of 3 windows per route, shrinking
+// toward the route's OWN rate borrows no strength from anywhere — the prior is
+// as noisy as the thing it is supposed to stabilise. The bank is a low-variance
+// estimator of the LEVEL a route sits at.
+//
+// What this is NOT: it is not a "bank wave" effect. That hypothesis was tested
+// and failed — given a sibling route of the same bank ran a bonus this month,
+// the lift for this route is 1.95pp with a CI spanning zero. The seasonal
+// version of the bank prior (which would borrow calendar SHAPE) measured worse
+// than production. The bank helps as a level, not as a synchrony signal; do not
+// let anyone re-justify this with a story the data does not support.
+//
+// Backtested 2026-07-25 over 795 walk-forward predictions: production 3.68%
+// Brier skill vs per-route climatology, this 7.54%, and it is the first
+// variant whose advantage excludes zero in BOTH clustered bootstrap schemes
+// (P(dBrier<=0) = 0.002 by cutoff, 0.004 by route).
+const K_HIER = 5;
 
 /**
  * Seasonality estimates for one route, from its archived windows:
@@ -136,9 +129,17 @@ function refractoryMults(allSpans, nowAmi) {
  * mp[Jul], so 1-(1-mp)(1-mp) double-counts it; p2 counts the stretch once.
  * A route with no archive gets zeros (see normalize.mjs - "no evidence" is
  * zeros, not a guess; only routes WITH evidence earn the smoothed floor).
+ *
+ * Returns p2's numerator/denominator masses rather than finished p2 values:
+ * the p2 prior is hierarchical (route blended with bank), so it cannot be
+ * computed until every route in the archive has been measured. deriveHistory
+ * assembles it. mp keeps its own route-level prior — the hierarchical prior
+ * was only ever measured on p2, and unmeasured changes do not ship.
  */
 function seasonality(windows, now) {
-  if (!windows.length) return { mp: Array(12).fill(0), p2: Array(12).fill(0) };
+  if (!windows.length) {
+    return { mp: Array(12).fill(0), calMass: Array.from({ length: 12 }, () => ({ k: 0, n: 0 })), stretch: { k: 0, n: 0 } };
+  }
 
   let firstAmi = Infinity;
   const spans = windows.map((w) => {
@@ -167,14 +168,14 @@ function seasonality(windows, now) {
 
   const mp = k1.map((k, cal) => round3((k + TAU * prior1) / (n1[cal] + TAU)));
 
-  // stretch climatology: decay-weighted share of observed 2-month stretches hit
+  // this route's own 2-month base rate: decay-weighted share of every observed
+  // sliding stretch that was hit. One of the two ingredients of the p2 prior.
   let sHits = 0, sN = 0;
   for (let m = firstAmi; m + 1 < nowAmi; m += 1) { const w = wOf(m); sN += w; if (hit2(m)) sHits += w; }
-  const prior2 = sN ? sHits / sN : 0;
 
-  const p2 = Array.from({ length: 12 }, (_, cal) => {
+  // per-calendar-stretch masses, left un-shrunk for deriveHistory to finish
+  const calMass = Array.from({ length: 12 }, (_, cal) => {
     let k = 0, n = 0;
-    // every occurrence of the (cal, cal+1) stretch with both months observed
     const firstYear = Math.floor(firstAmi / 12), lastYear = Math.floor(nowAmi / 12);
     for (let y = firstYear; y <= lastYear; y += 1) {
       const m = y * 12 + cal;
@@ -182,10 +183,10 @@ function seasonality(windows, now) {
       n += wOf(m);
       if (hit2(m)) k += wOf(m);
     }
-    return round3((k + TAU * prior2) / (n + TAU));
+    return { k, n };
   });
 
-  return { mp, p2 };
+  return { mp, calMass, stretch: { k: sHits, n: sN } };
 }
 
 /**
@@ -259,33 +260,36 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
     byId.get(id).windows.push({ start, end, pct });
   }
 
-  // Pooled refractory hazard from every route's windows, then applied to each
-  // route's p2 by how long ago ITS last window ended. This bakes "now" into
-  // p2 — the published number is a genuine forecast, not pure seasonality —
-  // which is safe because the feed rebuilds every 30 minutes. mp stays purely
-  // seasonal: the sparkline answers "when does this route cluster", the
-  // verdict answers "should you wait", and those are different questions.
-  const nowAmi = ami(now);
-  const mults = refractoryMults(
-    [...byId.values()].map(({ windows }) => windows.map((w) => ({ s: ami(w.start), e: ami(w.end) }))),
-    nowAmi,
-  );
+  // Two passes, because the p2 prior is hierarchical: pass 1 measures every
+  // route, pass 2 blends each route's base rate with its bank's before
+  // shrinking. A single pass cannot do this — the bank prior does not exist
+  // until every route in the bank has been measured.
+  const parts = new Map();
+  const bankMass = new Map();
+  for (const [id, { bank, windows }] of byId) {
+    windows.sort((a, b) => b.start - a.start); // most recent first
+    const s = seasonality(windows, now);
+    parts.set(id, s);
+    const acc = bankMass.get(bank) ?? { k: 0, n: 0 };
+    acc.k += s.stretch.k; acc.n += s.stretch.n;
+    bankMass.set(bank, acc);
+  }
 
   const out = new Map();
   for (const [id, { bank, code, windows }] of byId) {
-    windows.sort((a, b) => b.start - a.start); // most recent first
-    const { mp, p2: p2Seasonal } = seasonality(windows, now);
-    const lastEnd = Math.max(...windows.map((w) => ami(w.end)));
-    const p2 = p2Seasonal.map((p, cal) => {
-      // the next occurrence of this calendar month, as the client will read it
-      let m = Math.floor(nowAmi / 12) * 12 + cal;
-      if (m <= nowAmi) m += 12;
-      const mult = mults[bucketOf(Math.max(0, m - lastEnd))];
-      // capped at .95 for the same reason next.prob is: a forecast from a
-      // handful of years is never a certainty, and mult > 1 could compound
-      // a strong seasonal into one.
-      return round3(Math.min(0.95, 1 - (1 - Math.min(p, 0.999)) ** mult));
-    });
+    const { mp, calMass, stretch } = parts.get(id);
+    const priorRoute = stretch.n ? stretch.k / stretch.n : 0;
+    // LEAVE-ONE-ROUTE-OUT: subtract this route's own mass, so a route never
+    // seeds the prior it is then shrunk toward. Without this the prior would
+    // partly be the route restating itself, and thin routes — the ones the
+    // pooling exists to help — would be the most self-referential of all.
+    const bm = bankMass.get(bank) ?? { k: 0, n: 0 };
+    const outK = bm.k - stretch.k, outN = bm.n - stretch.n;
+    const priorBank = outN > 0 ? outK / outN : priorRoute;
+    const w = windows.length / (windows.length + K_HIER);
+    const prior2 = w * priorRoute + (1 - w) * priorBank;
+
+    const p2 = calMass.map(({ k, n }) => round3(Math.min(0.95, (k + TAU * prior2) / (n + TAU))));
     const next = forecastNext(windows, mp, now);
     const entry = {
       bank,

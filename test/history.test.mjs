@@ -263,3 +263,49 @@ test('source.parse feeds the archive to the history store without a second fetch
   await frequentmiler.parse(PAGE);
   assert.equal(deriveHistory(NOW).get('citi-av').hist.length, 2);
 });
+
+test('o prior do p2 é hierárquico: a MESMA rota fina muda quando o banco tem irmãs', () => {
+  // A comparação que isola o pooling: a rota fina é byte a byte a mesma nos
+  // dois cenários. Só o que existe ao redor dela muda.
+  const thinOnly = [
+    { bankName: 'Amex', partnerName: 'Cathay Pacific', pct: 30, startDateRaw: '01/05/24', endDateRaw: '01/20/24' },
+    { bankName: 'Amex', partnerName: 'Cathay Pacific', pct: 30, startDateRaw: '01/05/25', endDateRaw: '01/20/25' },
+  ];
+  const busySiblings = [];
+  for (const yy of ['21', '22', '23', '24', '25', '26']) {
+    busySiblings.push({ bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: `03/01/${yy}`, endDateRaw: `03/28/${yy}` });
+    busySiblings.push({ bankName: 'Amex', partnerName: 'Virgin Atlantic', pct: 30, startDateRaw: `05/01/${yy}`, endDateRaw: `05/28/${yy}` });
+  }
+  const alone = deriveHistory(NOW, thinOnly).get('amex-cx');
+  const pooled = deriveHistory(NOW, [...thinOnly, ...busySiblings]).get('amex-cx');
+
+  // Setembro: mês em que esta rota nunca rodou. Sozinha, ela só pode encolher
+  // para a própria taxa; com irmãs movimentadas, herda o nível do banco.
+  assert.ok(pooled.p2[8] > alone.p2[8], `irmãs ativas elevam o piso: ${alone.p2[8]} -> ${pooled.p2[8]}`);
+  // O empréstimo é de NÍVEL, não de forma: janeiro (o mês dela) continua sendo
+  // o pico nos dois cenários, e o pico não é achatado pelo prior.
+  assert.equal(alone.p2.indexOf(Math.max(...alone.p2)), 0, 'sozinha, o pico é o trecho jan-fev');
+  assert.equal(pooled.p2.indexOf(Math.max(...pooled.p2)), 0, 'com pooling, o pico continua sendo jan-fev');
+  assert.ok(pooled.p2[0] > 2 * pooled.p2[8], 'o sinal próprio continua dominando o prior emprestado');
+
+  // A rota GORDA do mesmo banco mal se move: peso 6/(6+5)=0.55 no dado próprio.
+  const thick = deriveHistory(NOW, [...thinOnly, ...busySiblings]).get('amex-av');
+  assert.equal(thick.p2.indexOf(Math.max(...thick.p2)), 2, 'a rota gorda mantém março');
+  assert.ok(thick.p2[2] > 0.6, 'e mantém a força do próprio sinal: ' + thick.p2[2]);
+});
+
+test('o prior do banco é leave-one-route-out — uma rota nunca semeia o próprio prior', () => {
+  // Banco com uma ÚNICA rota: sem irmã, o prior do banco tem de cair de volta
+  // para o da rota. Se o leave-one-out estivesse quebrado, a rota entraria no
+  // próprio prior e o p2 sairia diferente do caso sem pooling nenhum.
+  const solo = ['24', '25', '26'].map((yy) => ({
+    bankName: 'Wells Fargo', partnerName: 'Avianca LifeMiles', pct: 30,
+    startDateRaw: `03/01/${yy}`, endDateRaw: `03/28/${yy}`,
+  }));
+  const entry = deriveHistory(NOW, solo).get('wf-av');
+  assert.ok(entry, 'a rota solo existe');
+  for (const v of entry.p2) assert.ok(v > 0 && v < 1, 'p2 continua uma probabilidade válida: ' + v);
+  // mar-abr tem 3 ocorrências observadas todas acertadas; fev-mar só 2 (fev/2024
+  // é anterior ao início do registro), então março encolhe menos e lidera.
+  assert.equal(entry.p2.indexOf(Math.max(...entry.p2)), 2, 'sem irmãs, a sazonalidade própria manda');
+});

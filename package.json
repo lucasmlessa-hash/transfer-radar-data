@@ -10,7 +10,8 @@
   "scripts": {
     "test": "node --test test/*.test.mjs",
     "build": "node src/publish.mjs",
-    "build:fixtures": "node src/publish.mjs --fixtures"
+    "build:fixtures": "node src/publish.mjs --fixtures",
+    "backtest": "node scripts/backtest.mjs"
   },
   "devDependencies": {
     "cheerio": "^1.2.0"
