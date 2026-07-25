@@ -140,8 +140,11 @@ test('devalued and corrected ratios match the audit', () => {
     ['C1', 'air', 'Emirates Skywards', '1000:750'],
     ['BILT', 'air', 'Alaska Atmos Rewards', '1:1'],
     // Esfera was optimistic by 2-3x across the board (curated, inherited by merge)
-    ['ESF', 'air', 'TAP Miles&Go', '2.2:1'],
-    ['ESF', 'air', 'Air France / KLM Flying Blue', '3:1'],
+    // 2.7:1, not the 2.2:1 this file used to assert: 2.2 is the Clube Esfera
+    // subscriber rate, and the app must quote what a non-subscriber pays.
+    ['ESF', 'air', 'TAP Miles&Go', '2.7:1'],
+    // likewise 3.5:1, not 3:1 — the audit had recorded Esfera's Clube rate
+    ['ESF', 'air', 'Air France / KLM Flying Blue', '3.5:1'],
     ['ESF', 'hotel', 'ALL Accor Live Limitless', '3.5:1'],
     ['LIV', 'air', 'Iberia Avios', '3.5:1'],
     ['LIV', 'hotel', 'ALL Accor Live Limitless', '3.5:1'],

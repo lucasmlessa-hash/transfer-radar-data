@@ -26,6 +26,31 @@ test('the Esfera UI label templates must never be read as a rate', () => {
   assert.equal(parsePartnerRatio(`<html><body>${labels}</body></html>`, 'ESF'), null);
 });
 
+test('Esfera publishes two rates per partner — the standard one wins, not the Clube one', () => {
+  // The curated file carried Flying Blue at 3:1 and TAP at 2.2:1. Both were the
+  // subscriber rates. Quoting a rate the user does not qualify for understates
+  // what a transfer costs them, which is the one error direction that loses points.
+  const fb = '3,5 pontos Esfera por 1 milha Flying Blue para todos os clientes; '
+    + '3 pontos Esfera por 1 milha Flying Blue para clientes do Clube Esfera;';
+  assert.equal(parseRatioText(fb, 'ESF'), '3.5:1');
+});
+
+test('an announced rate change applies from its date, not before and not never', () => {
+  // Verbatim shape of Esfera's Etihad regulation on 2026-07-25. Both the
+  // standing parity and the scheduled change sit on the page at once, so a
+  // date-blind parser is wrong on one side of the 31st or the other.
+  const etihad = 'Atualização de paridade — Etihad Guest A partir de 31.Julho.2026, a paridade de '
+    + 'transferência para Etihad Guest será alterada: Clube Esfera: de 3,3 para 4,2 pontos Esfera '
+    + 'por 1 milha Etihad Guest. Esfera: de 3,5 para 4,5 pontos Esfera por 1 milha Etihad Guest. '
+    + 'Até 30.Julho.2026, permanecem válidas as condições atuais. Paridades: '
+    + '3,5 pontos Esfera por 1 milha Etihad Guest para todos os clientes; '
+    + '3,3 pontos Esfera por 1 milha Etihad Guest para clientes do Clube Esfera;';
+  assert.equal(parseRatioText(etihad, 'ESF', new Date('2026-07-25')), '3.5:1', 'before the change');
+  assert.equal(parseRatioText(etihad, 'ESF', new Date('2026-07-30')), '3.5:1', 'on the last day of the old rate');
+  assert.equal(parseRatioText(etihad, 'ESF', new Date('2026-07-31')), '4.5:1', 'the day it takes effect');
+  assert.equal(parseRatioText(etihad, 'ESF', new Date('2027-06-01')), '4.5:1', 'and stays in force after');
+});
+
 test('a rate of zero or garbage is rejected rather than published', () => {
   assert.equal(parseRatioText('0 pontos Livelo = 1 ponto X', 'LIV'), null);
   assert.equal(parseRatioText('1 ponto Livelo = 0 ponto X', 'LIV'), null);

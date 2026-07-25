@@ -16,23 +16,129 @@
 // per run is rude at 48 runs a day for numbers that change maybe twice a year.
 // See .github/workflows/refresh-br-ratios.yml.
 
-const RE_LIVELO = /([\d.,]+)\s*pontos?\s+Livelo\s*=\s*([\d.,]+)\s*(?:pontos?|milhas?|Avios)?/i;
-// Esfera states it inside the terms-and-conditions blob in __NEXT_DATA__.
-// Anchored on a digit so the UI label templates ("esferaPoint2Text":" ponto
-// Esfera =") can never match — they have no leading number.
-const RE_ESFERA = /([\d.,]+)\s*[Pp]ontos?\s+Esfera\s*=\s*([\d.,]+)\s*(?:[Pp]ontos?|[Mm]ilhas?|Avios)/;
+const RE_LIVELO = /([\d.,]+)\s*pontos?\s+Livelo\s*(?:=|para|por)\s*([\d.,]+)\s*(?:pontos?|milhas?|Avios)?/i;
+// Esfera states it inside the terms-and-conditions blob in __NEXT_DATA__, and
+// the wording varies by partner: "=", "para", or "por". Anchored on a leading
+// digit so the UI label templates ("esferaPoint2Text":" ponto Esfera =") can
+// never match — they carry no number.
+const RE_ESFERA = /([\d.,]+)\s*[Pp]ontos?\s+Esfera\s*(?:=|para|por)\s*([\d.,]+)\s*(?:[Pp]ontos?|[Mm]ilhas?|Avios)/g;
+// An Esfera regulation can carry several rates for one partner along TWO axes:
+//
+//   who  — the standard rate, and a better one for Clube Esfera subscribers
+//   when — a scheduled change, announced ahead of time and still on the page
+//
+// Etihad on 2026-07-25 lists four, and none of them is stale:
+//
+//   "A partir de 31.Julho.2026 ... Clube Esfera: de 3,3 para 4,2 ...
+//                                  Esfera:       de 3,5 para 4,5 ...
+//    Até 30.Julho.2026, permanecem válidas as condições atuais"
+//   plus the standing "3,5 ... para todos os clientes" / "3,3 ... Clube".
+//
+// So 4,5 is not a leftover — it is what Esfera will charge in six days. A
+// parser that ignores the date is wrong either today (quoting 4,5 early) or
+// from the 31st onward (quoting 3,5 forever). Hence:
+//
+//   1. a rate inside an "A partir de <date>" block that has NOT arrived is
+//      dropped — it is not what a transfer costs right now;
+//   2. once that date passes, the dated rate WINS over the standing section,
+//      which the site may not get around to editing;
+//   3. among what remains, "para todos os clientes" marks the standard rate
+//      and beats an unmarked line; club rates are excluded unless nothing
+//      else is left;
+//   4. ties break to the WORST rate, because quoting one the user does not
+//      qualify for is the error that costs them points.
+//
+// Rules 3 and 4 were each needed on their own: without the club rule the file
+// carried Flying Blue at 3:1 and TAP at 2.2:1 (member rates, real ones 3.5:1
+// and 2.7:1); without "todos os clientes", Etihad came out at 4.5:1 today.
+const CLUB = /clube/i;
+const EVERYONE = /para\s+todos\s+os\s+clientes/i;
+const PT_MONTHS = ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const RE_FROM_DATE = /A partir de\s+(\d{1,2})[.\/ ]([A-Za-zçÇãÃéÉ]+)[.\/ ](\d{4})/gi;
+
+/** "31.Julho.2026" -> Date, or null when the month word is not recognised. */
+function parsePtDate(day, monthWord, year) {
+  const mi = PT_MONTHS.indexOf(String(monthWord).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''));
+  if (mi === -1) return null;
+  return new Date(Date.UTC(Number(year), mi, Number(day)));
+}
+
+// Where a scheduled-change block ends. Esfera closes it explicitly ("Até
+// 30.Julho.2026, permanecem válidas as condições atuais"), so the terminator is
+// read rather than guessed at — a character budget swallowed the standing
+// parity section that follows and left the parser with nothing at all.
+const RE_BLOCK_END = /At[ée]\s+\d{1,2}[.\/ ][A-Za-zçÇãÃéÉ]+[.\/ ]\d{4}|Paridades\s*:/gi;
 
 // "3.5" and "3,5" both appear; thousands separators do not (rates are small).
 const num = (s) => Number(String(s).replace(',', '.'));
 const fmt = (n) => (Number.isInteger(n) ? String(n) : String(Math.round(n * 100) / 100));
 
-/** "3.5 pontos Livelo = 1 ponto Iberia Plus" -> "3.5:1" (points sent : received). */
-export function parseRatioText(text, which) {
-  const m = (which === 'LIV' ? RE_LIVELO : RE_ESFERA).exec(text);
-  if (!m) return null;
-  const from = num(m[1]), to = num(m[2]);
-  if (!Number.isFinite(from) || !Number.isFinite(to) || from <= 0 || to <= 0) return null;
-  return `${fmt(from)}:${fmt(to)}`;
+/**
+ * "3.5 pontos Livelo = 1 ponto Iberia Plus" -> "3.5:1" (points sent : received).
+ *
+ * When a page states several rates, the WORST one wins: it is the standard
+ * rate, and the better ones are conditional on a paid subscription the app
+ * cannot know the user has. Quoting a rate someone does not qualify for is the
+ * one error direction that costs them points.
+ */
+export function parseRatioText(text, which, now = new Date()) {
+  const s = String(text ?? '');
+  const found = [];
+  if (which === 'LIV') {
+    const m = RE_LIVELO.exec(s);
+    if (m) found.push({ m, club: false, everyone: false, effective: null });
+  } else {
+    // where each scheduled change starts, and from when it applies
+    const markers = [];
+    RE_FROM_DATE.lastIndex = 0;
+    let d;
+    while ((d = RE_FROM_DATE.exec(s)) !== null) {
+      const when = parsePtDate(d[1], d[2], d[3]);
+      if (when) markers.push({ at: d.index, when });
+    }
+    RE_ESFERA.lastIndex = 0;
+    let m;
+    while ((m = RE_ESFERA.exec(s)) !== null) {
+      // the qualifier trails the rate ("... para clientes do Clube Esfera")
+      const tail = s.slice(m.index, m.index + m[0].length + 60);
+      // the rate belongs to a scheduled change only when no block terminator
+      // sits between the announcement and it
+      const marker = markers
+        .filter((k) => k.at < m.index && !hasTerminatorBetween(s, k.at, m.index))
+        .pop();
+      found.push({ m, club: CLUB.test(tail), everyone: EVERYONE.test(tail), effective: marker?.when ?? null });
+    }
+  }
+  const rates = found
+    .map(({ m, club, everyone, effective }) => ({ from: num(m[1]), to: num(m[2]), club, everyone, effective }))
+    .filter((r) => Number.isFinite(r.from) && Number.isFinite(r.to) && r.from > 0 && r.to > 0)
+    // announced but not yet in force: not what a transfer costs today
+    .filter((r) => !r.effective || r.effective <= now);
+  if (!rates.length) return null;
+
+  // a change that HAS taken effect is newer information than the standing text
+  const inForce = rates.filter((r) => r.effective);
+  if (inForce.length) {
+    const latest = Math.max(...inForce.map((r) => r.effective.getTime()));
+    const current = inForce.filter((r) => r.effective.getTime() === latest);
+    const nonClub = current.filter((r) => !r.club);
+    return pickWorst(nonClub.length ? nonClub : current);
+  }
+  const everyone = rates.filter((r) => r.everyone && !r.club);
+  if (everyone.length) return pickWorst(everyone);
+  const nonClub = rates.filter((r) => !r.club);
+  return pickWorst(nonClub.length ? nonClub : rates);
+}
+
+function hasTerminatorBetween(s, from, to) {
+  RE_BLOCK_END.lastIndex = from;
+  const m = RE_BLOCK_END.exec(s);
+  return !!m && m.index < to;
+}
+
+function pickWorst(rates) {
+  const pick = rates.reduce((a, b) => (a.from / a.to >= b.from / b.to ? a : b));
+  return `${fmt(pick.from)}:${fmt(pick.to)}`;
 }
 
 const stripTags = (html) => html
@@ -52,8 +158,8 @@ const nextData = (html) => {
  * Livelo puts it in visible copy; Esfera buries it in the regulation text that
  * ships inside __NEXT_DATA__, so both haystacks are searched for both banks.
  */
-export function parsePartnerRatio(html, bank) {
-  return parseRatioText(stripTags(html), bank) ?? parseRatioText(nextData(html), bank);
+export function parsePartnerRatio(html, bank, now = new Date()) {
+  return parseRatioText(stripTags(html), bank, now) ?? parseRatioText(nextData(html), bank, now);
 }
 
 /** Livelo's listing page -> [{ name, url }] for every active transfer partner. */
