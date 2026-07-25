@@ -157,7 +157,7 @@ function seasonality(windows, now) {
     return {
       mp: Array(12).fill(0),
       calMass: Array.from({ length: 12 }, () => ({ k: 0, n: 0 })),
-      horizonMass: HORIZONS.map(() => ({ k: 0, n: 0, prior: 0 })),
+      horizonMass: HORIZONS.map(() => ({ k: 0, n: 0, prior: 0, priorN: 0 })),
       stretch: { k: 0, n: 0 },
     };
   }
@@ -219,7 +219,7 @@ function seasonality(windows, now) {
   const hitH = (m, h) => { for (let k = 0; k < h; k += 1) if (hit1(m + k)) return true; return false; };
   const maxH = Math.max(...HORIZONS);
   const calStart = (((nowAmi + 1) % 12) + 12) % 12;
-  const horizonMass = HORIZONS.map(() => ({ k: 0, n: 0, prior: 0 }));
+  const horizonMass = HORIZONS.map(() => ({ k: 0, n: 0, prior: 0, priorN: 0 }));
   for (let y = Math.floor(firstAmi / 12) - 1; y <= Math.floor(nowAmi / 12); y += 1) {
     const m = y * 12 + calStart;
     if (!observed(m) || !observed(m + maxH - 1)) continue;
@@ -239,8 +239,10 @@ function seasonality(windows, now) {
   // curve monotone too.
   HORIZONS.forEach((h, i) => {
     let k = 0, n = 0;
-    for (let m = firstAmi; m + h - 1 < nowAmi; m += 1) { const w = wOf(m); n += w; if (hitH(m, h)) k += w; }
+    let starts = 0;
+    for (let m = firstAmi; m + h - 1 < nowAmi; m += 1) { const w = wOf(m); n += w; starts += 1; if (hitH(m, h)) k += w; }
     horizonMass[i].prior = n ? k / n : 0;
+    horizonMass[i].priorN = starts; // how much the prior itself rests on
   });
 
   // per-calendar-stretch masses, left un-shrunk for deriveHistory to finish
@@ -364,14 +366,23 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
     // thin-sample frequency and needs the same shrinkage. Monotone by
     // construction (a hit inside h months is a hit inside h+1), and the
     // shrinkage cannot break that because every horizon shares one prior.
-    // Only published when every horizon rests on at least one real observation.
-    // A route whose single window is recent cannot have a 6-month stretch
-    // observed at all: n and the prior are both 0, the estimate collapses to
-    // the prior, and the curve comes out "95% within 1 month, 0% within 6" —
-    // which is not a cautious number, it is a wrong one. Same rule `next`
-    // already follows: no forecast beats an invented one, and the client
-    // simply omits the card.
-    const wait = horizonMass.every(({ n }) => n > 0)
+    // Published whenever the PRIOR is estimable, which is a weaker and more
+    // useful condition than requiring the calendar-anchored stretch itself to
+    // have been observed.
+    //
+    // Those are different questions. A route first archived in Sep 2025 has
+    // never had an August→January stretch observed (Aug 2025 predates it, Aug
+    // 2026 has not happened), so its calendar count is 0 — but its sliding
+    // 6-month rate rests on 5 real starts. With n=0 the formula reduces to
+    // exactly that prior: "no August-specific evidence, so here is this
+    // route's general 6-month rate". Honest, and monotone, since the sliding
+    // rates are monotone in h.
+    //
+    // The case still worth suppressing is when the prior itself has nothing
+    // behind it: a route whose only window is a month old cannot speak to six
+    // months at all, and the estimate collapses to a flat 0 — "95% within one
+    // month, 0% within six" is not a cautious number, it is a wrong one.
+    const wait = horizonMass.every(({ priorN }) => priorN > 0)
       ? horizonMass.map(({ k, n, prior }) => round3(Math.min(0.95, (k + TAU * prior) / (n + TAU))))
       : undefined;
     const next = forecastNext(windows, mp, now);
