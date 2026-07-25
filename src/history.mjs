@@ -117,6 +117,9 @@ const yearWeight = (nowAmi, m) => 0.5 ** ((Math.floor(nowAmi / 12) - Math.floor(
 // retrospective. Do not quote 7.54% as a forward expectation.
 const K_HIER = 5;
 
+// The horizons the "worth waiting how long?" card asks about, in months.
+const HORIZONS = [1, 3, 6];
+
 /**
  * Seasonality estimates for one route, from its archived windows:
  *
@@ -151,7 +154,12 @@ const K_HIER = 5;
  */
 function seasonality(windows, now) {
   if (!windows.length) {
-    return { mp: Array(12).fill(0), calMass: Array.from({ length: 12 }, () => ({ k: 0, n: 0 })), stretch: { k: 0, n: 0 } };
+    return {
+      mp: Array(12).fill(0),
+      calMass: Array.from({ length: 12 }, () => ({ k: 0, n: 0 })),
+      horizonMass: HORIZONS.map(() => ({ k: 0, n: 0, prior: 0 })),
+      stretch: { k: 0, n: 0 },
+    };
   }
 
   let firstAmi = Infinity;
@@ -186,6 +194,55 @@ function seasonality(windows, now) {
   let sHits = 0, sN = 0;
   for (let m = firstAmi; m + 1 < nowAmi; m += 1) { const w = wOf(m); sN += w; if (hit2(m)) sHits += w; }
 
+  // "Worth waiting how long?" -- P(at least one bonus within the next h months),
+  // for h in HORIZONS, counted EMPIRICALLY over the stretches actually observed
+  // rather than composed from mp.
+  //
+  // Composing is what the design handoff specifies (1 - prod(1 - mp[month]))
+  // and it overstates, because a bonus running 14 Jun -> 18 Jul raises both
+  // mp[Jun] and mp[Jul] and the product then treats one window as two
+  // independent chances. Measured against what actually happened in the
+  // archive: +3pp at 2 months, +7pp at 3, +6pp at 6 -- the error grows with the
+  // horizon, which is exactly where the card prints its biggest, gold numbers.
+  // An "89% by January" that is really ~80% is what makes someone wait and
+  // lose the seat.
+  // Anchored on the calendar stretch that starts NEXT month, not on a generic
+  // sliding window: the card says "by OCT", so the answer has to be about
+  // this route in those actual months, seasonality and all.
+  //
+  // Every horizon shares ONE denominator -- the years in which the whole
+  // longest window was observed. Letting each horizon pick its own set of
+  // years makes the curve non-monotone (measured: 5 routes where "within 6
+  // months" came out BELOW "within 3"), which is nonsense on its face: a bonus
+  // inside 3 months is a bonus inside 6. Common denominator, nested
+  // numerators, monotone by construction.
+  const hitH = (m, h) => { for (let k = 0; k < h; k += 1) if (hit1(m + k)) return true; return false; };
+  const maxH = Math.max(...HORIZONS);
+  const calStart = (((nowAmi + 1) % 12) + 12) % 12;
+  const horizonMass = HORIZONS.map(() => ({ k: 0, n: 0, prior: 0 }));
+  for (let y = Math.floor(firstAmi / 12) - 1; y <= Math.floor(nowAmi / 12); y += 1) {
+    const m = y * 12 + calStart;
+    if (!observed(m) || !observed(m + maxH - 1)) continue;
+    const w = wOf(m);
+    HORIZONS.forEach((h, i) => {
+      horizonMass[i].n += w;
+      if (hitH(m, h)) horizonMass[i].k += w;
+    });
+  }
+  // Each horizon shrinks toward ITS OWN base rate -- the route's sliding
+  // h-month rate over every observed start, seasonality ignored. Shrinking the
+  // 6-month figure toward the 2-month prior (which is what reusing p2's prior
+  // did) dragged it down to below the 3-month figure's honest level: wrong
+  // question, wrong anchor. The sliding rate sees ~50-100 starts against the
+  // handful of same-calendar years, so it is stable enough to be the prior
+  // without any pooling, and it is monotone in h, which keeps the shrunk
+  // curve monotone too.
+  HORIZONS.forEach((h, i) => {
+    let k = 0, n = 0;
+    for (let m = firstAmi; m + h - 1 < nowAmi; m += 1) { const w = wOf(m); n += w; if (hitH(m, h)) k += w; }
+    horizonMass[i].prior = n ? k / n : 0;
+  });
+
   // per-calendar-stretch masses, left un-shrunk for deriveHistory to finish
   const calMass = Array.from({ length: 12 }, (_, cal) => {
     let k = 0, n = 0;
@@ -199,7 +256,7 @@ function seasonality(windows, now) {
     return { k, n };
   });
 
-  return { mp, calMass, stretch: { k: sHits, n: sN } };
+  return { mp, calMass, horizonMass, stretch: { k: sHits, n: sN } };
 }
 
 /**
@@ -290,7 +347,7 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
 
   const out = new Map();
   for (const [id, { bank, code, windows }] of byId) {
-    const { mp, calMass, stretch } = parts.get(id);
+    const { mp, calMass, horizonMass, stretch } = parts.get(id);
     const priorRoute = stretch.n ? stretch.k / stretch.n : 0;
     // LEAVE-ONE-ROUTE-OUT: subtract this route's own mass, so a route never
     // seeds the prior it is then shrunk toward. Without this the prior would
@@ -303,12 +360,27 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
     const prior2 = w * priorRoute + (1 - w) * priorBank;
 
     const p2 = calMass.map(({ k, n }) => round3(Math.min(0.95, (k + TAU * prior2) / (n + TAU))));
+    // Same pooled prior and cap as p2 — a horizon estimate is the same kind of
+    // thin-sample frequency and needs the same shrinkage. Monotone by
+    // construction (a hit inside h months is a hit inside h+1), and the
+    // shrinkage cannot break that because every horizon shares one prior.
+    // Only published when every horizon rests on at least one real observation.
+    // A route whose single window is recent cannot have a 6-month stretch
+    // observed at all: n and the prior are both 0, the estimate collapses to
+    // the prior, and the curve comes out "95% within 1 month, 0% within 6" —
+    // which is not a cautious number, it is a wrong one. Same rule `next`
+    // already follows: no forecast beats an invented one, and the client
+    // simply omits the card.
+    const wait = horizonMass.every(({ n }) => n > 0)
+      ? horizonMass.map(({ k, n, prior }) => round3(Math.min(0.95, (k + TAU * prior) / (n + TAU))))
+      : undefined;
     const next = forecastNext(windows, mp, now);
     const entry = {
       bank,
       code,
       mp,
       p2,
+      ...(wait === undefined ? {} : { wait }),
       typical: typicalRange(windows.map((w) => w.pct)),
       hist: windows.map((w) => ({ w: windowLabel(w.start), pct: w.pct, len: lengthLabel(w.start, w.end) })),
     };

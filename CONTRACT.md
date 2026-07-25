@@ -28,6 +28,7 @@ Schemas: `schema/feed.schema.json` and `schema/partners.schema.json`
       "typical": "+75–100%",      // free-text typical bonus range, display-only
       "mp": [0.7,0.5,0.5,0.6,0.5,0.7,0.6,0.7,0.5,0.7,0.5,0.8],  // ALWAYS length 12, Jan..Dec, each a probability 0..1
       "p2": [0.8,0.6,0.6,0.7,0.7,0.8,0.8,0.8,0.7,0.8,0.7,0.9],  // OPTIONAL, length 12: P(bonus during the 2-month stretch starting at that month)
+      "wait": [0.13,0.69,0.79],   // OPTIONAL, length 3: cumulative P(>=1 bonus) within 1 / 3 / 6 months of generatedAt
       "active":  { "pct": 75, "endDate": "2026-07-25" },        // OPTIONAL, present iff a bonus is live right now
       "ended":   { "pct": 25, "endedAt": "2026-07-14" },        // OPTIONAL, present iff a bonus just ended
       "next":    { "label": "Sep 2026", "prob": 82 },           // OPTIONAL, forecast rows: next likely window + confidence 0..100
@@ -65,6 +66,16 @@ Field notes:
   `mp` entries, and the independence product double-counts it. When `p2` is
   absent (pre-2026-07-25 cached feeds), that composition is the least-bad
   fallback.
+- `wait` (optional) is the "worth waiting how long?" curve: cumulative
+  probability of at least one bonus on this route within 1, 3 and 6 months of
+  `generatedAt`. Like `p2` it is measured EMPIRICALLY over the stretches the
+  archive actually observed — never composed as `1-prod(1-mp)`, which
+  overstates by ~7pp at 3 months and ~6pp at 6 because one window spanning two
+  months feeds both `mp` entries and the product counts it twice.
+  Non-decreasing by construction; a client may assume `wait[0] <= wait[1] <=
+  wait[2]` and the validator enforces it. Absent for routes whose archive is
+  too short to observe a 6-month stretch at all — show no card rather than a
+  fabricated 0%.
 - `next.prob` is an integer `0..100` (percent confidence).
 - No extra keys are allowed on a route object beyond the ones listed above.
 

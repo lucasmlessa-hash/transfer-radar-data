@@ -168,6 +168,9 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       typical: h?.typical ?? '—',
       mp: h?.mp ?? NO_HISTORY_MP,
       p2: h?.p2 ?? NO_HISTORY_MP,
+      // absent, not zeroed, when the archive cannot support the estimate —
+      // see history.mjs; the client omits the card rather than showing 0%
+      ...(h?.wait === undefined ? {} : { wait: h.wait }),
       hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
@@ -206,6 +209,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       typical: h.typical,
       mp: h.mp,
       p2: h.p2,
+      ...(h.wait === undefined ? {} : { wait: h.wait }),
       hist: h.hist,
       next: h.next,
     });

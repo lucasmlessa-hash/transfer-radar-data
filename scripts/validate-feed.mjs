@@ -37,7 +37,7 @@ function validateRoute(r, i) {
   // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
   // routes from feeds that predate it, and a required key would turn a source
   // outage into a publish abort. New builds always emit it (see normalize.mjs).
-  const allowed = [...required, 'p2', 'active', 'ended', 'next', 'summary'];
+  const allowed = [...required, 'p2', 'wait', 'active', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
 
   for (const k of ['id', 'bank', 'airline', 'code', 'time', 'typical']) {
@@ -54,6 +54,19 @@ function validateRoute(r, i) {
     r.p2.forEach((v, j) => {
       if (typeof v !== 'number' || v < 0 || v > 1) fail(`${ctx}.p2[${j}]: must be a number in 0..1`);
     });
+  }
+
+  if ('wait' in r) {
+    if (!Array.isArray(r.wait) || r.wait.length !== 3) fail(`${ctx}.wait: must be an array of length 3`);
+    r.wait.forEach((v, j) => {
+      if (typeof v !== 'number' || v < 0 || v > 1) fail(`${ctx}.wait[${j}]: must be a number in 0..1`);
+    });
+    // A curve that goes down says "a bonus within 6 months is less likely than
+    // within 3", which is impossible. Cheap to check, and it caught a real
+    // defect during development.
+    if (r.wait[0] > r.wait[1] + 1e-9 || r.wait[1] > r.wait[2] + 1e-9) {
+      fail(`${ctx}.wait: cumulative curve must not decrease (${r.wait.join(' / ')})`);
+    }
   }
 
   if (!Array.isArray(r.hist)) fail(`${ctx}.hist: must be an array`);
