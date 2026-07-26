@@ -48,7 +48,16 @@ Field notes:
 - `active`, `ended`, `next`, and `summary` are all optional and independent,
   though in practice a route currently only ever carries `active` alone,
   `ended` (+ optionally `next`/`summary`), or `next` + `summary` alone — never
-  `active` and `ended` together.
+  `active` and `ended` together. The validator enforces that last one.
+- `ended` (emitted since 2026-07-26) is the most recently CLOSED window on the
+  route, and only while it closed within the last 30 days. "Closed" is strictly
+  before today: `endDate` is inclusive, so a bonus running "until Jul 26" is
+  live all of Jul 26 and becomes `ended` on the 27th. A route may reach the
+  feed on the strength of `ended` alone — one archived window earns no `next`,
+  and dropping such a route hid the whole RECENTLY ENDED list from the client.
+  The client also derives `ended` itself for a route the feed published as
+  `active` whose date has since passed, under the same 30-day bound, so an
+  offline or frozen copy degrades into "recently ended" rather than a blank.
 - **Key change from the legacy hardcoded data**: `active.days` (days
   remaining) is **removed**. The feed carries `active.endDate` as a real ISO
   date (`YYYY-MM-DD`); the client computes days-remaining itself from

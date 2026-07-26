@@ -98,6 +98,19 @@ function validateRoute(r, i) {
     if (typeof r.ended.endedAt !== 'string' || !ISO_DATE.test(r.ended.endedAt)) {
       fail(`${ectx}.endedAt: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.ended.endedAt)}`);
     }
+    // CONTRACT.md: a route carries one or the other. Both would put the same
+    // route in ACTIVE NOW and RECENTLY ENDED at once.
+    if ('active' in r) fail(`${ctx}: carries both "active" and "ended"`);
+  }
+
+  if ('ended' in r) {
+    const ectx = `${ctx}.ended`;
+    if (!isPlainObject(r.ended)) fail(`${ectx}: must be an object`);
+    checkKeys(r.ended, ['pct', 'endedAt'], ['pct', 'endedAt'], ectx);
+    if (typeof r.ended.pct !== 'number') fail(`${ectx}.pct: must be a number`);
+    if (typeof r.ended.endedAt !== 'string' || !ISO_DATE.test(r.ended.endedAt)) {
+      fail(`${ectx}.endedAt: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.ended.endedAt)}`);
+    }
   }
 
   if ('next' in r) {

@@ -351,3 +351,60 @@ test('wait is absent, not zeroed, when the archive cannot support it', () => {
   assert.equal(e.wait, undefined, 'no curve rather than a fabricated one');
   assert.equal(e.next, undefined, 'and no forecast either — one window is an anecdote');
 });
+
+test('a window that closed days ago is published as `ended`, with the real date', () => {
+  // citi-av's most recent archived window ran 06/14/26–07/18/26; NOW is the 24th.
+  const entry = deriveHistory(NOW, parseHistory(PAGE)).get('citi-av');
+  assert.deepEqual(entry.ended, { pct: 50, endedAt: '2026-07-18' });
+});
+
+test('`ended` expires after 30 days rather than lingering', () => {
+  const old = [{ bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: '05/01/26', endDateRaw: '06/01/26' }];
+  assert.equal(deriveHistory(NOW, old).get('amex-av').ended, undefined, '53 days is not "just ended"');
+  const fresh = [{ ...old[0], endDateRaw: '06/25/26' }];
+  assert.deepEqual(deriveHistory(NOW, fresh).get('amex-av').ended, { pct: 30, endedAt: '2026-06-25' }, '29 days still counts');
+});
+
+test('a window still running is not `ended`, not even on its own last day', () => {
+  // End dates are inclusive: a bonus "until Jul 24" is live all of Jul 24.
+  const today = [{ bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: '07/01/26', endDateRaw: '07/24/26' }];
+  assert.equal(deriveHistory(NOW, today).get('amex-av').ended, undefined, 'its last day is still a live day');
+  const future = [{ ...today[0], endDateRaw: '08/31/26' }];
+  assert.equal(deriveHistory(NOW, future).get('amex-av').ended, undefined);
+});
+
+test('`ended` picks the window that closed last, not the one that started last', () => {
+  // The archive holds overlapping pairs; `windows` is sorted by START, so the
+  // first entry is not necessarily the one that closed most recently.
+  const overlapping = [
+    { bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: '07/05/26', endDateRaw: '07/10/26' },
+    { bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 25, startDateRaw: '07/01/26', endDateRaw: '07/20/26' },
+  ];
+  assert.deepEqual(deriveHistory(NOW, overlapping).get('amex-av').ended, { pct: 25, endedAt: '2026-07-20' });
+});
+
+test('a route with a bonus running now never advertises the previous one as ended', () => {
+  // CONTRACT.md: `active` and `ended` are mutually exclusive. citi-av has a
+  // window that closed on the 18th AND a live listing — only `active` ships.
+  const history = deriveHistory(NOW, parseHistory(PAGE));
+  assert.ok(history.get('citi-av').ended, 'precondition: history knows it just ended');
+  const { routes } = normalize(
+    [{ bankName: 'Citi ThankYou Rewards', partnerName: 'Avianca LifeMiles', pct: 60, endDateRaw: '08/15/26', sourceUrl: 'https://x' }],
+    NOW, history,
+  );
+  const av = routes.find((r) => r.id === 'citi-av');
+  assert.ok(av.active, 'the live bonus wins');
+  assert.equal(av.ended, undefined);
+});
+
+test('a just-ended route reaches the feed even with no forecast to its name', () => {
+  // One window means no `next` (see above), and before `ended` existed such a
+  // route was dropped from the feed entirely — the Live tab could never show it.
+  const one = [{ bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: '07/01/26', endDateRaw: '07/15/26' }];
+  const { routes } = normalize([], NOW, deriveHistory(NOW, one));
+  const av = routes.find((r) => r.id === 'amex-av');
+  assert.ok(av, 'the route is published');
+  assert.deepEqual(av.ended, { pct: 30, endedAt: '2026-07-15' });
+  assert.equal(av.next, undefined);
+  assert.equal(av.active, undefined);
+});

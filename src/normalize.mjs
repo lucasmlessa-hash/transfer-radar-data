@@ -174,6 +174,9 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
+      // Stripped below like pct/endDate: a route that has a bonus running now
+      // must not also advertise the previous one as just-ended (CONTRACT.md).
+      ended: h?.ended,
     };
 
     const sourceUrls = existing ? existing.sourceUrls : new Set();
@@ -184,11 +187,13 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   const routes = [];
   const sourceUrlsById = {};
   for (const [id, { route, sourceUrls }] of byId) {
-    const { pct, endDate, ...rest } = route;
+    const { pct, endDate, ended, ...rest } = route;
     const out = { ...rest };
     // unparseable/missing end date -> published WITHOUT `active` (forecast
-    // row, never a phantom live deal)
+    // row, never a phantom live deal). A source still listing the route but
+    // with no parseable date is exactly when `ended` earns its keep.
     if (endDate) out.active = { pct, endDate };
+    else if (ended) out.ended = ended;
     routes.push(out);
     sourceUrlsById[id] = [...sourceUrls];
   }
@@ -197,10 +202,16 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   // right now. Without these the client's Forecast tab has nothing to render.
   // `next` is deliberately NOT attached to routes that are live - per
   // CONTRACT.md a route carries `active` alone or `next` alone.
+  // A route that just ended earns a row even with no `next` to its name: the
+  // Live tab's RECENTLY ENDED list is the whole point, and the routes most
+  // likely to lack `next` are exactly the young ones (one archived window)
+  // that the Brazilian and Rove sources keep producing.
   const forecasts = [];
+  const endedOnly = [];
   for (const [id, h] of history) {
-    if (byId.has(id) || !h.next) continue;
-    forecasts.push({
+    if (byId.has(id)) continue;
+    if (!h.next && !h.ended) continue;
+    const row = {
       id,
       bank: h.bank,
       airline: partnerDisplayName(h.code),
@@ -211,15 +222,21 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       p2: h.p2,
       ...(h.wait === undefined ? {} : { wait: h.wait }),
       hist: h.hist,
-      next: h.next,
-    });
+      ...(h.ended === undefined ? {} : { ended: h.ended }),
+      ...(h.next === undefined ? {} : { next: h.next }),
+    };
+    (h.next ? forecasts : endedOnly).push(row);
   }
-  forecasts.sort((a, b) => b.next.prob - a.next.prob);
+  // `ended` rows sort to the front so the cap can never silently swallow one:
+  // there are at most a handful at a time (a 30-day window), and losing one
+  // costs a whole section of the Live tab, where losing a low-probability
+  // forecast row costs one card in a list of forty.
+  forecasts.sort((a, b) => Number(Boolean(b.ended)) - Number(Boolean(a.ended)) || b.next.prob - a.next.prob);
   const dropped = forecasts.slice(MAX_FORECAST_ROUTES);
   if (dropped.length) {
     console.log(`[normalize] forecast cap ${MAX_FORECAST_ROUTES}: dropped ${dropped.length} lower-probability route(s): ${dropped.map((r) => `${r.id}@${r.next.prob}%`).join(', ')}`);
   }
-  routes.push(...forecasts.slice(0, MAX_FORECAST_ROUTES));
+  routes.push(...forecasts.slice(0, MAX_FORECAST_ROUTES), ...endedOnly);
 
   return { routes, unmapped, sourceUrlsById };
 }

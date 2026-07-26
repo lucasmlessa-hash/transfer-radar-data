@@ -62,6 +62,39 @@ function lengthLabel(start, end) {
   return `${days} day${days === 1 ? '' : 's'}`;
 }
 
+// How long a closed window still counts as "just ended" (CONTRACT.md `ended`).
+// 30 days for two reasons: it is the span over which "I just missed it" is
+// still actionable, and it is also the span the archive says matters most —
+// per docs/FOLLOW-UPS.md §0 a route runs at 3.1%/month in the first two months
+// after a window closes against 12.3% at 3-5 months, so a bonus that just
+// ended is the strongest evidence we have that this route is quiet right now.
+const RECENT_END_DAYS = 30;
+
+const isoDay = (d) => d.toISOString().slice(0, 10);
+
+/**
+ * The most recently CLOSED window, if it closed within RECENT_END_DAYS.
+ *
+ * Strictly before today, not before `now`: an end date is inclusive — a bonus
+ * "until Jul 31" is still live all of Jul 31 — and calling it ended on its own
+ * last day would push someone off a transfer they could still make. The live
+ * window (end in the future) fails the same test and is skipped.
+ *
+ * Picks by latest `end`, not by array order: `windows` is sorted by START, and
+ * the archive holds overlapping pairs where the later start is not the later
+ * end.
+ */
+function recentlyEnded(windows, now) {
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  let best = null;
+  for (const w of windows) {
+    const daysAgo = (today - w.end.getTime()) / DAY_MS;
+    if (daysAgo <= 0 || daysAgo > RECENT_END_DAYS) continue;
+    if (!best || w.end > best.end) best = w;
+  }
+  return best && { pct: best.pct, endedAt: isoDay(best.end) };
+}
+
 // Beta-Binomial shrinkage strength, in pseudo-years. Chosen a priori during the
 // 2026-07-25 analysis; the walk-forward backtest (scripts/backtest.mjs, 767
 // predictions over 2024-01..2026-04) then measured the raw-frequency model at
@@ -386,6 +419,7 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
       ? horizonMass.map(({ k, n, prior }) => round3(Math.min(0.95, (k + TAU * prior) / (n + TAU))))
       : undefined;
     const next = forecastNext(windows, mp, now);
+    const ended = recentlyEnded(windows, now);
     const entry = {
       bank,
       code,
@@ -396,6 +430,7 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
       hist: windows.map((w) => ({ w: windowLabel(w.start), pct: w.pct, len: lengthLabel(w.start, w.end) })),
     };
     if (next) entry.next = next;
+    if (ended) entry.ended = ended;
     out.set(id, entry);
   }
   return out;
