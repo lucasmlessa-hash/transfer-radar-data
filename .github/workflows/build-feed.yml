@@ -7,11 +7,12 @@ name: Build feed
 
 on:
   schedule:
-    # Nominal cadence, NOT the delivered one: GitHub queues scheduled workflows
-    # on shared runners and drops them under load, so observed spacing runs
-    # closer to an hour and a half. Nothing downstream may assume 30 minutes —
-    # the panel dates the feed from generatedAt and warns when it goes stale,
-    # rather than trusting the schedule.
+    # Nominal cadence, NOT the delivered one. GitHub queues scheduled workflows
+    # on shared runners and silently drops them under load: the five runs before
+    # 2026-07-26T11:04Z landed 1h45, 2h37, 3h03 and 4h04 apart. Nothing
+    # downstream may assume 30 minutes — the panel dates the feed from
+    # generatedAt and warns when it goes stale, instead of trusting the
+    # schedule. Asking for */30 is still right; it is the ceiling, not a floor.
     - cron: '*/30 * * * *'
   workflow_dispatch: {}
 
