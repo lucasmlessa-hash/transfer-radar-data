@@ -7,6 +7,11 @@ name: Build feed
 
 on:
   schedule:
+    # Nominal cadence, NOT the delivered one: GitHub queues scheduled workflows
+    # on shared runners and drops them under load, so observed spacing runs
+    # closer to an hour and a half. Nothing downstream may assume 30 minutes —
+    # the panel dates the feed from generatedAt and warns when it goes stale,
+    # rather than trusting the schedule.
     - cron: '*/30 * * * *'
   workflow_dispatch: {}
 
@@ -85,8 +90,14 @@ jobs:
       # public archive covers — accumulate real history. Day granularity means
       # this commits at most ~once a day despite the */30 cron. Only after the
       # feed validated: a build that failed or shipped garbage must not advance
-      # the ledger either. Push conflicts (operator pushed meanwhile) fail the
-      # step and open the pipeline-failure issue — by design, never force.
+      # the ledger either.
+      #
+      # A losing push race must NOT fail the job. deploy has `needs: build`, so
+      # a hard failure here would hold a perfectly good feed back from users
+      # over bookkeeping — the wrong trade in a fail-safe pipeline. It also
+      # self-heals: the ledger is rebuilt from the live feed every run, so the
+      # same rows reappear in the next diff and get committed then. Warn, never
+      # force, keep going.
       - name: Persist observed-windows ledger
         run: |
           # status --porcelain, not diff --quiet: the latter is blind to an
@@ -98,8 +109,9 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add data/observed-windows.json
             git commit -m "chore(data): observed-windows ledger $(date -u +%F)"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            if ! (git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"); then
+              echo "::warning::ledger push failed (concurrent push?) — the feed still publishes and the next run re-appends these rows"
+            fi
           fi
 
       - name: Upload Pages artifact

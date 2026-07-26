@@ -5,6 +5,7 @@
 'use strict';
 
 import { readFileSync } from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const USAGE = 'Usage: node validate-feed.mjs <file> [--schema feed|partners]';
 
@@ -112,7 +113,7 @@ function validateRoute(r, i) {
   if ('summary' in r && typeof r.summary !== 'string') fail(`${ctx}.summary: must be a string`);
 }
 
-function validateFeed(doc) {
+export function validateFeed(doc) {
   if (!isPlainObject(doc)) fail('feed: must be an object');
   checkKeys(doc, ['version', 'generatedAt', 'routes'], ['version', 'generatedAt', 'routes'], 'feed');
   if (doc.version !== 1) fail(`feed.version: must be 1, got ${JSON.stringify(doc.version)}`);
@@ -129,7 +130,7 @@ function validatePartnerTuple(t, ctx) {
   }
 }
 
-function validatePartners(doc) {
+export function validatePartners(doc) {
   if (!isPlainObject(doc)) fail('partners: must be an object');
   const required = ['version', 'banks', 'airlineDomains', 'bankDomains', 'airlineValues', 'directory'];
   // Curated extras, all optional: per-airline logo overrides, per-bank transfer
@@ -273,4 +274,9 @@ function main(argv) {
   return 0;
 }
 
-process.exit(main(process.argv.slice(2)));
+// Only exit when run as a CLI: the tests import validateFeed to check the
+// copy of the feed bundled into the extension, and a module-level exit would
+// kill the test runner on import.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  process.exit(main(process.argv.slice(2)));
+}

@@ -9,8 +9,12 @@ on:
     - cron: '17 6 * * 1' # Mondays, off the hour to avoid the crowded :00 slot
   workflow_dispatch: {}
 
+# contents: write for the ratio commit; issues: write because the failure
+# step opens one — without it the alert about a failure fails too, which is
+# the least useful possible failure mode.
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: br-ratios

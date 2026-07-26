@@ -309,3 +309,45 @@ test('o prior do banco é leave-one-route-out — uma rota nunca semeia o própr
   // é anterior ao início do registro), então março encolhe menos e lidera.
   assert.equal(entry.p2.indexOf(Math.max(...entry.p2)), 2, 'sem irmãs, a sazonalidade própria manda');
 });
+
+test('wait is the cumulative curve the client renders, and it never decreases', () => {
+  // The whole "worth waiting how long?" card, and the verdict that now
+  // summarises it, rest on this field. It shipped with no test at all: a
+  // mutation that inverted the order, or dropped the field entirely, passed
+  // the full suite.
+  const marchEveryYear = ['21', '22', '23', '24', '25', '26'].map((yy) => ({
+    bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 40,
+    startDateRaw: `03/01/${yy}`, endDateRaw: `03/28/${yy}`,
+  }));
+  const e = deriveHistory(NOW, marchEveryYear).get('amex-av');
+  assert.ok(Array.isArray(e.wait) && e.wait.length === 3, 'three horizons: 1, 3 and 6 months');
+  for (const v of e.wait) assert.ok(v > 0 && v <= 0.95, `each is a capped probability: ${v}`);
+  assert.ok(e.wait[0] <= e.wait[1] && e.wait[1] <= e.wait[2],
+    `a bonus within 1 month is also within 3 and 6 — ${e.wait.join(' / ')}`);
+
+  // A March-only route asked in July: the 6-month window (Aug..Jan) misses
+  // March entirely, so the curve must stay low rather than inherit the peak.
+  assert.ok(e.wait[2] < 0.5, `Aug..Jan does not contain this route's March window: ${e.wait[2]}`);
+});
+
+test('wait is monotone for every route in the real archive, not just a fixture', () => {
+  // The defect this guards actually happened: per-horizon denominators made
+  // "within 6 months" come out BELOW "within 3" on 5 routes. The fix was a
+  // shared denominator, and nothing else asserts it holds across real data.
+  const derived = deriveHistory(NOW, parseHistory(PAGE));
+  for (const [id, e] of derived) {
+    if (!e.wait) continue;
+    assert.ok(e.wait[0] <= e.wait[1] + 1e-9 && e.wait[1] <= e.wait[2] + 1e-9,
+      `${id}: cumulative curve decreases — ${e.wait.join(' / ')}`);
+  }
+});
+
+test('wait is absent, not zeroed, when the archive cannot support it', () => {
+  // One window a month old cannot speak to six months: the prior has nothing
+  // behind it and the estimate would collapse to a flat 0, printing
+  // "95% within one month, 0% within six". Absent beats invented.
+  const oneRecent = [{ bankName: 'Amex', partnerName: 'Avianca LifeMiles', pct: 30, startDateRaw: '06/01/26', endDateRaw: '06/20/26' }];
+  const e = deriveHistory(NOW, oneRecent).get('amex-av');
+  assert.equal(e.wait, undefined, 'no curve rather than a fabricated one');
+  assert.equal(e.next, undefined, 'and no forecast either — one window is an anecdote');
+});

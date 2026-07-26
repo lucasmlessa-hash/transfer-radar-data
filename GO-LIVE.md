@@ -11,11 +11,13 @@ against the real pages is an operator step, done here.
    fresh init, either is fine — nothing here references a path outside this
    directory).
 
-2. **Enable Pages.** In the repo's Settings → Pages, serve from a branch. The
-   pipeline writes to `out/`; either configure Pages to serve `/out` directly,
-   or add a step to `build-feed.yml` that copies `out/` to `docs/` before the
-   commit step (Pages doesn't serve arbitrary directory names by default —
-   `/docs` and `/` are the two built-in options).
+2. **Enable Pages.** ~~Serve from a branch~~ — **feito de outro jeito, e este
+   passo está errado.** O deploy real usa `actions/upload-pages-artifact` +
+   `actions/deploy-pages`, com Pages configurado como **GitHub Actions**, não
+   como branch. `out/` é gitignored de propósito e nunca é commitado; o
+   cabeçalho de `build-feed.yml` explica por quê. Copiar `out/` para `docs/`,
+   como este passo recomendava, republicaria dado de build no repositório e
+   contradiz o workflow em produção.
 
 3. **Fix the parsers against live HTML.** Run the workflow once via
    `workflow_dispatch`. Expect it to publish few or zero routes, or to log
