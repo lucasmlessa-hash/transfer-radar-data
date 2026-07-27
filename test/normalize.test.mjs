@@ -151,7 +151,7 @@ test('an untracked bank, or a hotel partner, never becomes a route', () => {
   // `routes` is the untracked *other* half - an unknown bank, or a hotel
   // program, which is never an airline route no matter who the bank is.
   //
-  // Brex, PAYBACK, Frontier Miles and IHG are chosen because they sit outside
+  // Brex, PAYBACK and IHG are chosen because they sit outside
   // the product's route model on purpose, not because coverage happens to be
   // incomplete today. Rove/Qantas used to fill the "untracked bank" role here
   // until Rove was added as a tracked bank - rove-qf is now a correct, live
@@ -159,7 +159,7 @@ test('an untracked bank, or a hotel partner, never becomes a route', () => {
   // re-point that row at another name still outside the model rather than
   // deleting the test.
   const cases = [
-    [{ bankName: 'Brex', partnerName: 'Frontier Miles', pct: 25, endDateRaw: '07/31/26', sourceUrl: 'https://fm.example/' }, /unknown bank/],
+    [{ bankName: 'Brex', partnerName: 'Qantas Frequent Flyer', pct: 25, endDateRaw: '07/31/26', sourceUrl: 'https://fm.example/' }, /unknown bank/],
     [{ bankName: 'PAYBACK', partnerName: 'Lufthansa (Miles and More)', pct: 10, endDateRaw: 'July 31, 2026', sourceUrl: 'https://aw.example/' }, /unknown bank/],
     [{ bankName: 'PAYBACK', partnerName: 'Qantas (Frequent Flyer)', pct: 50, endDateRaw: 'August 14, 2026', sourceUrl: 'https://aw.example/' }, /unknown bank/],
     [{ bankName: 'Chase Ultimate Rewards', partnerName: 'IHG', pct: 100, endDateRaw: '07/30/26', sourceUrl: 'https://fm.example/' }, /unknown partner/],

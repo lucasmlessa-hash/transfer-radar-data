@@ -21,7 +21,9 @@ const BANK_ALIASES = {
 export const PARTNER_ALIASES = {
   AF: ['air france', 'air france klm', 'air france / klm flying blue', 'air france/klm flying blue', 'flying blue', 'klm'],
   AV: ['avianca', 'avianca lifemiles', 'lifemiles'],
-  AM: ['aeromexico', 'aeromexico rewards', 'aeromexico club premier'],
+  // 'aeromexico clubpremier' sem espaço: é como o arquivo do Frequent Miler
+  // escreve, e 7 janelas ficavam de fora por causa desse espaço.
+  AM: ['aeromexico', 'aeromexico rewards', 'aeromexico club premier', 'aeromexico clubpremier', 'club premier', 'clubpremier'],
   VS: ['virgin atlantic', 'virgin atlantic flying club', 'flying club'],
   QR: ['qatar airways', 'qatar airways avios', 'qatar avios', 'qatar privilege club', 'qatar privilege club avios', 'qatar airways privilege club'],
   BA: ['british airways', 'british airways avios', 'ba avios'],
@@ -38,18 +40,25 @@ export const PARTNER_ALIASES = {
   QF: ['qantas', 'qantas frequent flyer'],
   JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank', 'jal (japan airlines) mileage bank'],
   LH: ['lufthansa', 'miles and more', 'miles more', 'lufthansa miles and more', 'lufthansa miles more'],
-  AS: ['alaska', 'alaska airlines', 'atmos rewards', 'alaska atmos rewards', 'alaska mileage plan', 'mileage plan'],
+  AS: ['alaska', 'alaska airlines', 'atmos rewards', 'alaska atmos rewards', 'alaska mileage plan', 'mileage plan', 'alaska mileageplan', 'mileageplan'],
   AA: ['american', 'american airlines', 'aadvantage', 'american aadvantage', 'american airlines aadvantage'],
   AC: ['air canada', 'aeroplan', 'air canada aeroplan'],
   TK: ['turkish', 'turkish airlines', 'miles smiles', 'turkish miles smiles', 'turkish airlines miles & smiles'],
   EK: ['emirates', 'skywards', 'emirates skywards'],
-  SQ: ['singapore', 'singapore airlines', 'krisflyer', 'singapore krisflyer'],
+  // idem: o arquivo escreve o nome completo, 'singapore airlines krisflyer',
+  // que não era nenhuma das quatro grafias listadas. 9 janelas perdidas.
+  SQ: ['singapore', 'singapore airlines', 'krisflyer', 'singapore krisflyer', 'singapore airlines krisflyer'],
   UA: ['united', 'united airlines', 'united mileageplus', 'mileageplus'],
   B6: ['jetblue', 'jetblue airways', 'jetblue trueblue', 'trueblue'],
   EY: ['etihad', 'etihad airways', 'etihad guest'],
   IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club'],
   CM: ['copa', 'copa airlines', 'connectmiles', 'connect miles', 'copa connectmiles', 'copa connect miles', 'copa airlines connectmiles'],
   TP: ['tap', 'tap air portugal', 'tap portugal', 'miles&go', 'tap miles&go', 'tap miles & go', 'tap miles and go', 'miles and go'],
+  // Adicionadas em 2026-07-27 pelo critério "é parceira HOJE de um banco
+  // rastreado": a Frontier é 1:1 pela Rove e estava com bônus AO VIVO sendo
+  // descartado; a Southwest é 1:1 por Chase e Bilt, com janelas até 2026.
+  F9: ['frontier', 'frontier miles', 'frontier airlines', 'frontier bonus miles'],
+  WN: ['southwest', 'southwest airlines', 'rapid rewards', 'southwest rapid rewards'],
 };
 
 // Display name used for a route's `airline` field when no seed route already
@@ -83,6 +92,8 @@ const PARTNER_DISPLAY_NAMES = {
   IB: 'Iberia Avios',
   CM: 'Copa ConnectMiles',
   TP: 'TAP Miles&Go',
+  F9: 'Frontier Miles',
+  WN: 'Southwest Rapid Rewards',
 };
 
 // Real sources spell the same bank/partner a dozen ways: a trailing

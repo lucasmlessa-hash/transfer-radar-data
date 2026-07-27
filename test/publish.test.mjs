@@ -72,7 +72,11 @@ test('happy path: hotels/currencies/airlines outside the tracked set stay unmapp
     // route) - if a future coverage expansion tracks one of the names below
     // too, re-point it at another name still outside the model rather than
     // deleting the check.
-    const mustStayUnmapped = ['IHG', 'Frontier Miles', 'PAYBACK'];
+    // 'Frontier Miles' saiu daqui em 2026-07-27 quando a Frontier virou rota
+    // rastreada (F9, parceira 1:1 da Rove, com bônus ao vivo que estava sendo
+    // descartado). Repontado para 'Hilton Honors', que é hotel e portanto
+    // continua fora do modelo por desenho, não por cobertura incompleta.
+    const mustStayUnmapped = ['IHG', 'Hilton Honors', 'PAYBACK'];
     for (const name of mustStayUnmapped) {
       assert.ok(
         unmappedNames.some((n) => n.includes(name)),
