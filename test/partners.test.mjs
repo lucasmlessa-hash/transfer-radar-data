@@ -18,17 +18,34 @@ const hotel = (bank) => new Map(P.directory[bank].hotel);
 // A code with an alias but no airlineValues entry silently renders NaN¢/mile
 // in the extension (VAL[r.code] is undefined), which is exactly the class of
 // bug this guards.
-test('every airline code has all three: alias, domain, cents-per-mile value', () => {
+test('every airline code has alias, domain and display name; the value is optional', () => {
   for (const code of Object.keys(PARTNER_ALIASES)) {
     assert.equal(resolvePartner(code), code, `${code}: bare code must resolve to itself`);
     assert.ok(P.airlineDomains[code], `${code}: missing airlineDomains entry`);
-    assert.ok(typeof P.airlineValues[code] === 'number', `${code}: missing airlineValues entry`);
     assert.notEqual(partnerDisplayName(code), code, `${code}: missing PARTNER_DISPLAY_NAMES entry`);
   }
   // and nothing in partners.json is orphaned the other way
   for (const code of Object.keys(P.airlineValues)) {
     assert.ok(PARTNER_ALIASES[code], `${code}: in partners.json but has no aliases`);
     assert.ok(P.airlineDomains[code], `${code}: has a value but no domain`);
+  }
+});
+
+// cents-per-mile USED to be required here, which quietly set the product's
+// coverage ceiling: an airline nobody publishes a valuation for could not be
+// tracked, so a real bonus on it was dropped before anyone saw it. Nine current
+// transfer partners sat outside the model for that reason alone (Thai, Vietnam,
+// Finnair, SAS, Hainan, Air India, Malaysia, InterMiles, Delta). The client now
+// renders "—¢/pt" when the number is missing, the same honest blank it already
+// shows for an unknown transfer time — so the requirement moved here instead:
+// a value is optional, but a code that HAS one must also carry its provenance.
+test('a published value always comes with provenance, and vice versa', () => {
+  for (const [code, v] of Object.entries(P.airlineValues)) {
+    assert.equal(typeof v, 'number', `${code}: airlineValues entry must be a number when present`);
+    assert.ok(P.airlineValueMeta[code], `${code}: has a value but no airlineValueMeta`);
+  }
+  for (const code of Object.keys(P.airlineValueMeta)) {
+    assert.ok(typeof P.airlineValues[code] === 'number', `${code}: has provenance but no value`);
   }
 });
 

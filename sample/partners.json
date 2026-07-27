@@ -86,7 +86,16 @@
     "CM": "copaair.com",
     "TP": "flytap.com",
     "F9": "flyfrontier.com",
-    "WN": "southwest.com"
+    "WN": "southwest.com",
+    "AI": "airindia.com",
+    "DL": "delta.com",
+    "AY": "finnair.com",
+    "HU": "hainanairlines.com",
+    "9W": "intermiles.com",
+    "MH": "malaysiaairlines.com",
+    "SK": "flysas.com",
+    "TG": "thaiairways.com",
+    "VN": "vietnamairlines.com"
   },
   "airlineIconUrls": {
     "AD": "https://icons.duckduckgo.com/ip3/voeazul.com.br.ico",
@@ -444,7 +453,7 @@
           "1000:800"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -506,7 +515,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -596,7 +605,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -612,7 +621,7 @@
           "1:1"
         ],
         [
-          "Malaysia Enrich",
+          "Malaysia Airlines Enrich",
           "1:1"
         ],
         [
@@ -706,7 +715,7 @@
           "1000:750"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -804,7 +813,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -894,7 +903,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [
@@ -1068,7 +1077,7 @@
           "1:1"
         ],
         [
-          "Finnair Plus+",
+          "Finnair Plus",
           "1:1"
         ],
         [

@@ -24,7 +24,13 @@ export const PARTNER_ALIASES = {
   // 'aeromexico clubpremier' sem espaço: é como o arquivo do Frequent Miler
   // escreve, e 7 janelas ficavam de fora por causa desse espaço.
   AM: ['aeromexico', 'aeromexico rewards', 'aeromexico club premier', 'aeromexico clubpremier', 'club premier', 'clubpremier'],
-  VS: ['virgin atlantic', 'virgin atlantic flying club', 'flying club'],
+  // 'virgin red' e a grafia que o arquivo do Frequent Miler usa para o parceiro
+  // Virgin do Capital One entre 2022 e 2024; de 2025 em diante a mesma fonte
+  // passa a escrever 'Virgin Atlantic Flying Club'. Sao a mesma moeda (Virgin
+  // Points) e o teste discriminante confirma: as duas grafias NUNCA coexistem
+  // no mesmo banco, diferente de 'Virgin Australia', que convive com
+  // 'Virgin Atlantic' no mesmo ano na Amex e no Citi por serem cias distintas.
+  VS: ['virgin atlantic', 'virgin atlantic flying club', 'flying club', 'virgin red', 'virgin points'],
   QR: ['qatar airways', 'qatar airways avios', 'qatar avios', 'qatar privilege club', 'qatar privilege club avios', 'qatar airways privilege club'],
   BA: ['british airways', 'british airways avios', 'ba avios'],
   EI: ['aer lingus', 'aer lingus aerclub', 'aerclub', 'aer lingus avios'],
@@ -38,7 +44,7 @@ export const PARTNER_ALIASES = {
   // partners.json's airlineDomains + airlineValues (see CONTRACT.md).
   BR: ['eva', 'eva air', 'eva airways', 'infinity mileagelands', 'eva air infinity mileagelands', 'eva infinity mileagelands'],
   QF: ['qantas', 'qantas frequent flyer'],
-  JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank', 'jal (japan airlines) mileage bank'],
+  JL: ['jal', 'jmb', 'japan airlines', 'japan airlines mileage bank', 'jal mileage bank', 'jal (japan airlines) mileage bank', 'japan airlines jal mileage bank'],
   LH: ['lufthansa', 'miles and more', 'miles more', 'lufthansa miles and more', 'lufthansa miles more'],
   AS: ['alaska', 'alaska airlines', 'atmos rewards', 'alaska atmos rewards', 'alaska mileage plan', 'mileage plan', 'alaska mileageplan', 'mileageplan'],
   AA: ['american', 'american airlines', 'aadvantage', 'american aadvantage', 'american airlines aadvantage'],
@@ -59,6 +65,21 @@ export const PARTNER_ALIASES = {
   // descartado; a Southwest é 1:1 por Chase e Bilt, com janelas até 2026.
   F9: ['frontier', 'frontier miles', 'frontier airlines', 'frontier bonus miles'],
   WN: ['southwest', 'southwest airlines', 'rapid rewards', 'southwest rapid rewards'],
+  // Adicionadas em 2026-07-27 pela auditoria das 39 parceiras. TODAS sao
+  // parceiras ativas de pelo menos um banco rastreado, e sem codigo um bonus
+  // real delas seria descartado em silencio -- o modo de falha que manteve a
+  // Frontier invisivel. Nenhuma tem valuation publicada no Frequent Miler nem
+  // no TPG, e por isso `airlineValues` passou a ser opcional: melhor um
+  // '—¢/pt' honesto do que perder a promocao inteira.
+  AI: ['air india', 'maharaja club', 'air india maharaja club', 'flying returns'],
+  DL: ['delta', 'delta air lines', 'skymiles', 'delta skymiles'],
+  AY: ['finnair', 'finnair plus', 'finnair plus+'],
+  HU: ['hainan', 'hainan airlines', 'fortune wings club'],
+  '9W': ['intermiles', 'jet airways intermiles', 'jet airways'],
+  MH: ['malaysia', 'malaysia airlines', 'enrich', 'malaysia enrich', 'malaysia airlines enrich'],
+  SK: ['sas', 'eurobonus', 'sas eurobonus', 'scandinavian airlines', 'scandinavian airlines sas eurobonus'],
+  TG: ['thai', 'thai airways', 'royal orchid plus', 'thai airways royal orchid plus'],
+  VN: ['vietnam airlines', 'lotusmiles', 'vietnam airlines lotusmiles'],
 };
 
 // Display name used for a route's `airline` field when no seed route already
@@ -94,6 +115,15 @@ const PARTNER_DISPLAY_NAMES = {
   TP: 'TAP Miles&Go',
   F9: 'Frontier Miles',
   WN: 'Southwest Rapid Rewards',
+  AI: 'Air India Maharaja Club',
+  DL: 'Delta SkyMiles',
+  AY: 'Finnair Plus',
+  HU: 'Hainan Airlines',
+  '9W': 'Jet Airways InterMiles',
+  MH: 'Malaysia Airlines Enrich',
+  SK: 'Scandinavian Airlines (SAS) EuroBonus',
+  TG: 'Thai Airways Royal Orchid Plus',
+  VN: 'Vietnam Airlines LotusMiles',
 };
 
 // Real sources spell the same bank/partner a dozen ways: a trailing
@@ -112,7 +142,11 @@ function norm(s) {
     // the same programme resolves from one source and not the other -- which
     // is how a partner ends up listed twice under two spellings.
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/[/&.,-]/g, ' ')
+    // Parenteses viram espaco tambem: nameCandidates() so descasca um
+    // parentetico FINAL, entao um no meio da string ficava invisivel para o
+    // resolver -- "Scandinavian Airlines (SAS) EuroBonus" nao casava com
+    // grafia nenhuma por causa disso.
+    .replace(/[/&.,()-]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
