@@ -7,7 +7,7 @@
       "code": "BR",
       "pct": 30,
       "firstSeen": "2026-07-25",
-      "lastSeen": "2026-07-27",
+      "lastSeen": "2026-07-28",
       "endDate": "2026-07-31"
     },
     {
@@ -16,7 +16,7 @@
       "code": "VS",
       "pct": 30,
       "firstSeen": "2026-07-25",
-      "lastSeen": "2026-07-27",
+      "lastSeen": "2026-07-28",
       "endDate": "2026-07-31"
     },
     {
@@ -25,7 +25,7 @@
       "code": "QF",
       "pct": 50,
       "firstSeen": "2026-07-25",
-      "lastSeen": "2026-07-27",
+      "lastSeen": "2026-07-28",
       "endDate": "2026-08-14"
     },
     {
@@ -34,7 +34,7 @@
       "code": "AF",
       "pct": 20,
       "firstSeen": "2026-07-25",
-      "lastSeen": "2026-07-27",
+      "lastSeen": "2026-07-28",
       "endDate": "2026-08-22"
     },
     {
@@ -52,7 +52,7 @@
       "code": "F9",
       "pct": 25,
       "firstSeen": "2026-07-27",
-      "lastSeen": "2026-07-27",
+      "lastSeen": "2026-07-28",
       "endDate": "2026-07-31"
     }
   ]
