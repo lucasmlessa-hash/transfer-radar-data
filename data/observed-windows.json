@@ -54,6 +54,51 @@
       "firstSeen": "2026-07-27",
       "lastSeen": "2026-07-28",
       "endDate": "2026-07-31"
+    },
+    {
+      "id": "amex-cx",
+      "bank": "AMEX",
+      "code": "CX",
+      "pct": 10,
+      "firstSeen": "2026-07-28",
+      "lastSeen": "2026-07-28",
+      "endDate": "2026-08-28"
+    },
+    {
+      "id": "c1-cx",
+      "bank": "C1",
+      "code": "CX",
+      "pct": 10,
+      "firstSeen": "2026-07-28",
+      "lastSeen": "2026-07-28",
+      "endDate": "2026-08-28"
+    },
+    {
+      "id": "citi-cx",
+      "bank": "CITI",
+      "code": "CX",
+      "pct": 10,
+      "firstSeen": "2026-07-28",
+      "lastSeen": "2026-07-28",
+      "endDate": "2026-08-28"
+    },
+    {
+      "id": "bilt-cx",
+      "bank": "BILT",
+      "code": "CX",
+      "pct": 10,
+      "firstSeen": "2026-07-28",
+      "lastSeen": "2026-07-28",
+      "endDate": "2026-08-28"
+    },
+    {
+      "id": "wf-cx",
+      "bank": "WF",
+      "code": "CX",
+      "pct": 10,
+      "firstSeen": "2026-07-28",
+      "lastSeen": "2026-07-28",
+      "endDate": "2026-08-28"
     }
   ]
 }
