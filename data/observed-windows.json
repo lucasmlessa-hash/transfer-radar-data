@@ -99,6 +99,15 @@
       "firstSeen": "2026-07-28",
       "lastSeen": "2026-07-31",
       "endDate": "2026-08-28"
+    },
+    {
+      "id": "c1-av",
+      "bank": "C1",
+      "code": "AV",
+      "pct": 15,
+      "firstSeen": "2026-07-31",
+      "lastSeen": "2026-07-31",
+      "endDate": "2026-08-31"
     }
   ]
 }
