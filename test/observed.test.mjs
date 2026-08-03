@@ -123,3 +123,35 @@ test('runPipeline wires the ledger end to end: sighting, persistence, continuati
     rmSync(outDir, { recursive: true, force: true });
   }
 });
+
+test('a new window is stamped with what the PREVIOUS feed said — and only then', () => {
+  const prevFeed = {
+    generatedAt: '2026-07-24T18:00:00.000Z',
+    routes: [
+      { id: 'citi-af', p2: [0, 0, 0, 0, 0, 0, 0.34, 0, 0, 0, 0, 0], wait: [0.13, 0.69, 0.79] },
+      { id: 'amex-vs', p2: null }, // old feed without the fields
+    ],
+  };
+  const w = updateLedger([], [
+    route('citi-af', 'CITI', 'AF', 20, '2026-08-22'),  // tracked, with numbers
+    route('amex-vs', 'AMEX', 'VS', 30, '2026-07-31'),  // tracked, no numbers
+    route('rove-qf', 'ROVE', 'QF', 50, '2026-08-14'),  // first-ever: not in prev feed
+  ], '2026-07-25', prevFeed);
+
+  // opening month is July -> index 6 of the previous feed's p2
+  assert.deepEqual(w.find((x) => x.id === 'citi-af').pred, { p2: 0.34, w1: 0.13, asOf: '2026-07-24' });
+  assert.deepEqual(w.find((x) => x.id === 'amex-vs').pred, { p2: null, w1: null, asOf: '2026-07-24' });
+  // absence IS the record: a first-ever route is unforecastable by design, and
+  // any future engine-check claim has to count it as such, not skip it.
+  assert.deepEqual(w.find((x) => x.id === 'rove-qf').pred, { absent: true, asOf: '2026-07-24' });
+
+  // a re-sighting must never launder hindsight into pred
+  const later = { generatedAt: '2026-07-26T18:00:00.000Z', routes: [{ id: 'citi-af', p2: Array(12).fill(0.99), wait: [0.9, 0.9, 0.9] }] };
+  const w2 = updateLedger(w, [route('citi-af', 'CITI', 'AF', 20, '2026-08-22')], '2026-07-26', later);
+  assert.deepEqual(w2.find((x) => x.id === 'citi-af').pred, { p2: 0.34, w1: 0.13, asOf: '2026-07-24' }, 'pred is stamped once, at open');
+
+  // bootstrap run (no previous feed): no pred at all — "we cannot know" is not
+  // the same record as "the engine had nothing"
+  const boot = updateLedger([], [route('esf-ad', 'ESF', 'AD', 115, '2026-08-10')], '2026-07-25', null);
+  assert.equal(boot[0].pred, undefined);
+});

@@ -8,11 +8,24 @@
 // deriveHistory() the FM archive feeds, after dedupe so a window FM also
 // archived is never counted twice.
 //
-// Ledger entry: { id, bank, code, pct, firstSeen, lastSeen, endDate? }
+// Ledger entry: { id, bank, code, pct, firstSeen, lastSeen, endDate?, pred? }
 // with day-granular ISO dates. Day granularity is deliberate: the CI cron
 // runs every 30 minutes, and committing a timestamp bump 48x/day would bury
 // the repo history. One day of imprecision on a window boundary is noise at
 // the month granularity the forecast operates on.
+//
+// `pred` is the PROSPECTIVE record: what the previously PUBLISHED feed said
+// about this route at the moment the window was first sighted — the one number
+// that can never be reconstructed later (Pages keeps no history of feed.json).
+// Stamped once at window open, never updated: a re-sighting must not launder
+// hindsight into it. Shape: { p2, w1, asOf } when the route was in the previous
+// feed (p2 = that feed's 2-month probability for the opening month, w1 = its
+// 1-month cumulative wait figure, either may be null on old feeds), or
+// { absent: true, asOf } when the engine had no line on the route at all —
+// which is itself the honest record: first-ever routes are unforecastable by
+// design, and any future "engine check" claim has to count them as such.
+// This exists so the v4 handoff's ENGINE CHECK strip can one day be computed
+// honestly instead of fabricated — see docs/FOLLOW-UPS.md §7.
 
 import { readFileSync } from 'node:fs';
 import { resolveBank, resolvePartner } from './aliases.mjs';
@@ -62,9 +75,14 @@ export function loadLedger(path) {
  * @param {Array} windows existing ledger entries
  * @param {Array} activeRoutes normalized routes carrying `active`
  * @param {string} todayIso YYYY-MM-DD of this build
+ * @param {object|null} prevFeed the previously PUBLISHED feed (or null on a
+ *   bootstrap run) — the source of the prospective `pred` stamp on new windows
  */
-export function updateLedger(windows, activeRoutes, todayIso) {
+export function updateLedger(windows, activeRoutes, todayIso, prevFeed = null) {
   const out = windows.map((w) => ({ ...w }));
+  const prevById = new Map((prevFeed?.routes ?? []).map((r) => [r.id, r]));
+  const asOf = prevFeed?.generatedAt ? prevFeed.generatedAt.slice(0, 10) : null;
+  const openMonth = Number(todayIso.slice(5, 7)) - 1;
   for (const r of activeRoutes) {
     const end = r.active.endDate ?? null;
     const e = out.find((w) => w.id === r.id
@@ -74,9 +92,16 @@ export function updateLedger(windows, activeRoutes, todayIso) {
       if (todayIso > e.lastSeen) e.lastSeen = todayIso;
       if (r.active.pct > e.pct) e.pct = r.active.pct;
       if (end) e.endDate = end;
+      // never touch e.pred: hindsight must not overwrite the prospective record
     } else {
       const entry = { id: r.id, bank: r.bank, code: r.code, pct: r.active.pct, firstSeen: todayIso, lastSeen: todayIso };
       if (end) entry.endDate = end;
+      if (asOf) {
+        const p = prevById.get(r.id);
+        entry.pred = p
+          ? { p2: p.p2?.[openMonth] ?? null, w1: p.wait?.[0] ?? null, asOf }
+          : { absent: true, asOf };
+      }
       out.push(entry);
     }
   }

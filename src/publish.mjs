@@ -144,19 +144,23 @@ export async function runPipeline({
 
   const { routes: candidateRoutes, unmapped } = normalize(raw, now);
 
+  // Read BEFORE the ledger update, not just for the merge below: at this point
+  // out/feed.json is still what users were actually served (CI seeds it from
+  // the live deployment), which makes it the only honest source for the
+  // prospective `pred` stamp — what the engine said BEFORE the window opened.
+  const previous = readPreviousFeed(outDir);
+
   // Fold THIS run's live sightings into the ledger — before the stale-route
   // merge below, which would otherwise advance lastSeen on bonuses nobody
   // actually saw this run. Day-granular, so the file only changes ~once a day.
   if (ledgerPath && ledger.ok) {
-    const updated = updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10));
+    const updated = updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10), previous);
     if (JSON.stringify(updated) !== JSON.stringify(ledger.windows)) {
       mkdirSync(path.dirname(ledgerPath), { recursive: true });
       writeFileSync(ledgerPath, JSON.stringify({ version: 1, windows: updated }, null, 2) + '\n');
       console.log(`[observed] ledger updated: ${updated.length} window(s)`);
     }
   }
-
-  const previous = readPreviousFeed(outDir);
 
   // ponytail: a route in the contract carries no source tag, so a failed
   // source's prior contribution can't be pulled out individually. The
