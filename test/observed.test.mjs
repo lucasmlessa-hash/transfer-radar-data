@@ -96,8 +96,13 @@ test('runPipeline wires the ledger end to end: sighting, persistence, continuati
   const { rmSync, readFileSync: rf, existsSync } = await import('node:fs');
   const outDir = mkdtempSync(path.join(tmpdir(), 'observed-out-'));
   const ledgerPath = path.join(outDir, 'ledger', 'observed-windows.json');
+  // Pinned clock, before the earliest fixture end date (2026-07-26). Without it
+  // the test read the real calendar, so once wall-clock time passed those end
+  // dates every re-sighting reopened the expired windows (9 vs 6) and the suite
+  // rotted. The panel suite learned this same lesson; runPipeline takes `now`.
+  const now = new Date('2026-07-20T12:00:00Z');
   try {
-    const r1 = await runPipeline({ fixtures: true, outDir, ledgerPath });
+    const r1 = await runPipeline({ fixtures: true, outDir, ledgerPath, now });
     assert.equal(r1.ok, true);
     assert.ok(existsSync(ledgerPath), 'first build creates the ledger');
     const l1 = JSON.parse(rf(ledgerPath, 'utf8'));
@@ -105,14 +110,14 @@ test('runPipeline wires the ledger end to end: sighting, persistence, continuati
     assert.deepEqual(l1.windows.map((w) => w.id).sort(), activeIds, 'every live bonus is a ledger window');
 
     // same fixtures again: continuation, not duplication
-    const r2 = await runPipeline({ fixtures: true, outDir, ledgerPath });
+    const r2 = await runPipeline({ fixtures: true, outDir, ledgerPath, now });
     assert.equal(r2.ok, true);
     const l2 = JSON.parse(rf(ledgerPath, 'utf8'));
     assert.equal(l2.windows.length, l1.windows.length, 'a re-sighting never opens a second window');
 
     // a run with the ledger disabled must not leak the previous run's
     // observed windows into history via the module-level store
-    const r3 = await runPipeline({ fixtures: true, outDir });
+    const r3 = await runPipeline({ fixtures: true, outDir, now });
     assert.equal(r3.ok, true);
   } finally {
     rmSync(outDir, { recursive: true, force: true });
