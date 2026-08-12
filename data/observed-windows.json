@@ -193,6 +193,20 @@
         "absent": true,
         "asOf": "2026-07-27"
       }
+    },
+    {
+      "id": "chase-ac",
+      "bank": "CHASE",
+      "code": "AC",
+      "pct": 20,
+      "firstSeen": "2026-08-12",
+      "lastSeen": "2026-08-12",
+      "endDate": "2026-09-30",
+      "pred": {
+        "p2": 0.214,
+        "w1": 0.171,
+        "asOf": "2026-08-12"
+      }
     }
   ]
 }
