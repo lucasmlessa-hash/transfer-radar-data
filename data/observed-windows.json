@@ -375,6 +375,20 @@
         "w1": null,
         "asOf": "2026-08-15"
       }
+    },
+    {
+      "id": "rove-qf",
+      "bank": "ROVE",
+      "code": "QF",
+      "pct": 50,
+      "firstSeen": "2026-08-15",
+      "lastSeen": "2026-08-15",
+      "endDate": "2026-08-14",
+      "pred": {
+        "p2": 0.108,
+        "w1": null,
+        "asOf": "2026-08-15"
+      }
     }
   ]
 }
