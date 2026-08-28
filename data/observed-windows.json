@@ -61,7 +61,7 @@
       "code": "AV",
       "pct": 15,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-31",
       "pred": {
         "p2": 0.325,
@@ -75,7 +75,7 @@
       "code": "TK",
       "pct": 40,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-31",
       "pred": {
         "p2": 0.224,
@@ -89,7 +89,7 @@
       "code": "BA",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.48,
@@ -103,7 +103,7 @@
       "code": "IB",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.226,
@@ -117,7 +117,7 @@
       "code": "EI",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.29,
@@ -131,7 +131,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-28",
       "pred": {
         "p2": 0.161,
@@ -145,7 +145,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-28",
       "pred": {
         "p2": 0.06,
@@ -159,7 +159,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-28",
       "pred": {
         "p2": 0.172,
@@ -173,7 +173,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-28",
       "pred": {
         "p2": 0.07,
@@ -187,7 +187,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-08-28",
       "pred": {
         "absent": true,
@@ -200,7 +200,7 @@
       "code": "AC",
       "pct": 20,
       "firstSeen": "2026-08-12",
-      "lastSeen": "2026-08-27",
+      "lastSeen": "2026-08-28",
       "endDate": "2026-09-30",
       "pred": {
         "p2": 0.214,
