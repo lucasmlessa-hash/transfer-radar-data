@@ -155,3 +155,25 @@ test('a new window is stamped with what the PREVIOUS feed said — and only then
   const boot = updateLedger([], [route('esf-ad', 'ESF', 'AD', 115, '2026-08-10')], '2026-07-25', null);
   assert.equal(boot[0].pred, undefined);
 });
+
+test('a long source outage does not split a window whose end date never moved', () => {
+  // Regressão real, achada em 2026-08-28. amex-ba +30% -> British Airways ia
+  // até 2026-09-27, sumiu das fontes por 25 dias e voltou anunciando a MESMA
+  // data. A regra de 7 dias abriu uma segunda janela para um bônus que nunca
+  // parou; o fantasma virou "janela passada" no arquivo, puxou a mediana da
+  // rota para o nível do bônus vigente e apagou o selo WEAK dele.
+  const aberta = [{ id: 'amex-ba', bank: 'AMEX', code: 'BA', pct: 30, firstSeen: '2026-08-03', lastSeen: '2026-08-03', endDate: '2026-09-27' }];
+  const depois = updateLedger(aberta, [route('amex-ba', 'AMEX', 'BA', 30, '2026-09-27')], '2026-08-28');
+  assert.equal(depois.length, 1, 'mesma data de fim, ainda no futuro: é a mesma janela, por maior que seja o buraco');
+  assert.equal(depois[0].firstSeen, '2026-08-03', 'o começo real é preservado');
+  assert.equal(depois[0].lastSeen, '2026-08-28');
+
+  // mas uma data de fim DIFERENTE após o buraco é uma janela nova de verdade
+  const nova = updateLedger(aberta, [route('amex-ba', 'AMEX', 'BA', 30, '2026-11-30')], '2026-08-28');
+  assert.equal(nova.length, 2, 'data de fim diferente = promoção nova');
+
+  // e uma janela já ENCERRADA nunca é continuada, mesmo com a data batendo
+  const encerrada = [{ id: 'amex-ba', bank: 'AMEX', code: 'BA', pct: 30, firstSeen: '2026-05-01', lastSeen: '2026-06-01', endDate: '2026-06-01' }];
+  const relistada = updateLedger(encerrada, [route('amex-ba', 'AMEX', 'BA', 30, '2026-06-01')], '2026-08-28');
+  assert.equal(relistada.length, 2, 'uma janela que já fechou não revive');
+});

@@ -36,7 +36,35 @@ import { parseMDY } from './history.mjs';
 // for a build or two; issuers do not run back-to-back identical promos with
 // a week's gap -- and if one ever does, undercounting one window beats
 // stitching two real windows into a fictitious month-long one).
+//
+// The gap rule alone is NOT sufficient, and assuming it was corrupted the
+// archive: see sameWindow() below.
 const REAPPEAR_GAP_DAYS = 7;
+
+/**
+ * Is this sighting a continuation of ledger entry `e`, or a new window?
+ *
+ * Two independent ways to say "same window", because the gap heuristic alone
+ * got this wrong in production (found 2026-08-28):
+ *
+ *  1. An unexpired END DATE THAT MATCHES. This is the decisive one and it
+ *     ignores the gap entirely. amex-ba's +30% to British Airways ran to
+ *     2026-09-27, vanished from the sources for 25 days, and came back still
+ *     advertising 2026-09-27 — so the ledger opened a SECOND entry for a bonus
+ *     that had never stopped. The phantom then entered the archive as a real
+ *     past window, which dragged the route's median down to meet the live
+ *     bonus and silently killed its WEAK badge. Issuers do not run two windows
+ *     that expire on the same day; an exact end-date match on a window that has
+ *     not closed yet is identity, not coincidence.
+ *  2. Seen recently AND not past its known end — the original heuristic, which
+ *     still covers undated listings (Livelo publishes some with no end date),
+ *     where there is no date to match on.
+ */
+function sameWindow(e, endDate, todayIso) {
+  if (e.endDate && e.endDate >= todayIso && endDate === e.endDate) return true;
+  return dayDiff(e.lastSeen, todayIso) <= REAPPEAR_GAP_DAYS
+    && !(e.endDate && e.endDate < todayIso);
+}
 
 const dayDiff = (aIso, bIso) => Math.round((Date.parse(bIso) - Date.parse(aIso)) / 86400000);
 
@@ -85,9 +113,7 @@ export function updateLedger(windows, activeRoutes, todayIso, prevFeed = null) {
   const openMonth = Number(todayIso.slice(5, 7)) - 1;
   for (const r of activeRoutes) {
     const end = r.active.endDate ?? null;
-    const e = out.find((w) => w.id === r.id
-      && dayDiff(w.lastSeen, todayIso) <= REAPPEAR_GAP_DAYS
-      && !(w.endDate && w.endDate < todayIso));
+    const e = out.find((w) => w.id === r.id && sameWindow(w, end, todayIso));
     if (e) {
       if (todayIso > e.lastSeen) e.lastSeen = todayIso;
       if (r.active.pct > e.pct) e.pct = r.active.pct;
