@@ -7,13 +7,26 @@ name: Build feed
 
 on:
   schedule:
-    # Nominal cadence, NOT the delivered one. GitHub queues scheduled workflows
-    # on shared runners and silently drops them under load: the five runs before
-    # 2026-07-26T11:04Z landed 1h45, 2h37, 3h03 and 4h04 apart. Nothing
-    # downstream may assume 30 minutes — the panel dates the feed from
-    # generatedAt and warns when it goes stale, instead of trusting the
-    # schedule. Asking for */30 is still right; it is the ceiling, not a floor.
-    - cron: '*/30 * * * *'
+    # Hourly, off the hour. This asks for LESS than the old */30 on purpose.
+    #
+    # Measured 2026-08-28 over the last 100 scheduled runs: GitHub honoured
+    # 65% of requested triggers on 08-23, then 48%, 33%, 6%, and 2% on 08-28 —
+    # every run that DID fire succeeded, so nothing here is broken; the
+    # scheduler simply drops them. Runs also arrive spread across the whole
+    # hour (median 11 min late, p90 28 min), so the ':00 and :30' the old cron
+    # asked for was never honoured anyway.
+    #
+    # Why asking for less should help: GitHub deprioritises high-frequency
+    # schedules on the shared pool first, and */30 (48/day) sits in the most
+    # deprioritised bucket. This is a HYPOTHESIS, not a measurement — but the
+    # downside is nil, because 24/day is already far more than this product
+    # needs: the median bonus window is 31 days (268 archived windows), so an
+    # hour of lag costs 0.1% of a typical window.
+    #
+    # If the drop rate does not recover within a week, the next lever is an
+    # external trigger (repository_dispatch from any cron host), not a
+    # higher-frequency ask — that would make it worse.
+    - cron: '23 * * * *'
   workflow_dispatch: {}
 
 # contents: write exists solely for the observed-windows ledger commit below.
