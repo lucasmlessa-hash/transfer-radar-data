@@ -37,6 +37,12 @@
       "bg": "#F5E7E3",
       "fg": "#872E2A"
     },
+    "USB": {
+      "name": "US Bank",
+      "short": "US Bank",
+      "bg": "#E4EAF6",
+      "fg": "#153C8C"
+    },
     "ESF": {
       "name": "Esfera",
       "short": "Esfera",
@@ -109,6 +115,7 @@
     "C1": "capitalone.com",
     "BILT": "biltrewards.com",
     "WF": "wellsfargo.com",
+    "USB": "usbank.com",
     "ESF": "esfera.com.vc",
     "LIV": "livelo.com.br",
     "ROVE": "rovemiles.com"
@@ -988,6 +995,23 @@
           "1:2"
         ]
       ]
+    },
+    "USB": {
+      "air": [
+        [
+          "Air France / KLM Flying Blue",
+          "1:1"
+        ],
+        [
+          "Ethiopian Shebamiles",
+          "1:1"
+        ],
+        [
+          "Qatar Airways Avios",
+          "1:1"
+        ]
+      ],
+      "hotel": []
     },
     "ESF": {
       "air": [

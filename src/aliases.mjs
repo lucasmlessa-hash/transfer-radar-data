@@ -16,6 +16,10 @@ const BANK_ALIASES = {
   ESF: ['esfera', 'banco do brasil esfera', 'bb esfera'],
   LIV: ['livelo', 'livelo pontos'],
   ROVE: ['rove', 'rove miles', 'rove rewards'],
+  // 2026-08-28: o FM adicionou uma coluna US Bank na lista mestre (entre Wells
+  // e Rove) — o banco lançou transferências de verdade. As grafias cobrem o
+  // cabeçalho da tabela e os nomes prováveis nas listagens de bônus.
+  USB: ['us bank', 'u.s. bank', 'usbank', 'us bank altitude', 'altitude reserve', 'us bank smartly', 'smartly'],
 };
 
 export const PARTNER_ALIASES = {

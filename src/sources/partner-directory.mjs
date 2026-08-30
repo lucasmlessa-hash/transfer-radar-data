@@ -17,7 +17,7 @@
 // Partners tab.
 
 import * as cheerio from 'cheerio';
-import { resolvePartner, partnerDisplayName } from '../aliases.mjs';
+import { resolveBank, resolvePartner, partnerDisplayName } from '../aliases.mjs';
 
 // Neither airline nor hotel: coalition/shopping programmes the product's
 // air/hotel directory model deliberately does not carry.
@@ -67,20 +67,28 @@ export const canonical = (name) => {
  */
 export function parseFmDirectory(html) {
   const $ = cheerio.load(html);
-  const BANKS = ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'ROVE'];
+  const BANKS = ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE'];
   const byBank = Object.fromEntries(BANKS.map((b) => [b, { air: new Map(), hotel: new Map() }]));
   $('table.tablepress').each((_, el) => {
     const head = $(el).find('thead th').map((__, e) => $(e).text().trim()).get();
     if (!/Rewards Program/i.test(head[0] ?? '') || head.some((h) => /Indirect/i.test(h))) return;
     if (!/Transfer Ratio/i.test(head[1] ?? '')) return;
+    // Columns mapped by HEADER, never by position. The old positional map
+    // assumed the 2026-07 column order; when FM inserted "US Bank" between
+    // Wells Fargo and Rove, every Rove cell silently became a US Bank cell and
+    // the published Partners tab showed Rove with US Bank's 2-partner list
+    // instead of its real 9 (caught 2026-08-28). Header-driven mapping makes
+    // any future insertion a no-op here.
+    const colBank = head.map((h) => resolveBank(h.replace(/transfer ratio[\s\S]*$/i, '').trim()));
     $(el).find('tbody tr').each((__, tr) => {
       const tds = $(tr).find('td').map((___, e) => $(e).text().trim()).get();
       const prog = tds[0];
       if (!prog || NOT_TRAVEL.test(prog)) return;
       const bucket = HOTELISH.test(prog) ? 'hotel' : 'air';
       const name = canonical(prog);
-      BANKS.forEach((bank, i) => {
-        const cell = tds[i + 1] ?? '';
+      colBank.forEach((bank, i) => {
+        if (!bank || !byBank[bank]) return;
+        const cell = tds[i] ?? '';
         if (!cell) return;
         if (!byBank[bank][bucket].has(name)) byBank[bank][bucket].set(name, parseRatio(cell));
       });
