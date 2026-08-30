@@ -103,16 +103,6 @@ function validateRoute(r, i) {
     if ('active' in r) fail(`${ctx}: carries both "active" and "ended"`);
   }
 
-  if ('ended' in r) {
-    const ectx = `${ctx}.ended`;
-    if (!isPlainObject(r.ended)) fail(`${ectx}: must be an object`);
-    checkKeys(r.ended, ['pct', 'endedAt'], ['pct', 'endedAt'], ectx);
-    if (typeof r.ended.pct !== 'number') fail(`${ectx}.pct: must be a number`);
-    if (typeof r.ended.endedAt !== 'string' || !ISO_DATE.test(r.ended.endedAt)) {
-      fail(`${ectx}.endedAt: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.ended.endedAt)}`);
-    }
-  }
-
   if ('next' in r) {
     const nctx = `${ctx}.next`;
     if (!isPlainObject(r.next)) fail(`${nctx}: must be an object`);
@@ -148,9 +138,24 @@ export function validatePartners(doc) {
   const required = ['version', 'banks', 'airlineDomains', 'bankDomains', 'airlineValues', 'directory'];
   // Curated extras, all optional: per-airline logo overrides, per-bank transfer
   // speeds, and provenance for each airlineValues number.
-  const optional = ['airlineIconUrls', 'transferTimes', 'airlineValueMeta'];
+  // ratioProvenance: quando e de onde uma razão de transferência SEM scraper foi
+  // conferida à mão. Razões mudam (desvalorização é rotina), e uma errada
+  // corrompe o ¢/pt e a ordenação BEST VALUE sem barulho — por isso a data é
+  // obrigatória por banco e um teste falha quando ela envelhece.
+  const optional = ['airlineIconUrls', 'transferTimes', 'airlineValueMeta', 'ratioProvenance'];
   checkKeys(doc, required, [...required, ...optional], 'partners');
   if (doc.version !== 1) fail(`partners.version: must be 1, got ${JSON.stringify(doc.version)}`);
+
+  if ('ratioProvenance' in doc) {
+    if (!isPlainObject(doc.ratioProvenance)) fail('partners.ratioProvenance: must be an object');
+    for (const [bank, m] of Object.entries(doc.ratioProvenance)) {
+      const ctx = `partners.ratioProvenance.${bank}`;
+      if (!isPlainObject(m)) fail(`${ctx}: must be an object`);
+      checkKeys(m, ['asOf', 'source'], ['asOf', 'source', 'note'], ctx);
+      if (typeof m.asOf !== 'string' || !ISO_DATE.test(m.asOf)) fail(`${ctx}.asOf: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(m.asOf)}`);
+      if (typeof m.source !== 'string' || !/^https:\/\//.test(m.source)) fail(`${ctx}.source: must be an https URL`);
+    }
+  }
 
   if (!isPlainObject(doc.banks)) fail('partners.banks: must be an object');
   for (const [k, v] of Object.entries(doc.banks)) {

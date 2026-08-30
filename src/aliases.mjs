@@ -20,6 +20,14 @@ const BANK_ALIASES = {
   // e Rove) — o banco lançou transferências de verdade. As grafias cobrem o
   // cabeçalho da tabela e os nomes prováveis nas listagens de bônus.
   USB: ['us bank', 'u.s. bank', 'usbank', 'us bank altitude', 'altitude reserve', 'us bank smartly', 'smartly'],
+  // Plataformas de hotel que transferem PARA aéreas. Entram como remetente, não
+  // como destino — continuam sendo hotel quando aparecem do outro lado (o
+  // HOTELISH do diretório cuida disso). Medido em 2026-08-30 no arquivo do
+  // Frequent Miler: Marriott tem 35 janelas para 8 aéreas que já rastreamos,
+  // de 2017 a 2026, até +50%; Wyndham 3 (todas +100% para United) e Choice 2.
+  MAR: ['marriott', 'marriott bonvoy', 'bonvoy'],
+  WYN: ['wyndham', 'wyndham rewards'],
+  CHO: ['choice', 'choice privileges', 'choice hotels'],
 };
 
 export const PARTNER_ALIASES = {

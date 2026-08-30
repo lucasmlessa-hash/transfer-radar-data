@@ -37,6 +37,33 @@ jobs:
       - name: Refresh partner ratios
         run: node scripts/refresh-br-ratios.mjs
 
+      # Razão de transferência não é fixa, e uma errada não quebra nada — só
+      # mente. Este passo compara as razões dos bancos US contra as commitadas
+      # e GRITA quando alguma mudou; a issue abaixo é o ponto todo, porque uma
+      # desvalorização aplicada em silêncio é indistinguível de nada ter
+      # acontecido. Semanal, portanto mais frequente que a revisão mensal que o
+      # teste de ratioProvenance cobra das razões sem scraper.
+      - name: Monitor transfer ratios
+        id: ratios
+        run: |
+          out=$(node scripts/monitor-ratios.mjs)
+          echo "$out"
+          if echo "$out" | grep -q RATIO_CHANGES_FOUND; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            { echo 'body<<RATIOEOF'; echo "$out" | grep -v RATIO_CHANGES_FOUND; echo RATIOEOF; } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open an issue when a ratio moved
+        if: steps.ratios.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create ratio-change --color 1D76DB --description "A transfer ratio changed" 2>/dev/null || true
+          gh issue create \
+            --title "Razão de transferência mudou: $(date -u +%F)" \
+            --label ratio-change \
+            --body "$(printf 'O scrape encontrou razões diferentes das commitadas.\n\n```\n%s\n```\n\nO arquivo já foi atualizado pelo build. Confira se é desvalorização real e ajuste o que depender disso.' "${{ steps.ratios.outputs.body }}")"
+
       # The tests are the gate, not the commit: bundled-partners-sync and the
       # canonical-name guard both read sample/partners.json, so a scrape that
       # introduced a duplicate or a non-canonical name fails here and never
@@ -54,7 +81,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add sample/partners.json
-            git commit -m "chore(data): refresh BR partner ratios $(date -u +%F)"
+            git commit -m "chore(data): refresh partner ratios $(date -u +%F)"
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi

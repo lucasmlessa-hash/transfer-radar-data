@@ -263,3 +263,30 @@ test('a bank never lists the same partner twice', () => {
     }
   }
 });
+
+// As razões de transferência MUDAM — desvalorização é rotina no setor, e uma
+// razão errada corrompe o ¢/pt e a ordenação BEST VALUE em silêncio. As dos
+// bancos americanos são raspadas da lista mestre do FM a cada build, e as
+// brasileiras pelo job semanal; essas se auto-corrigem. Já Marriott, Wyndham e
+// Choice não têm tabela raspável — foram lidas à mão. Este teste é o
+// cronômetro: passados 35 dias sem alguém revisar e re-datar, a suíte falha e
+// o build para, em vez de servir um número velho para sempre.
+const RATIO_REVIEW_DAYS = 35;
+
+test('razões curadas à mão são revisadas ao menos uma vez por mês', () => {
+  const prov = P.ratioProvenance ?? {};
+  const semScraper = Object.keys(P.directory).filter((b) => (P.directory[b].air ?? []).length && !prov[b]
+    && !['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE', 'ESF', 'LIV'].includes(b));
+  assert.deepEqual(semScraper, [], `banco sem scraper e sem ratioProvenance: ${semScraper}`);
+
+  const hoje = Date.now();
+  for (const [bank, m] of Object.entries(prov)) {
+    assert.ok(P.directory[bank], `${bank}: ratioProvenance sem banco no diretório`);
+    assert.match(m.asOf, /^\d{4}-\d{2}-\d{2}$/, `${bank}.asOf`);
+    assert.ok(/^https:\/\//.test(m.source ?? ''), `${bank}: precisa de uma fonte verificável`);
+    const dias = Math.floor((hoje - Date.parse(m.asOf)) / 86400000);
+    assert.ok(dias <= RATIO_REVIEW_DAYS,
+      `${bank}: razões conferidas pela última vez há ${dias} dias (limite ${RATIO_REVIEW_DAYS}). `
+      + `Reveja em ${m.source} e atualize asOf — desvalorização silenciosa é exatamente o que este teste existe para pegar.`);
+  }
+});

@@ -185,6 +185,6 @@ export function mergeDirectory(curated, scrapedByBank) {
 // every showcase id properly. Livelo stays here: its listing already carries
 // both name and status, so it costs one request.
 export const DIRECTORY_SOURCES = [
-  { id: 'fm-directory', url: 'https://frequentmiler.com/transfer-partner-master-list/', fixture: 'partner-fm.html', parse: parseFmDirectory, banks: ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'ROVE'] },
+  { id: 'fm-directory', url: 'https://frequentmiler.com/transfer-partner-master-list/', fixture: 'partner-fm.html', parse: parseFmDirectory, banks: ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE'] },
   { id: 'livelo-directory', url: 'https://www.livelo.com.br/livelo-para-parceiros', fixture: 'partner-livelo.html', parse: (html) => ({ LIV: parseLiveloDirectory(html) }), banks: ['LIV'] },
 ];

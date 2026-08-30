@@ -29,7 +29,7 @@ const ARCHIVE_TABLE = `
 <tbody>
 <tr><td>Citi ThankYou Rewards</td><td>50% transfer bonus from Citi ThankYou Rewards to Avianca LifeMiles</td><td><p style='display: none;'>46187</p>06/14/26</td><td><p style='display: none;'>46221</p>07/18/26</td></tr>
 <tr><td>Citi ThankYou Rewards</td><td>25% transfer bonus from Citi ThankYou Rewards to Avianca LifeMiles</td><td><p style='display: none;'>45800</p>06/02/25</td><td><p style='display: none;'>45810</p>06/02/25</td></tr>
-<tr><td>Marriott Bonvoy</td><td>35% transfer bonus from Marriott Bonvoy to Air Canada Aeroplan</td><td>07/17/17</td><td>08/21/17</td></tr>
+<tr><td>Brex</td><td>35% transfer bonus from Brex to Air Canada Aeroplan</td><td>07/17/17</td><td>08/21/17</td></tr>
 <tr><td>Capital One Miles</td><td>5,000 bonus point transfer bonus from Capital One Miles to JetBlue TrueBlue</td><td>01/01/24</td><td>02/01/24</td></tr>
 <tr><td>Amex Membership Rewards</td><td>40% transfer bonus from Amex Membership Rewards to Virgin Atlantic Flying Club [Targeted]</td><td>11/21/25</td><td>12/31/25</td></tr>
 </tbody></table>`;
@@ -78,7 +78,27 @@ test('deriveHistory builds hist most-recent-first with inclusive day lengths', (
 
 test('deriveHistory drops untracked banks/partners instead of inventing codes', () => {
   const derived = deriveHistory(NOW, parseHistory(PAGE));
+  // A Brex faz esse papel aqui: 10 janelas no arquivo real, mas o programa foi
+  // descontinuado em 2023 e nenhum banco rastreado a lista. Era a Marriott até
+  // 2026-08-30, quando ela virou remetente rastreado — reapontado em vez de
+  // apagado, como as outras guardas deste tipo pedem.
   assert.deepEqual([...derived.keys()], ['citi-av']);
+});
+
+test('Marriott, Wyndham e Choice são remetentes rastreados, não hotéis descartados', () => {
+  // 2026-08-30: 35 janelas da Marriott para 8 aéreas que já cobrimos estavam
+  // sendo jogadas fora porque o remetente não resolvia. Hotel continua sendo
+  // hotel quando é DESTINO; o que mudou é o outro lado da seta.
+  const raw = [
+    { bankName: 'Marriott Bonvoy', partnerName: 'Air Canada Aeroplan', pct: 35, startDateRaw: '07/17/25', endDateRaw: '08/21/25' },
+    { bankName: 'Marriott Bonvoy', partnerName: 'United MileagePlus', pct: 25, startDateRaw: '01/10/26', endDateRaw: '02/10/26' },
+    { bankName: 'Wyndham Rewards', partnerName: 'United MileagePlus', pct: 100, startDateRaw: '05/01/25', endDateRaw: '06/01/25' },
+    { bankName: 'Choice Privileges', partnerName: 'Air France / KLM Flying Blue', pct: 100, startDateRaw: '02/01/26', endDateRaw: '03/01/26' },
+    // e um hotel como DESTINO continua fora: não é rota para aérea
+    { bankName: 'Chase Ultimate Rewards', partnerName: 'IHG', pct: 70, startDateRaw: '07/01/26', endDateRaw: '08/31/26' },
+  ];
+  const ids = [...deriveHistory(new Date('2026-08-30T00:00:00Z'), raw).keys()].sort();
+  assert.deepEqual(ids, ['cho-af', 'mar-ac', 'mar-ua', 'wyn-ua']);
 });
 
 test('mp is the shrunk per-occurrence frequency — with evidence, never a raw 0 or 1', () => {

@@ -60,6 +60,24 @@
       "short": "Rove",
       "bg": "#E6F0EC",
       "fg": "#1F5C46"
+    },
+    "MAR": {
+      "name": "Marriott Bonvoy",
+      "short": "Marriott",
+      "bg": "#F3E7E4",
+      "fg": "#8C3B2E"
+    },
+    "WYN": {
+      "name": "Wyndham Rewards",
+      "short": "Wyndham",
+      "bg": "#E5EAF3",
+      "fg": "#1F4E79"
+    },
+    "CHO": {
+      "name": "Choice Privileges",
+      "short": "Choice",
+      "bg": "#EAE7F2",
+      "fg": "#4A3E86"
     }
   },
   "airlineDomains": {
@@ -118,7 +136,10 @@
     "USB": "usbank.com",
     "ESF": "esfera.com.vc",
     "LIV": "livelo.com.br",
-    "ROVE": "rovemiles.com"
+    "ROVE": "rovemiles.com",
+    "MAR": "marriott.com",
+    "WYN": "wyndhamhotels.com",
+    "CHO": "choicehotels.com"
   },
   "airlineValues": {
     "AF": 1.3,
@@ -1214,6 +1235,86 @@
           "3:2"
         ]
       ]
+    },
+    "MAR": {
+      "air": [
+        [
+          "Air Canada Aeroplan",
+          "3:1"
+        ],
+        [
+          "United MileagePlus",
+          "3:1"
+        ],
+        [
+          "American Airlines AAdvantage",
+          "3:1"
+        ],
+        [
+          "Cathay Pacific Asia Miles",
+          "3:1"
+        ],
+        [
+          "Etihad Guest",
+          "3:1"
+        ],
+        [
+          "British Airways Avios",
+          "3:1"
+        ],
+        [
+          "Avianca LifeMiles",
+          "3:1"
+        ],
+        [
+          "Virgin Atlantic Flying Club",
+          "3:1"
+        ]
+      ],
+      "hotel": []
+    },
+    "WYN": {
+      "air": [
+        [
+          "Singapore KrisFlyer",
+          "5:1"
+        ],
+        [
+          "United MileagePlus",
+          "—"
+        ]
+      ],
+      "hotel": []
+    },
+    "CHO": {
+      "air": [
+        [
+          "Air France / KLM Flying Blue",
+          "—"
+        ],
+        [
+          "United MileagePlus",
+          "—"
+        ]
+      ],
+      "hotel": []
+    }
+  },
+  "ratioProvenance": {
+    "MAR": {
+      "asOf": "2026-08-30",
+      "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
+      "note": "Razão-base 3:1. Marriott ainda dá 5.000 milhas bônus a cada 60.000 pontos (United 10.000; American e Avianca nenhum), o que só vale em blocos de 60k — por isso a base publicada é o que fica na razão."
+    },
+    "WYN": {
+      "asOf": "2026-08-30",
+      "source": "https://corporate.wyndhamhotels.com/news-releases/wyndham-rewards-adds-krisflyer-as-newest-point-transfer-partner/",
+      "note": "KrisFlyer 5:1 (6.000 pontos = 1.200 milhas), do anúncio oficial de set/2025. As demais parceiras a Wyndham só expõe via calculadora interativa — ficam sem razão de propósito, e o app mostra traço."
+    },
+    "CHO": {
+      "asOf": "2026-08-30",
+      "source": "https://www.choicehotels.com/choice-privileges/redeem/airline-partners",
+      "note": "Choice não publica tabela por parceira; sem razão citável, fica em branco. As duas janelas arquivadas foram +100%."
     }
   }
 }
