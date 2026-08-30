@@ -1054,7 +1054,7 @@
         ],
         [
           "Etihad Guest",
-          "3.5:1"
+          "4.5:1"
         ],
         [
           "Iberia Avios",
@@ -1112,7 +1112,7 @@
         ],
         [
           "Etihad Guest",
-          "3.5:1"
+          "4.5:1"
         ],
         [
           "Iberia Avios",
@@ -1243,11 +1243,15 @@
           "3:1"
         ],
         [
-          "United MileagePlus",
+          "American Airlines AAdvantage",
           "3:1"
         ],
         [
-          "American Airlines AAdvantage",
+          "Avianca LifeMiles",
+          "3:1"
+        ],
+        [
+          "British Airways Avios",
           "3:1"
         ],
         [
@@ -1259,11 +1263,7 @@
           "3:1"
         ],
         [
-          "British Airways Avios",
-          "3:1"
-        ],
-        [
-          "Avianca LifeMiles",
+          "United MileagePlus",
           "3:1"
         ],
         [
