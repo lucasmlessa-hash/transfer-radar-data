@@ -166,6 +166,29 @@
             "maximum": 1
           },
           "description": "Cumulative P(>=1 bonus) within 1 / 3 / 6 months of generatedAt. Non-decreasing."
+        },
+        "upcoming": {
+          "type": "object",
+          "required": [
+            "pct",
+            "startDate",
+            "endDate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "pct": {
+              "type": "number"
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date"
+            },
+            "endDate": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "description": "Announced but not yet running. Mutually exclusive with `active` — the source table lists current AND upcoming bonuses, and treating an unstarted one as live tells the user to transfer for nothing."
         }
       }
     }

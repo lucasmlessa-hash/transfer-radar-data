@@ -150,6 +150,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
 
     const id = `${bankCode.toLowerCase()}-${airCode.toLowerCase()}`;
     const endDate = parseEndDate(raw.endDateRaw, now);
+    const startDate = parseEndDate(raw.startDateRaw, now);
     const existing = byId.get(id);
 
     // dedupe across sources: keep the higher pct, keep the union of sourceUrls
@@ -174,6 +175,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
+      startDate,
       // Stripped below like pct/endDate: a route that has a bonus running now
       // must not also advertise the previous one as just-ended (CONTRACT.md).
       ended: h?.ended,
@@ -187,12 +189,21 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   const routes = [];
   const sourceUrlsById = {};
   for (const [id, { route, sourceUrls }] of byId) {
-    const { pct, endDate, ended, ...rest } = route;
+    const { pct, endDate, startDate, ended, ...rest } = route;
     const out = { ...rest };
+    const today = now.toISOString().slice(0, 10);
     // unparseable/missing end date -> published WITHOUT `active` (forecast
     // row, never a phantom live deal). A source still listing the route but
     // with no parseable date is exactly when `ended` earns its keep.
-    if (endDate) out.active = { pct, endDate };
+    //
+    // A start date in the FUTURE is the third case, and it is the dangerous
+    // one: Frequent Miler's table is "Current AND UPCOMING", so a bonus can sit
+    // there for days before it exists. Calling that `active` told users to
+    // transfer into a bonus that would pay nothing. It ships as `upcoming`
+    // instead — worth showing, since knowing a +100% lands on the 1st is the
+    // most actionable thing this app can say, but never as "live now".
+    if (endDate && startDate && startDate > today) out.upcoming = { pct, startDate, endDate };
+    else if (endDate) out.active = { pct, endDate };
     else if (ended) out.ended = ended;
     routes.push(out);
     sourceUrlsById[id] = [...sourceUrls];

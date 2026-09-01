@@ -30,6 +30,7 @@ Schemas: `schema/feed.schema.json` and `schema/partners.schema.json`
       "p2": [0.8,0.6,0.6,0.7,0.7,0.8,0.8,0.8,0.7,0.8,0.7,0.9],  // OPTIONAL, length 12: P(bonus during the 2-month stretch starting at that month)
       "wait": [0.13,0.69,0.79],   // OPTIONAL, length 3: cumulative P(>=1 bonus) within 1 / 3 / 6 months of generatedAt
       "active":  { "pct": 75, "endDate": "2026-07-25" },        // OPTIONAL, present iff a bonus is live right now
+      "upcoming":{ "pct": 100, "startDate": "2026-09-01", "endDate": "2026-09-01" },  // OPTIONAL, announced but NOT yet running
       "ended":   { "pct": 25, "endedAt": "2026-07-14" },        // OPTIONAL, present iff a bonus just ended
       "next":    { "label": "Sep 2026", "prob": 82 },           // OPTIONAL, forecast rows: next likely window + confidence 0..100
       "summary": "…",                                            // OPTIONAL, free text, paired with `next`
@@ -45,6 +46,15 @@ Field notes:
 - `generatedAt` must be a real ISO-8601 UTC timestamp — the client computes
   "updated N min/hours ago" from it; it never parses a display string.
 - A route always has: `id, bank, airline, code, time, typical, mp, hist`.
+- `upcoming` (emitted since 2026-09-01) is a bonus the source has ANNOUNCED but
+  which has not started. Mutually exclusive with `active`, and the validator
+  enforces it. Frequent Miler's table is titled "Current **and Upcoming**" and
+  the parser used to read only the end date, so an announced bonus shipped as
+  live: on 2026-08-30 the app showed "Bilt → Virgin +100%, ACTIVE NOW, ENDS IN
+  3D" for a window that existed only on Sep 1. Acting on that earns no bonus at
+  all, and transfers are irreversible. Bilt makes this the common case rather
+  than an edge one — 24 of its 26 archived windows last exactly one day and
+  start on the 1st of the month, announced days ahead.
 - `active`, `ended`, `next`, and `summary` are all optional and independent,
   though in practice a route currently only ever carries `active` alone,
   `ended` (+ optionally `next`/`summary`), or `next` + `summary` alone — never

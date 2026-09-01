@@ -38,7 +38,7 @@ function validateRoute(r, i) {
   // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
   // routes from feeds that predate it, and a required key would turn a source
   // outage into a publish abort. New builds always emit it (see normalize.mjs).
-  const allowed = [...required, 'p2', 'wait', 'active', 'ended', 'next', 'summary'];
+  const allowed = [...required, 'p2', 'wait', 'active', 'upcoming', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
 
   for (const k of ['id', 'bank', 'airline', 'code', 'time', 'typical']) {
@@ -88,6 +88,22 @@ function validateRoute(r, i) {
     if (typeof r.active.endDate !== 'string' || !ISO_DATE.test(r.active.endDate)) {
       fail(`${actx}.endDate: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.active.endDate)}`);
     }
+  }
+
+  if ('upcoming' in r) {
+    const uctx = `${ctx}.upcoming`;
+    if (!isPlainObject(r.upcoming)) fail(`${uctx}: must be an object`);
+    checkKeys(r.upcoming, ['pct', 'startDate', 'endDate'], ['pct', 'startDate', 'endDate'], uctx);
+    if (typeof r.upcoming.pct !== 'number') fail(`${uctx}.pct: must be a number`);
+    for (const k of ['startDate', 'endDate']) {
+      if (typeof r.upcoming[k] !== 'string' || !ISO_DATE.test(r.upcoming[k])) {
+        fail(`${uctx}.${k}: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.upcoming[k])}`);
+      }
+    }
+    if (r.upcoming.endDate < r.upcoming.startDate) fail(`${uctx}: ends before it starts`);
+    // Announced-but-not-live is mutually exclusive with live: the whole point
+    // of the field is that these two must never be confused.
+    if ('active' in r) fail(`${ctx}: carries both "active" and "upcoming"`);
   }
 
   if ('ended' in r) {

@@ -171,10 +171,23 @@ export const source = {
         return;
       }
 
+      // The table is titled "Current AND UPCOMING", and this parser used to
+      // read only the end date — so a bonus announced days ahead was published
+      // as live the moment it appeared. That is the one error class this
+      // product must never make: on 2026-08-30 it showed "Bilt -> Virgin +100%,
+      // ACTIVE NOW, ENDS IN 3D" for a window that existed only on Sep 1.
+      // Transferring on the strength of that gets zero bonus, and transfers are
+      // irreversible. Bilt makes it acute: 24 of its 26 archived windows last
+      // exactly ONE day and start on the 1st of the month.
+      const $startCell = $(cells[2]);
+      $startCell.find('p').remove();
+      const startDateRaw = $startCell.text().trim();
+
       out.push({
         bankName,
         partnerName: match[3].trim(),
         pct: Number(match[1]),
+        startDateRaw,
         endDateRaw,
         sourceUrl: source.url,
       });
