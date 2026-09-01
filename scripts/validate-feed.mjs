@@ -83,10 +83,16 @@ function validateRoute(r, i) {
   if ('active' in r) {
     const actx = `${ctx}.active`;
     if (!isPlainObject(r.active)) fail(`${actx}: must be an object`);
-    checkKeys(r.active, ['pct', 'endDate'], ['pct', 'endDate'], actx);
+    checkKeys(r.active, ['pct', 'endDate'], ['pct', 'startDate', 'endDate'], actx);
     if (typeof r.active.pct !== 'number') fail(`${actx}.pct: must be a number`);
     if (typeof r.active.endDate !== 'string' || !ISO_DATE.test(r.active.endDate)) {
       fail(`${actx}.endDate: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.active.endDate)}`);
+    }
+    if ('startDate' in r.active) {
+      if (typeof r.active.startDate !== 'string' || !ISO_DATE.test(r.active.startDate)) {
+        fail(`${actx}.startDate: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.active.startDate)}`);
+      }
+      if (r.active.endDate < r.active.startDate) fail(`${actx}: ends before it starts`);
     }
   }
 

@@ -81,6 +81,11 @@
             "endDate": {
               "type": "string",
               "format": "date"
+            },
+            "startDate": {
+              "type": "string",
+              "format": "date",
+              "description": "Optional: when the window opened. Lets the client tell a bonus that started today from one running for weeks."
             }
           }
         },

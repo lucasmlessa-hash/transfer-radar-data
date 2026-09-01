@@ -203,7 +203,10 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
     // instead — worth showing, since knowing a +100% lands on the 1st is the
     // most actionable thing this app can say, but never as "live now".
     if (endDate && startDate && startDate > today) out.upcoming = { pct, startDate, endDate };
-    else if (endDate) out.active = { pct, endDate };
+    // startDate viaja junto no `active` quando a fonte publica: é o que deixa o
+    // cliente saber que a campanha começou HOJE. Sem isso, "ENDS IN 27D" não
+    // distingue um bônus que abriu agora de um que já corre há três semanas.
+    else if (endDate) out.active = startDate ? { pct, startDate, endDate } : { pct, endDate };
     else if (ended) out.ended = ended;
     routes.push(out);
     sourceUrlsById[id] = [...sourceUrls];

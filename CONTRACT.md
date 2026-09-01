@@ -29,7 +29,7 @@ Schemas: `schema/feed.schema.json` and `schema/partners.schema.json`
       "mp": [0.7,0.5,0.5,0.6,0.5,0.7,0.6,0.7,0.5,0.7,0.5,0.8],  // ALWAYS length 12, Jan..Dec, each a probability 0..1
       "p2": [0.8,0.6,0.6,0.7,0.7,0.8,0.8,0.8,0.7,0.8,0.7,0.9],  // OPTIONAL, length 12: P(bonus during the 2-month stretch starting at that month)
       "wait": [0.13,0.69,0.79],   // OPTIONAL, length 3: cumulative P(>=1 bonus) within 1 / 3 / 6 months of generatedAt
-      "active":  { "pct": 75, "endDate": "2026-07-25" },        // OPTIONAL, present iff a bonus is live right now
+      "active":  { "pct": 75, "startDate": "2026-07-01", "endDate": "2026-07-25" },  // OPTIONAL, present iff a bonus is live right now; startDate optional
       "upcoming":{ "pct": 100, "startDate": "2026-09-01", "endDate": "2026-09-01" },  // OPTIONAL, announced but NOT yet running
       "ended":   { "pct": 25, "endedAt": "2026-07-14" },        // OPTIONAL, present iff a bonus just ended
       "next":    { "label": "Sep 2026", "prob": 82 },           // OPTIONAL, forecast rows: next likely window + confidence 0..100
@@ -55,6 +55,11 @@ Field notes:
   all, and transfers are irreversible. Bilt makes this the common case rather
   than an edge one — 24 of its 26 archived windows last exactly one day and
   start on the 1st of the month, announced days ahead.
+- `active.startDate` is optional and present when the source publishes it. It
+  exists so the client can tell a bonus that opened TODAY from one running for
+  weeks — `endDate` alone cannot. The NEW badge uses it to survive at least the
+  first day of a campaign, which matters because a one-day window (Bilt's usual
+  shape) would otherwise lose its badge the second time the panel is opened.
 - `active`, `ended`, `next`, and `summary` are all optional and independent,
   though in practice a route currently only ever carries `active` alone,
   `ended` (+ optionally `next`/`summary`), or `next` + `summary` alone — never
