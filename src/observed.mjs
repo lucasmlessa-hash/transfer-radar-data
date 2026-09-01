@@ -61,7 +61,16 @@ const REAPPEAR_GAP_DAYS = 7;
  *     where there is no date to match on.
  */
 function sameWindow(e, endDate, todayIso) {
-  if (e.endDate && e.endDate >= todayIso && endDate === e.endDate) return true;
+  // Data de fim IGUAL é identidade, tenha ela passado ou não. A versão anterior
+  // exigia `e.endDate >= todayIso` aqui, e isso produziu um runaway em
+  // produção: quando a fonte continua listando um bônus já vencido (c1-av e
+  // citi-tk seguiram publicados com fim em 31/08 no dia 01/09), NENHUM ramo
+  // casava e cada build abria mais uma janela fantasma — duas no primeiro dia,
+  // sem teto. Cada fantasma vira "janela passada" no arquivo e envenena a
+  // mediana da rota, que é o mesmo estrago que apagou os selos WEAK antes.
+  // Emissor não roda duas promoções que expiram no mesmo dia; se a data bate,
+  // é a mesma janela, e `endOf()` já a limita ao endDate real.
+  if (e.endDate && endDate === e.endDate) return true;
   return dayDiff(e.lastSeen, todayIso) <= REAPPEAR_GAP_DAYS
     && !(e.endDate && e.endDate < todayIso);
 }
@@ -113,6 +122,11 @@ export function updateLedger(windows, activeRoutes, todayIso, prevFeed = null) {
   const openMonth = Number(todayIso.slice(5, 7)) - 1;
   for (const r of activeRoutes) {
     const end = r.active.endDate ?? null;
+    // Data de fim no passado não é bônus vivo, é a fonte atrasada em remover a
+    // listagem. O painel já ignora (daysUntil <= 0); o ledger passa a ignorar
+    // também, em vez de arquivar um avistamento que não aconteceu. Inclusivo:
+    // um bônus que termina HOJE ainda é transferível hoje.
+    if (end && end < todayIso) continue;
     const e = out.find((w) => w.id === r.id && sameWindow(w, end, todayIso));
     if (e) {
       if (todayIso > e.lastSeen) e.lastSeen = todayIso;

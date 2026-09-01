@@ -172,8 +172,30 @@ test('a long source outage does not split a window whose end date never moved', 
   const nova = updateLedger(aberta, [route('amex-ba', 'AMEX', 'BA', 30, '2026-11-30')], '2026-08-28');
   assert.equal(nova.length, 2, 'data de fim diferente = promoção nova');
 
-  // e uma janela já ENCERRADA nunca é continuada, mesmo com a data batendo
+  // ESTA asserção estava invertida e causou um runaway em produção — ver o
+  // teste abaixo. Uma relistagem com a MESMA data de fim é a mesma janela,
+  // tenha ela vencido ou não; o que abre janela nova é data diferente.
   const encerrada = [{ id: 'amex-ba', bank: 'AMEX', code: 'BA', pct: 30, firstSeen: '2026-05-01', lastSeen: '2026-06-01', endDate: '2026-06-01' }];
   const relistada = updateLedger(encerrada, [route('amex-ba', 'AMEX', 'BA', 30, '2026-06-01')], '2026-08-28');
-  assert.equal(relistada.length, 2, 'uma janela que já fechou não revive');
+  assert.equal(relistada.length, 1, 'mesma data de fim continua sendo a mesma janela');
+});
+
+test('fonte que insiste em listar bônus vencido não gera uma janela por build', () => {
+  // Runaway real, achado em 2026-09-01: c1-av e citi-tk seguiam publicados com
+  // fim em 31/08 depois do dia 01/09. Nenhum ramo do sameWindow casava, então
+  // CADA build abria outra janela — duas no primeiro dia, sem teto. Cada uma
+  // vira "janela passada" no arquivo e envenena a mediana da rota (foi assim
+  // que os selos WEAK sumiram da primeira vez).
+  const morto = { id: 'c1-av', bank: 'C1', code: 'AV', active: { pct: 15, endDate: '2026-08-31' } };
+  let w = [{ id: 'c1-av', bank: 'C1', code: 'AV', pct: 15, firstSeen: '2026-08-03', lastSeen: '2026-08-31', endDate: '2026-08-31' }];
+  for (const dia of ['2026-09-01', '2026-09-01', '2026-09-02', '2026-09-05', '2026-10-01']) {
+    w = updateLedger(w, [morto], dia);
+  }
+  assert.equal(w.length, 1, `cinco builds sobre listagem vencida abriram ${w.length} janelas`);
+  assert.equal(w[0].firstSeen, '2026-08-03', 'e a janela original fica intacta');
+  assert.equal(w[0].lastSeen, '2026-08-31', 'lastSeen não avança por avistamento de bônus morto');
+
+  // o bônus que termina HOJE ainda é vivo — inclusivo, como no resto do app
+  const hoje = updateLedger([], [{ id: 'x-vs', bank: 'BILT', code: 'VS', active: { pct: 100, endDate: '2026-09-01' } }], '2026-09-01');
+  assert.equal(hoje.length, 1, 'um bônus que acaba hoje ainda é registrado');
 });
