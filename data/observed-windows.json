@@ -89,7 +89,7 @@
       "code": "BA",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.48,
@@ -103,7 +103,7 @@
       "code": "IB",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.226,
@@ -117,7 +117,7 @@
       "code": "EI",
       "pct": 30,
       "firstSeen": "2026-08-03",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-27",
       "pred": {
         "p2": 0.29,
@@ -200,7 +200,7 @@
       "code": "AC",
       "pct": 20,
       "firstSeen": "2026-08-28",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-30",
       "pred": {
         "p2": 0.214,
@@ -228,7 +228,7 @@
       "code": "SQ",
       "pct": 20,
       "firstSeen": "2026-08-30",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-17",
       "pred": {
         "absent": true,
@@ -241,7 +241,7 @@
       "code": "CM",
       "pct": 40,
       "firstSeen": "2026-09-01",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-30",
       "pred": {
         "absent": true,
@@ -254,7 +254,7 @@
       "code": "JL",
       "pct": 30,
       "firstSeen": "2026-09-01",
-      "lastSeen": "2026-09-04",
+      "lastSeen": "2026-09-05",
       "endDate": "2026-09-30",
       "pred": {
         "p2": 0.477,
