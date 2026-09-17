@@ -261,6 +261,19 @@
         "w1": 0.514,
         "asOf": "2026-09-01"
       }
+    },
+    {
+      "id": "esf-ad",
+      "bank": "ESF",
+      "code": "AD",
+      "pct": 110,
+      "firstSeen": "2026-09-17",
+      "lastSeen": "2026-09-17",
+      "endDate": "2026-09-20",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-09-17"
+      }
     }
   ]
 }
