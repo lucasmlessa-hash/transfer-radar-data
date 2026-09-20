@@ -274,6 +274,33 @@
         "absent": true,
         "asOf": "2026-09-17"
       }
+    },
+    {
+      "id": "citi-jl",
+      "bank": "CITI",
+      "code": "JL",
+      "pct": 30,
+      "firstSeen": "2026-09-20",
+      "lastSeen": "2026-09-20",
+      "endDate": "2026-10-24",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-09-20"
+      }
+    },
+    {
+      "id": "citi-av",
+      "bank": "CITI",
+      "code": "AV",
+      "pct": 25,
+      "firstSeen": "2026-09-20",
+      "lastSeen": "2026-09-20",
+      "endDate": "2026-10-24",
+      "pred": {
+        "p2": 0.588,
+        "w1": 0.498,
+        "asOf": "2026-09-20"
+      }
     }
   ]
 }
