@@ -315,6 +315,87 @@
         "w1": null,
         "asOf": "2026-09-20"
       }
+    },
+    {
+      "id": "amex-am",
+      "bank": "AMEX",
+      "code": "AM",
+      "pct": 20,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-30",
+      "pred": {
+        "p2": 0.058,
+        "w1": 0.053,
+        "asOf": "2026-10-01"
+      }
+    },
+    {
+      "id": "rove-jl",
+      "bank": "ROVE",
+      "code": "JL",
+      "pct": 50,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-31",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-10-01"
+      }
+    },
+    {
+      "id": "rove-af",
+      "bank": "ROVE",
+      "code": "AF",
+      "pct": 40,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-31",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-10-01"
+      }
+    },
+    {
+      "id": "rove-qr",
+      "bank": "ROVE",
+      "code": "QR",
+      "pct": 35,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-31",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-10-01"
+      }
+    },
+    {
+      "id": "amex-af",
+      "bank": "AMEX",
+      "code": "AF",
+      "pct": 25,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-31",
+      "pred": {
+        "p2": 0.548,
+        "w1": 0.362,
+        "asOf": "2026-10-01"
+      }
+    },
+    {
+      "id": "c1-ba",
+      "bank": "C1",
+      "code": "BA",
+      "pct": 20,
+      "firstSeen": "2026-10-01",
+      "lastSeen": "2026-10-01",
+      "endDate": "2026-10-31",
+      "pred": {
+        "p2": 0.448,
+        "w1": 0.428,
+        "asOf": "2026-10-01"
+      }
     }
   ]
 }
