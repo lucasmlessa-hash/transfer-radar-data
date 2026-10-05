@@ -281,7 +281,7 @@
       "code": "JL",
       "pct": 30,
       "firstSeen": "2026-09-20",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-24",
       "pred": {
         "absent": true,
@@ -294,7 +294,7 @@
       "code": "AV",
       "pct": 25,
       "firstSeen": "2026-09-20",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-24",
       "pred": {
         "p2": 0.588,
@@ -322,7 +322,7 @@
       "code": "AM",
       "pct": 20,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-30",
       "pred": {
         "p2": 0.058,
@@ -336,7 +336,7 @@
       "code": "JL",
       "pct": 50,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "absent": true,
@@ -349,7 +349,7 @@
       "code": "AF",
       "pct": 40,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "absent": true,
@@ -362,7 +362,7 @@
       "code": "QR",
       "pct": 35,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "absent": true,
@@ -375,7 +375,7 @@
       "code": "AF",
       "pct": 25,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "p2": 0.548,
@@ -389,7 +389,7 @@
       "code": "BA",
       "pct": 20,
       "firstSeen": "2026-10-01",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "p2": 0.448,
@@ -403,7 +403,7 @@
       "code": "QR",
       "pct": 35,
       "firstSeen": "2026-10-03",
-      "lastSeen": "2026-10-04",
+      "lastSeen": "2026-10-05",
       "endDate": "2026-10-31",
       "pred": {
         "p2": 0.717,
