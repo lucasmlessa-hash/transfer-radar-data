@@ -64,13 +64,15 @@ function isoFromParts(year, monthIdx, day) {
   return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 }
 
-// No-year formats ("25/07", "until Jul 25") need a year inferred: this year,
-// unless that date already passed relative to `now`, in which case next year.
+// No-year formats ("25/07", "until Jul 25") use the nearest calendar year.
 function yearForMonthDay(monthIdx, day, now) {
   const thisYear = now.getUTCFullYear();
-  const candidate = new Date(Date.UTC(thisYear, monthIdx, day));
   const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  return candidate < today ? thisYear + 1 : thisYear;
+  // A banner often lingers after expiry. Rolling every past day into next
+  // year resurrects yesterday's promotion for 364 days. The closest year
+  // also handles December/January without that false extension.
+  return [thisYear - 1, thisYear, thisYear + 1].sort((a, b) =>
+    Math.abs(Date.UTC(a, monthIdx, day) - today) - Math.abs(Date.UTC(b, monthIdx, day) - today))[0];
 }
 
 /**
@@ -136,6 +138,8 @@ export function parseEndDate(raw, now = new Date()) {
 export function normalize(rawBonuses, now = new Date(), history = deriveHistory(now)) {
   const unmapped = [];
   const byId = new Map(); // id -> { route: {..., pct, endDate}, sourceUrls: Set }
+  const today = now.toISOString().slice(0, 10);
+  const campaignRank = (r) => !r.endDate ? 0 : r.endDate < today ? 1 : r.startDate > today ? 2 : 3;
 
   for (const raw of rawBonuses) {
     const bankCode = resolveBank(raw.bankName);
@@ -150,11 +154,20 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
 
     const id = `${bankCode.toLowerCase()}-${airCode.toLowerCase()}`;
     const endDate = parseEndDate(raw.endDateRaw, now);
-    const startDate = parseEndDate(raw.startDateRaw, now);
+    let startDate = parseEndDate(raw.startDateRaw, now);
     const existing = byId.get(id);
+    // Two listings of the same campaign are corroboration. Missing a start
+    // date in one must not erase the explicit future start in the other.
+    if (existing && existing.route.pct === raw.pct && existing.route.endDate === endDate) {
+      startDate ||= existing.route.startDate;
+      existing.route.startDate ||= startDate;
+    }
 
-    // dedupe across sources: keep the higher pct, keep the union of sourceUrls
-    if (existing && existing.route.pct >= raw.pct) {
+    // Current observations beat expired/undated rows regardless of percentage.
+    // Only compare bonuses within the same temporal state.
+    const rank = campaignRank({ endDate, startDate });
+    const previousRank = existing ? campaignRank(existing.route) : -1;
+    if (existing && (previousRank > rank || (previousRank === rank && existing.route.pct >= raw.pct))) {
       existing.sourceUrls.add(raw.sourceUrl);
       continue;
     }
@@ -191,7 +204,6 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   for (const [id, { route, sourceUrls }] of byId) {
     const { pct, endDate, startDate, ended, ...rest } = route;
     const out = { ...rest };
-    const today = now.toISOString().slice(0, 10);
     // unparseable/missing end date -> published WITHOUT `active` (forecast
     // row, never a phantom live deal). A source still listing the route but
     // with no parseable date is exactly when `ended` earns its keep.
@@ -202,7 +214,11 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
     // transfer into a bonus that would pay nothing. It ships as `upcoming`
     // instead — worth showing, since knowing a +100% lands on the 1st is the
     // most actionable thing this app can say, but never as "live now".
-    if (endDate && startDate && startDate > today) out.upcoming = { pct, startDate, endDate };
+    if (endDate && endDate < today) {
+      const latest = ended?.endedAt > endDate ? ended : { pct, endedAt: endDate };
+      if (now.getTime() - Date.parse(latest.endedAt) <= 30 * 86400000) out.ended = latest;
+    }
+    else if (endDate && startDate && startDate > today) out.upcoming = { pct, startDate, endDate };
     // startDate viaja junto no `active` quando a fonte publica: é o que deixa o
     // cliente saber que a campanha começou HOJE. Sem isso, "ENDS IN 27D" não
     // distingue um bônus que abriu agora de um que já corre há três semanas.

@@ -49,18 +49,17 @@ function fromSlug(slug) {
 // Livelo stores countdowns in UTC but authors them as Brazilian wall-clock
 // deadlines ("23h59 do dia 26/07" is serialized 2026-07-27T02:59:59Z), so
 // shift to UTC-3 before taking the day or every campaign reads a day long.
-// Emitted as D/M because that is the BR shape normalize.js's parseEndDate
-// understands; it reads D/M/Y as US M/D/Y, so the year is deliberately
-// dropped (parseEndDate infers it).
+// Emit M/D/YYYY, the explicit-year format understood by normalize.mjs.
+// Dropping a year can resurrect an old countdown as a current campaign.
 // ponytail: fixed -3h, not a tz database. Brazil has had no DST since 2019.
 function toDayMonth(iso) {
   if (typeof iso !== 'string' || !iso) return '';
   const dateOnly = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (dateOnly) return `${dateOnly[3]}/${dateOnly[2]}`;
+  if (dateOnly) return `${dateOnly[2]}/${dateOnly[3]}/${dateOnly[1]}`;
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return '';
   const d = new Date(t - 3 * 60 * 60 * 1000);
-  return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  return `${String(d.getUTCMonth() + 1).padStart(2, '0')}/${String(d.getUTCDate()).padStart(2, '0')}/${d.getUTCFullYear()}`;
 }
 
 // Campaign pages carry the validity separately from the undated offer card.
@@ -98,6 +97,32 @@ function campaignDates(html, pct) {
 export const source = {
   id: 'livelo',
   url: 'https://www.livelo.com.br/ofertas',
+  isValidEmpty(html) {
+    const $ = cheerio.load(html);
+    let data;
+    try {
+      data = JSON.parse($('script#__NEXT_DATA__').first().html() || 'null');
+    } catch {
+      return false;
+    }
+    let shoppingCardFound = false;
+    for (const node of nodes(data)) {
+      if (!Array.isArray(node?.status?.variations) || node.status.forceClose) continue;
+      for (const variation of node.status.variations) {
+        if (variation?.status && !/vigente/i.test(variation.status)) continue;
+        if (variation?.statusCard && variation.statusCard !== 'active') continue;
+        const link = String(variation?.button?.redirectLink ?? '');
+        const copy = `${variation?.title ?? ''} ${variation?.description ?? ''}`;
+        // Reject any transfer-shaped card, including new percentage formats
+        // that the parser might not yet understand. Zero is then degraded.
+        if (PDP_LINK.test(link) || /transf(?:er|ir)/i.test(copy)) return false;
+        if (/\/juntar-pontos\/parceiros\//i.test(link) && /pontos|compr/i.test(copy)) {
+          shoppingCardFound = true;
+        }
+      }
+    }
+    return shoppingCardFound;
+  },
   async parse(html, { loadPage } = {}) {
     const $ = cheerio.load(html);
     const out = [];

@@ -29,7 +29,7 @@ export const source = {
 
       const cell = (sel) => {
         const $c = $row.find(sel).clone();
-        $c.find('.tt-arrow, .tt-from-region, .tt-bonus').remove();
+        $c.find('.tt-arrow, .tt-from-region, .tt-to-region, .tt-bonus').remove();
         return $c.text().replace(/\s+/g, ' ').trim();
       };
 

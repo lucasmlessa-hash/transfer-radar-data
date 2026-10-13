@@ -1053,10 +1053,6 @@
           "3:1"
         ],
         [
-          "Etihad Guest",
-          "3.5:1"
-        ],
-        [
           "Iberia Avios",
           "2:1"
         ],
@@ -1243,15 +1239,11 @@
           "3:1"
         ],
         [
+          "United MileagePlus",
+          "3:1"
+        ],
+        [
           "American Airlines AAdvantage",
-          "3:1"
-        ],
-        [
-          "Avianca LifeMiles",
-          "3:1"
-        ],
-        [
-          "British Airways Avios",
           "3:1"
         ],
         [
@@ -1263,7 +1255,11 @@
           "3:1"
         ],
         [
-          "United MileagePlus",
+          "British Airways Avios",
+          "3:1"
+        ],
+        [
+          "Avianca LifeMiles",
           "3:1"
         ],
         [
@@ -1290,11 +1286,11 @@
       "air": [
         [
           "Air France / KLM Flying Blue",
-          "—"
+          "5:1"
         ],
         [
           "United MileagePlus",
-          "—"
+          "5:1"
         ]
       ],
       "hotel": []
@@ -1302,19 +1298,19 @@
   },
   "ratioProvenance": {
     "MAR": {
-      "asOf": "2026-08-30",
+      "asOf": "2026-10-13",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "note": "Razão-base 3:1. Marriott ainda dá 5.000 milhas bônus a cada 60.000 pontos (United 10.000; American e Avianca nenhum), o que só vale em blocos de 60k — por isso a base publicada é o que fica na razão."
+      "note": "Oito rotas cadastradas conferidas na tabela oficial em 13/10/2026: razão-base 3:1. Bônus por blocos de 60.000 pontos não faz parte da razão-base; 5.000 milhas extras na maioria das parceiras, 10.000 na United, nenhum na American/Avianca/Delta."
     },
     "WYN": {
-      "asOf": "2026-08-30",
-      "source": "https://corporate.wyndhamhotels.com/news-releases/wyndham-rewards-adds-krisflyer-as-newest-point-transfer-partner/",
-      "note": "KrisFlyer 5:1 (6.000 pontos = 1.200 milhas), do anúncio oficial de set/2025. As demais parceiras a Wyndham só expõe via calculadora interativa — ficam sem razão de propósito, e o app mostra traço."
+      "asOf": "2026-10-13",
+      "source": "https://www.wyndhamhotels.com/WHGServices/loyalty/V4/member/partners",
+      "note": "API pública usada pela calculadora oficial, consultada em 13/10/2026: KrisFlyer 6.000/1.200, 16.000/3.200 e 30.000/6.000 confirmam razão-base 5:1. United retorna 6.000/2.400 durante promoção; a API não separa bônus da base, então a razão-base United permanece desconhecida (—)."
     },
     "CHO": {
-      "asOf": "2026-08-30",
-      "source": "https://www.choicehotels.com/choice-privileges/redeem/airline-partners",
-      "note": "Choice não publica tabela por parceira; sem razão citável, fica em branco. As duas janelas arquivadas foram +100%."
+      "asOf": "2026-10-13",
+      "source": "https://www.choicehotels.com/en-uk/choice-privileges/rewards-exchange",
+      "note": "Flying Blue e United: tabela pública oficial informa 5.000 pontos Choice para 1.000 milhas (5:1); mínimo de 5.000 pontos para essas rotas. Razão-base sem bônus promocional, conferida em 13/10/2026."
     }
   }
 }

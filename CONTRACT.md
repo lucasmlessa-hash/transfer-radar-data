@@ -139,3 +139,15 @@ Field notes:
   left, miles/points received on the right.
 - All five top-level keys (`banks`, `airlineDomains`, `bankDomains`,
   `airlineValues`, `directory`) are required, alongside `version`.
+
+### Collection health (optional for older feeds)
+
+`generatedAt` is the build time, not a claim that every source was verified.
+New feeds publish `health.status` (`ok` or `degraded`), `health.sources` keyed
+by source ID, and `health.carriedForwardRoutes`. Each source records `status`,
+`checkedAt`, entry count, undated count and, when available, `lastSuccessAt`.
+A failed/undated collection does not advance its last successful verification.
+`health.directories` separately reports official partner directory failures.
+A recognized empty listing can be healthy; missing page structure cannot.
+Clients must show partial coverage even when the build timestamp is recent.
+Expired carried-forward offers never remain `active` in a newly built feed.

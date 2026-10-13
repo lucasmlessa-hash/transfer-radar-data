@@ -3,6 +3,18 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 import { parseRatioText, parsePartnerRatio, liveloPartnerUrls, esferaPartnerUrls, esferaPartnerName } from '../src/sources/br-ratios.mjs';
+
+test('Esfera LATAM can verify the public structured conversion factor when prose omits it', () => {
+  const html = '<script id="__NEXT_DATA__">' + JSON.stringify({ props: { pageProps: { commerceData: { product: {
+    displayName: 'LATAM Pass', esf_transferConversionFactor: '1:1',
+    relatedProducts: [{ esf_transferConversionFactor: '9:1' }],
+  } } } } }) + '</script>';
+  assert.equal(parsePartnerRatio(html, 'ESF'), '1:1');
+  assert.equal(parsePartnerRatio(html.replace('"1:1"', '"0:1"'), 'ESF'), null);
+  assert.equal(parsePartnerRatio(html, 'LIV'), null);
+  assert.equal(parsePartnerRatio('<p>3,5 pontos Esfera por 1 milha para todos os clientes</p>' + html, 'ESF'), '3.5:1',
+    'dated and qualified published prose retains precedence over a generic factor');
+});
 import { resolvePartner, partnerDisplayName } from '../src/aliases.mjs';
 
 const nextData = (obj) => `<html><body><script id="__NEXT_DATA__" type="application/json">${JSON.stringify(obj)}</script></body></html>`;

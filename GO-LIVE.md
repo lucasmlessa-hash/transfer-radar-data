@@ -74,3 +74,27 @@ commits back first:
 A rejected subtree push is this in action, not corruption. Never force-push
 over `main`: that erases ledger history the pipeline cannot regenerate —
 those windows were observed live and exist nowhere else.
+
+## Operational health (2026-10-13 audit)
+
+Build success alone is insufficient. `feed.json.health` reports source and
+partner-directory coverage; `generatedAt` remains the build time. Validate the
+published endpoint with:
+
+    node scripts/check-feed-health.mjs https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
+
+Exit 1 means missing coverage, a partial collection, or data/verification older
+than six hours. The deploy job now performs this same check after publishing.
+A validated partial feed can still publish fresh observations from healthy
+sources, but the workflow and extension must expose the degraded status.
+
+GitHub's hourly schedule is best effort: the October audit measured gaps up to
+10.4 hours. `repository_dispatch` type `refresh-feed` is supported for an
+independent cloud scheduler. Use an existing authorized scheduler and a
+repository-scoped credential; do not put tokens in source. This hook alone does
+not install or activate an external scheduler. Check that real runs and the
+published `generatedAt` advance at the intended cadence after activation.
+
+Weekly ratio checks commit verified changes before reporting unavailable sources
+or overdue manual reviews. `node scripts/check-curated-ratios.mjs` verifies review
+age; never renew a provenance date without checking the official source.

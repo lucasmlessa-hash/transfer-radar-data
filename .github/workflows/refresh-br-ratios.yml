@@ -35,6 +35,8 @@ jobs:
       # value alone. It can add and correct, never blank out. So a bad network
       # day produces an empty diff rather than a wrecked Partners tab.
       - name: Refresh partner ratios
+        id: br
+        continue-on-error: true
         run: node scripts/refresh-br-ratios.mjs
 
       # Razão de transferência não é fixa, e uma errada não quebra nada — só
@@ -45,24 +47,16 @@ jobs:
       # teste de ratioProvenance cobra das razões sem scraper.
       - name: Monitor transfer ratios
         id: ratios
+        continue-on-error: true
         run: |
-          out=$(node scripts/monitor-ratios.mjs)
-          echo "$out"
-          if echo "$out" | grep -q RATIO_CHANGES_FOUND; then
+          set +e
+          node scripts/monitor-ratios.mjs 2>&1 | tee "$RUNNER_TEMP/ratio-monitor.txt"
+          status=${PIPESTATUS[0]}
+          set -e
+          if grep -q RATIO_CHANGES_FOUND "$RUNNER_TEMP/ratio-monitor.txt"; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            { echo 'body<<RATIOEOF'; echo "$out" | grep -v RATIO_CHANGES_FOUND; echo RATIOEOF; } >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Open an issue when a ratio moved
-        if: steps.ratios.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh label create ratio-change --color 1D76DB --description "A transfer ratio changed" 2>/dev/null || true
-          gh issue create \
-            --title "Razão de transferência mudou: $(date -u +%F)" \
-            --label ratio-change \
-            --body "$(printf 'O scrape encontrou razões diferentes das commitadas.\n\n```\n%s\n```\n\nO arquivo já foi atualizado pelo build. Confira se é desvalorização real e ajuste o que depender disso.' "${{ steps.ratios.outputs.body }}")"
+          exit "$status"
 
       # The tests are the gate, not the commit: bundled-partners-sync and the
       # canonical-name guard both read sample/partners.json, so a scrape that
@@ -86,6 +80,39 @@ jobs:
             git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
+      # A failed source preserves its saved values; verified changes from the
+      # other sources still pass the schema/tests and get committed above.
+      # This operational deadline is deliberately separate from npm test.
+      - name: Check hand-curated ratio review dates
+        id: curated
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node scripts/check-curated-ratios.mjs 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Open an issue when a ratio moved
+        if: steps.ratios.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create ratio-change --color 1D76DB --description "A transfer ratio changed" 2>/dev/null || true
+          {
+            printf '%s\n\n' 'O scrape encontrou razões diferentes. As alterações validadas foram commitadas neste workflow. Confira se é desvalorização real e ajuste o que depender disso.'
+            printf '%s\n' '```'
+            cat "$RUNNER_TEMP/ratio-monitor.txt"
+            printf '%s\n' '```'
+          } > "$RUNNER_TEMP/ratio-issue.md"
+          gh issue create \
+            --title "Razão de transferência mudou: $(date -u +%F)" \
+            --label ratio-change \
+            --body-file "$RUNNER_TEMP/ratio-issue.md"
+
+      - name: Report incomplete ratio verification
+        if: steps.br.outcome == 'failure' || steps.ratios.outcome == 'failure' || steps.curated.outcome == 'failure'
+        run: |
+          echo '::error::Ratio verification is incomplete. Verified changes were allowed through the validation gate; failed sources retained their previous values. Review the failed source or the overdue curated review above.'
+          exit 1
+
       - name: Open issue on failure
         if: failure()
         env:
@@ -98,5 +125,5 @@ jobs:
             gh issue create \
               --title "BR ratio refresh failed: $(date -u +%F)" \
               --label br-ratios-failure \
-              --body "See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. The curated ratios in sample/partners.json are untouched — the script only ever adds or corrects."
+              --body "See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}. Verification was incomplete or validation failed. Successfully verified changes may have been committed; unavailable sources retained their previous values. An overdue manual review requires checking the official source before updating asOf."
           fi

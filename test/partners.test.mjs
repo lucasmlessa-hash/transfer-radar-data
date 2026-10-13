@@ -142,6 +142,7 @@ test('dead partnerships stay removed from the directory', () => {
   assert.equal(air('BILT').has('American AAdvantage'), false, 'Bilt/AA ended 2024-06-24 (phantom)');
   assert.equal(air('BILT').has('Alaska Mileage Plan'), false, 'rebranded to Atmos Rewards 2025-08-20');
   assert.equal(air('LIV').has('Qatar Airways Avios'), false, 'no direct Livelo->Qatar partnership');
+  assert.equal(air('ESF').has('Etihad Guest'), false, 'Esfera Etihad product is unpublished and absent from all live partner pages, checked 2026-10-13');
 });
 
 // The hand-audit of 2026-07-25 predates the dynamic directory. Its surviving
@@ -200,7 +201,7 @@ test('added and departed partners match the official pages', () => {
   // time. The old test encoded a hole in our scraping as a fact about the
   // world, which is the failure mode a directory test exists to prevent.
   assert.ok(hotel('ESF').has('IHG One Rewards'), 'IHG is an Esfera partner (showcase id e000100736)');
-  for (const name of ['Etihad Guest', 'Turkish Miles&Smiles', 'Aeromexico Rewards']) {
+  for (const name of ['Turkish Miles&Smiles', 'Aeromexico Rewards']) {
     assert.ok(air('ESF').has(name), `${name} is an Esfera partner the menu-only scrape missed`);
   }
 });
@@ -264,29 +265,19 @@ test('a bank never lists the same partner twice', () => {
   }
 });
 
-// As razões de transferência MUDAM — desvalorização é rotina no setor, e uma
-// razão errada corrompe o ¢/pt e a ordenação BEST VALUE em silêncio. As dos
-// bancos americanos são raspadas da lista mestre do FM a cada build, e as
-// brasileiras pelo job semanal; essas se auto-corrigem. Já Marriott, Wyndham e
-// Choice não têm tabela raspável — foram lidas à mão. Este teste é o
-// cronômetro: passados 35 dias sem alguém revisar e re-datar, a suíte falha e
-// o build para, em vez de servir um número velho para sempre.
-const RATIO_REVIEW_DAYS = 35;
-
-test('razões curadas à mão são revisadas ao menos uma vez por mês', () => {
+// Shape/integrity belongs in this deterministic gate. The review deadline is
+// checked by scripts/check-curated-ratios.mjs as an independent workflow alert,
+// so overdue hotel reviews cannot prevent verified Brazilian rate changes.
+test('hand-curated ratios always carry dated official evidence', () => {
   const prov = P.ratioProvenance ?? {};
   const semScraper = Object.keys(P.directory).filter((b) => (P.directory[b].air ?? []).length && !prov[b]
     && !['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE', 'ESF', 'LIV'].includes(b));
   assert.deepEqual(semScraper, [], `banco sem scraper e sem ratioProvenance: ${semScraper}`);
 
-  const hoje = Date.now();
   for (const [bank, m] of Object.entries(prov)) {
     assert.ok(P.directory[bank], `${bank}: ratioProvenance sem banco no diretório`);
     assert.match(m.asOf, /^\d{4}-\d{2}-\d{2}$/, `${bank}.asOf`);
     assert.ok(/^https:\/\//.test(m.source ?? ''), `${bank}: precisa de uma fonte verificável`);
-    const dias = Math.floor((hoje - Date.parse(m.asOf)) / 86400000);
-    assert.ok(dias <= RATIO_REVIEW_DAYS,
-      `${bank}: razões conferidas pela última vez há ${dias} dias (limite ${RATIO_REVIEW_DAYS}). `
-      + `Reveja em ${m.source} e atualize asOf — desvalorização silenciosa é exatamente o que este teste existe para pegar.`);
+    assert.equal(new Date(m.asOf).toISOString().slice(0, 10), m.asOf, `${bank}: invalid date`);
   }
 });

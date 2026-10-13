@@ -22,6 +22,9 @@
       "items": {
         "$ref": "#/$defs/route"
       }
+    },
+    "health": {
+      "$ref": "#/$defs/health"
     }
   },
   "$defs": {
@@ -194,6 +197,75 @@
             }
           },
           "description": "Announced but not yet running. Mutually exclusive with `active` — the source table lists current AND upcoming bonuses, and treating an unstarted one as live tells the user to transfer for nothing."
+        }
+      }
+    },
+    "sourceHealth": {
+      "type": "object",
+      "required": [
+        "status",
+        "checkedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "degraded",
+            "failed"
+          ]
+        },
+        "checkedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastSuccessAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "entries": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "undated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "type": "string"
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "required": [
+        "status",
+        "sources",
+        "carriedForwardRoutes"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "enum": [
+            "ok",
+            "degraded"
+          ]
+        },
+        "sources": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/sourceHealth"
+          }
+        },
+        "directories": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/sourceHealth"
+          }
+        },
+        "carriedForwardRoutes": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

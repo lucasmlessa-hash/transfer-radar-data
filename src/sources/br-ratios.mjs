@@ -175,7 +175,18 @@ const nextData = (html) => {
  * ships inside __NEXT_DATA__, so both haystacks are searched for both banks.
  */
 export function parsePartnerRatio(html, bank, now = new Date()) {
-  return parseRatioText(stripTags(html), bank, now) ?? parseRatioText(nextData(html), bank, now);
+  const published = parseRatioText(stripTags(html), bank, now) ?? parseRatioText(nextData(html), bank, now);
+  if (published || bank !== 'ESF') return published;
+  // LATAM's public product payload carries the conversion factor while its
+  // prose terms omit it. Read only this product, not related products or UI
+  // templates. Qualified/date-sensitive terms above keep precedence.
+  try {
+    const raw = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/)?.[1];
+    const factor = JSON.parse(raw)?.props?.pageProps?.commerceData?.product?.esf_transferConversionFactor;
+    const match = /^(\d+(?:[.,]\d+)?):(\d+(?:[.,]\d+)?)$/.exec(factor ?? '');
+    if (match && num(match[1]) > 0 && num(match[2]) > 0) return `${fmt(num(match[1]))}:${fmt(num(match[2]))}`;
+  } catch { /* absent/malformed payload is not a verified rate */ }
+  return null;
 }
 
 /** Livelo's listing page -> [{ name, url }] for every active transfer partner. */

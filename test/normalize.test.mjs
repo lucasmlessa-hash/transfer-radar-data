@@ -181,3 +181,47 @@ test('an untracked bank, or a hotel partner, never becomes a route', () => {
   const { routes: withTrackedBank } = normalize([{ ...cases[1][0], bankName: 'Amex' }], NOW);
   assert.deepEqual(withTrackedBank.map((r) => r.id), ['amex-lh']);
 });
+
+test('a just-expired yearless campaign does not resurrect for another year', () => {
+  const now = new Date('2026-10-13T12:00:00Z');
+  assert.equal(parseEndDate('12/10', now), '2026-10-12');
+  const { routes } = normalize([{ bankName: 'Livelo', partnerName: 'Flying Blue', pct: 20, endDateRaw: '12/10', sourceUrl: 'https://www.livelo.com.br/ofertas' }], now, new Map());
+  assert.equal(routes[0].active, undefined);
+  assert.deepEqual(routes[0].ended, { pct: 20, endedAt: '2026-10-12' });
+});
+
+test('yearless New Year dates choose the nearest year, including previous December', () => {
+  assert.equal(parseEndDate('02/01', new Date('2026-12-31T12:00:00Z')), '2027-01-02');
+  assert.equal(parseEndDate('31/12', new Date('2027-01-02T12:00:00Z')), '2026-12-31');
+});
+
+test('an expired high bonus does not hide a lower current campaign on the same route', () => {
+  const rows = [
+    { bankName: 'Amex', partnerName: 'Flying Blue', pct: 40, endDateRaw: 'October 12, 2026', sourceUrl: 'https://old.example/' },
+    { bankName: 'Amex', partnerName: 'Flying Blue', pct: 20, endDateRaw: 'October 31, 2026', sourceUrl: 'https://new.example/' },
+  ];
+  for (const input of [rows, [...rows].reverse()]) {
+    const { routes } = normalize(input, new Date('2026-10-13T12:00:00Z'), new Map());
+    assert.equal(routes[0].active.pct, 20);
+  }
+});
+
+test('corroborating an announced campaign never erases its explicit future start', () => {
+  const rows = [
+    { bankName:'Bilt', partnerName:'Virgin Atlantic', pct:100, startDateRaw:'9/1/26', endDateRaw:'9/1/26', sourceUrl:'https://a.example/' },
+    { bankName:'Bilt', partnerName:'Virgin Atlantic', pct:100, endDateRaw:'9/1/26', sourceUrl:'https://b.example/' },
+  ];
+  for (const input of [rows,[...rows].reverse()]) {
+    const {routes} = normalize(input,new Date('2026-08-30'),new Map());
+    assert.equal(routes[0].active,undefined);
+    assert.deepEqual(routes[0].upcoming,{pct:100,startDate:'2026-09-01',endDate:'2026-09-01'});
+  }
+});
+
+test('old expired listing cannot replace a more recent ended campaign from history', () => {
+  const entry = {bankName:'Amex',partnerName:'Flying Blue',pct:40,endDateRaw:'July 1, 2026',sourceUrl:'https://a.example/'};
+  const now = new Date('2026-10-13');
+  assert.equal(normalize([entry],now,new Map()).routes[0].ended,undefined);
+  const recent = {pct:20,endedAt:'2026-10-10'};
+  assert.deepEqual(normalize([entry],now,new Map([['amex-af',{ended:recent}]])).routes[0].ended,recent);
+});

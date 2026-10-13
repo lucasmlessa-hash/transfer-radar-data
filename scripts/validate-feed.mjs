@@ -140,13 +140,37 @@ function validateRoute(r, i) {
 
 export function validateFeed(doc) {
   if (!isPlainObject(doc)) fail('feed: must be an object');
-  checkKeys(doc, ['version', 'generatedAt', 'routes'], ['version', 'generatedAt', 'routes'], 'feed');
+  checkKeys(doc, ['version', 'generatedAt', 'routes'], ['version', 'generatedAt', 'routes', 'health'], 'feed');
   if (doc.version !== 1) fail(`feed.version: must be 1, got ${JSON.stringify(doc.version)}`);
-  if (typeof doc.generatedAt !== 'string' || !ISO_DATETIME.test(doc.generatedAt)) {
+  if (typeof doc.generatedAt !== 'string' || !ISO_DATETIME.test(doc.generatedAt) || !Number.isFinite(Date.parse(doc.generatedAt))) {
     fail(`feed.generatedAt: must be an ISO-8601 UTC date-time, got ${JSON.stringify(doc.generatedAt)}`);
   }
   if (!Array.isArray(doc.routes)) fail('feed.routes: must be an array');
   doc.routes.forEach(validateRoute);
+  if ('health' in doc) {
+    const h = doc.health;
+    if (!isPlainObject(h)) fail('feed.health: must be an object');
+    checkKeys(h, ['status', 'sources', 'carriedForwardRoutes'], ['status', 'sources', 'carriedForwardRoutes', 'directories'], 'feed.health');
+    if (!['ok', 'degraded'].includes(h.status)) fail('feed.health.status: invalid status');
+    if (!Number.isInteger(h.carriedForwardRoutes) || h.carriedForwardRoutes < 0) fail('feed.health.carriedForwardRoutes: invalid count');
+    for (const group of ['sources', 'directories']) {
+      if (!(group in h)) continue;
+      if (!isPlainObject(h[group])) fail(`feed.health.${group}: must be an object`);
+      for (const [id, s] of Object.entries(h[group])) {
+        const ctx = `feed.health.${group}.${id}`;
+        if (!isPlainObject(s)) fail(`${ctx}: must be an object`);
+        checkKeys(s, ['status', 'checkedAt'], ['status', 'checkedAt', 'lastSuccessAt', 'entries', 'undated', 'error'], ctx);
+        if (!['ok', 'degraded', 'failed'].includes(s.status)) fail(`${ctx}.status: invalid status`);
+        for (const key of ['checkedAt', 'lastSuccessAt']) {
+          if (key in s && (typeof s[key] !== 'string' || !ISO_DATETIME.test(s[key]) || !Number.isFinite(Date.parse(s[key])))) fail(`${ctx}.${key}: invalid time`);
+        }
+        for (const key of ['entries', 'undated']) {
+          if (key in s && (!Number.isInteger(s[key]) || s[key] < 0)) fail(`${ctx}.${key}: invalid count`);
+        }
+        if ('error' in s && typeof s.error !== 'string') fail(`${ctx}.error: must be a string`);
+      }
+    }
+  }
 }
 
 function validatePartnerTuple(t, ctx) {

@@ -33,6 +33,17 @@ export const source = {
   id: 'esfera',
   url: 'https://www.esfera.com.vc/',
 
+  // Zero campaigns is healthy only when the advertised carousel is present
+  // and has readable shopping/redemption copy. Any transfer campaign signal
+  // makes zero suspicious (e.g. a new date/percentage format), not success.
+  isValidEmpty(html) {
+    const $ = cheerio.load(html);
+    const banners = $('.carousel-item img[alt]');
+    const alts = banners.map((_, el) => $(el).attr('alt') ?? '').get();
+    if (!alts.some(alt => /pontos|compre|resgat/i.test(alt))) return false;
+    return !$('img[alt]').toArray().some(el => TRANSFER_CTA.test($(el).attr('alt') ?? ''));
+  },
+
   async parse(html) {
     const $ = cheerio.load(html);
     const out = [];

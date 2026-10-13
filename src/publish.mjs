@@ -15,6 +15,7 @@ import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
+import { validatePartners } from '../scripts/validate-feed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -33,9 +34,7 @@ async function fetchHtml(src, fixtures, fixturesDir) {
   if (fixtures) {
     return readFileSync(path.join(fixturesDir, `${src.id}.html`), 'utf8');
   }
-  // Live mode - only exercised at go-live (see GO-LIVE.md); never run during
-  // this build (no network access in this environment).
-  const res = await fetch(src.url);
+  const res = await fetch(src.url, { signal: AbortSignal.timeout(20000) });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.text();
 }
@@ -94,12 +93,19 @@ export async function runPipeline({
 } = {}) {
   mkdirSync(outDir, { recursive: true });
 
+  const previous = readPreviousFeed(outDir);
   const raw = [];
   const failedSources = [];
   const entryCounts = {};
+  const sourceHealth = {};
 
   for (const src of SOURCES) {
     entryCounts[src.id] = 0;
+    const health = sourceHealth[src.id] = {
+      status: 'failed', checkedAt: now.toISOString(), entries: 0,
+      ...(previous?.health?.sources?.[src.id]?.lastSuccessAt
+        ? { lastSuccessAt: previous.health.sources[src.id].lastSuccessAt } : {}),
+    };
     try {
       const html = await fetchHtml(src, fixtures, fixturesDir);
       const entries = (await src.parse(html, {
@@ -114,7 +120,9 @@ export async function runPipeline({
         },
       })) ?? [];
       entryCounts[src.id] = entries.length;
+      health.entries = entries.length;
       const undated = entries.filter(entry => !parseEndDate(entry.endDateRaw, now));
+      health.undated = undated.length;
       if (undated.length) {
         console.warn(`::warning::[${src.id}] ${undated.length}/${entries.length} undated bonus(es) cannot be shown as active: ${undated.map(e => `${e.partnerName} +${e.pct}%`).join(', ')}`);
       }
@@ -122,14 +130,18 @@ export async function runPipeline({
       // none of these four sources is ever legitimately at zero bonuses. The
       // parsers warn-and-skip rather than throw, so this is the only place a
       // page redesign shows up. Same bucket as a thrown error.
-      if (entries.length === 0) {
+      if (entries.length === 0 && !src.isValidEmpty?.(html)) {
         console.warn(`[publish] source "${src.id}" returned 0 entries — treating as failed`);
+        health.error = 'No recognizable offers or confirmed empty listing';
         failedSources.push(src.id);
         continue;
       }
+      health.status = undated.length ? 'degraded' : 'ok';
+      if (!undated.length) health.lastSuccessAt = now.toISOString();
       raw.push(...entries);
     } catch (e) {
       console.warn(`[publish] source "${src.id}" failed: ${e.message}`);
+      health.error = e.message;
       failedSources.push(src.id);
     }
   }
@@ -162,19 +174,13 @@ export async function runPipeline({
   // out/feed.json is still what users were actually served (CI seeds it from
   // the live deployment), which makes it the only honest source for the
   // prospective `pred` stamp — what the engine said BEFORE the window opened.
-  const previous = readPreviousFeed(outDir);
 
   // Fold THIS run's live sightings into the ledger — before the stale-route
   // merge below, which would otherwise advance lastSeen on bonuses nobody
   // actually saw this run. Day-granular, so the file only changes ~once a day.
-  if (ledgerPath && ledger.ok) {
-    const updated = updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10), previous);
-    if (JSON.stringify(updated) !== JSON.stringify(ledger.windows)) {
-      mkdirSync(path.dirname(ledgerPath), { recursive: true });
-      writeFileSync(ledgerPath, JSON.stringify({ version: 1, windows: updated }, null, 2) + '\n');
-      console.log(`[observed] ledger updated: ${updated.length} window(s)`);
-    }
-  }
+  const updatedLedger = ledgerPath && ledger.ok
+    ? updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10), previous)
+    : null;
 
   // ponytail: a route in the contract carries no source tag, so a failed
   // source's prior contribution can't be pulled out individually. The
@@ -188,7 +194,16 @@ export async function runPipeline({
     const candidateIds = new Set(candidateRoutes.map((r) => r.id));
     for (const r of previous.routes ?? []) {
       if (!candidateIds.has(r.id)) {
-        candidateRoutes.push(r);
+        const carried = { ...r };
+        if (carried.active?.endDate < now.toISOString().slice(0, 10)) {
+          if (!carried.ended || carried.active.endDate > carried.ended.endedAt) {
+            carried.ended = { pct: carried.active.pct, endedAt: carried.active.endDate };
+          }
+          delete carried.active;
+        }
+        if (carried.ended && now.getTime() - Date.parse(carried.ended.endedAt) > 30 * 86400000) delete carried.ended;
+        if (carried.upcoming?.endDate < now.toISOString().slice(0, 10)) delete carried.upcoming;
+        candidateRoutes.push(carried);
         mergedFromPrevious += 1;
       }
     }
@@ -211,6 +226,11 @@ export async function runPipeline({
     version: 1,
     generatedAt: now.toISOString(),
     routes: candidateRoutes,
+    health: {
+      status: Object.values(sourceHealth).some(s => s.status !== 'ok') ? 'degraded' : 'ok',
+      sources: sourceHealth,
+      carriedForwardRoutes: mergedFromPrevious,
+    },
   };
 
   const { valid, message } = validateCandidate(candidate, outDir);
@@ -220,8 +240,6 @@ export async function runPipeline({
     return { ok: false, reason };
   }
 
-  writeFileSync(path.join(outDir, 'feed.json'), JSON.stringify(candidate, null, 2));
-
   // Partner directory refreshed from the official pages on every build —
   // partners join and leave (Esfera dropped AAdvantage; Livelo added United).
   // Failures here never abort the publish and never count toward the source
@@ -229,6 +247,7 @@ export async function runPipeline({
   // whose scrape failed, so the worst case is yesterday's directory.
   const partnersDoc = JSON.parse(readFileSync(path.join(ROOT, 'sample', 'partners.json'), 'utf8'));
   const scrapedDir = {};
+  candidate.health.directories = {};
   for (const src of DIRECTORY_SOURCES) {
     try {
       const html = fixtures
@@ -238,13 +257,30 @@ export async function runPipeline({
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           return res.text();
         })();
-      Object.assign(scrapedDir, src.parse(html));
+      const parsed = src.parse(html);
+      const missing = src.banks.filter(bank => !(parsed[bank]?.air?.size || parsed[bank]?.hotel?.size));
+      if (missing.length === src.banks.length) throw new Error('Missing partner listing');
+      Object.assign(scrapedDir, parsed);
+      candidate.health.directories[src.id] = { status: missing.length ? 'degraded' : 'ok', checkedAt: now.toISOString(),
+        ...(missing.length ? { error: `Missing banks: ${missing.join(', ')}` } : {}) };
+      if (missing.length) candidate.health.status = 'degraded';
     } catch (e) {
+      candidate.health.status = 'degraded';
+      candidate.health.directories[src.id] = { status: 'failed', checkedAt: now.toISOString(), error: e.message };
       console.warn(`[publish] directory source "${src.id}" failed (${e.message}) — curated lists kept for ${src.banks.join(', ')}`);
     }
   }
   partnersDoc.directory = mergeDirectory(partnersDoc.directory, scrapedDir);
+  try { validatePartners(partnersDoc); } catch (error) {
+    return { ok: false, reason: `Invalid partner directory: ${error.message}` };
+  }
   writeFileSync(path.join(outDir, 'partners.json'), JSON.stringify(partnersDoc, null, 2));
+  writeFileSync(path.join(outDir, 'feed.json'), JSON.stringify(candidate, null, 2));
+  if (updatedLedger && JSON.stringify(updatedLedger) !== JSON.stringify(ledger.windows)) {
+    mkdirSync(path.dirname(ledgerPath), { recursive: true });
+    writeFileSync(ledgerPath, JSON.stringify({ version: 1, windows: updatedLedger }, null, 2) + '\n');
+    console.log(`[observed] ledger updated: ${updatedLedger.length} window(s)`);
+  }
 
   const activeCount = candidateRoutes.filter((r) => r.active).length;
   const unmappedNames = unmapped.map((u) => u.partnerName || u.bankName);
@@ -258,7 +294,7 @@ export async function runPipeline({
     console.log(`[publish] merged ${mergedFromPrevious} stale route(s) from previous feed for failed source(s): ${failedSources.join(', ')}`);
   }
 
-  return { ok: true, routes: candidateRoutes, unmapped, sourcesOk, sourcesTotal: SOURCES.length, failedSources, entryCounts };
+  return { ok: true, routes: candidateRoutes, unmapped, sourcesOk, sourcesTotal: SOURCES.length, failedSources, entryCounts, health: candidate.health };
 }
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);

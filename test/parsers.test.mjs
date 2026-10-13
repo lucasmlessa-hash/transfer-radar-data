@@ -4,10 +4,11 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-import { source as frequentmiler } from '../src/sources/frequentmiler.mjs';
+import { source as frequentmiler, parseHistory } from '../src/sources/frequentmiler.mjs';
 import { source as awardwallet } from '../src/sources/awardwallet.mjs';
 import { source as livelo } from '../src/sources/livelo.mjs';
 import { source as esfera } from '../src/sources/esfera.mjs';
+import { resolveBank, resolvePartner } from '../src/aliases.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -107,4 +108,62 @@ test('esfera: fixture spot-check (saved snapshot)', async () => {
     endDateRaw: '26/07',
     sourceUrl: esfera.url,
   });
+});
+
+test('frequentmiler: added destination column preserves current offers and date positions', async () => {
+  const entries = await frequentmiler.parse(fixture('frequentmiler-2026-10'));
+  assert.equal(entries.length, 3);
+  assert.deepEqual(entries[0], {
+    bankName: 'Citi ThankYou Rewards',
+    partnerName: 'JAL (Japan Airlines) Mileage Bank',
+    pct: 30,
+    startDateRaw: '09/20/26',
+    endDateRaw: '10/24/26',
+    sourceUrl: frequentmiler.url,
+  });
+  assert.equal(entries[2].pct, 35, 'up-to percentages remain readable');
+  assert.equal(entries[2].endDateRaw, '10/31/26');
+});
+
+test('frequentmiler: added destination column preserves historical windows', () => {
+  assert.deepEqual(parseHistory(fixture('frequentmiler-2026-10')), [
+    { bankName: 'Chase Ultimate Rewards', partnerName: 'Air Canada Aeroplan', pct: 20, startDateRaw: '08/12/26', endDateRaw: '09/30/26' },
+    { bankName: 'Bilt', partnerName: 'Virgin Atlantic Flying Club', pct: 100, startDateRaw: '09/01/26', endDateRaw: '09/01/26' },
+  ]);
+});
+
+test('awardwallet: recipient region is metadata, not part of the airline name', async () => {
+  const entries = await awardwallet.parse(fixture('awardwallet-2026-10'));
+  assert.equal(entries.length, 2);
+  assert.equal(entries[0].partnerName, 'British Airways (Club)');
+  assert.equal(resolveBank(entries[0].bankName), 'C1');
+  assert.equal(resolvePartner(entries[0].partnerName), 'BA');
+  assert.equal(entries[0].pct, 20);
+  assert.equal(entries[0].endDateRaw, 'October 31, 2026');
+  // Flying Blue was never missing an alias: HSBC is the untracked origin.
+  assert.equal(resolvePartner(entries[1].partnerName), 'AF');
+  assert.equal(resolveBank(entries[1].bankName), null);
+});
+
+test('esfera: populated shopping carousel can legitimately contain no transfer bonus', async () => {
+  const html = fixture('esfera-empty-2026-10');
+  assert.deepEqual(await esfera.parse(html), []);
+  assert.equal(esfera.isValidEmpty?.(html), true);
+  assert.equal(esfera.isValidEmpty?.('<html><img alt="Esfera"></html>'), false);
+  assert.equal(esfera.isValidEmpty?.('<div class="carousel-item"><img alt=""></div>'), false);
+  assert.equal(esfera.isValidEmpty?.(fixture('esfera')), false);
+  const malformedBonus = html + '<div class="carousel-item"><img alt="Transfira pontos e ganhe 50% de bônus!"></div>';
+  assert.equal(esfera.isValidEmpty?.(malformedBonus), false, 'a missing deadline must not masquerade as no offers');
+});
+
+test('livelo: known shopping cards distinguish zero transfer bonuses from a broken payload', async () => {
+  const html = fixture('livelo-shopping-2026-10');
+  assert.deepEqual(await livelo.parse(html), []);
+  assert.equal(livelo.isValidEmpty?.(html), true);
+  assert.equal(livelo.isValidEmpty?.('<html>Forbidden</html>'), false);
+  assert.equal(livelo.isValidEmpty?.('<script id="__NEXT_DATA__">{}</script>'), false);
+  assert.equal(livelo.isValidEmpty?.('<script id="__NEXT_DATA__">{bad</script>'), false);
+  assert.equal(livelo.isValidEmpty?.(fixture('livelo')), false);
+  const changedTransfer = html.replace('Ganhe em suas compras:', 'Transfira pontos e ganhe cinquenta por cento de bônus');
+  assert.equal(livelo.isValidEmpty?.(changedTransfer), false, 'a changed transfer-bonus format cannot become healthy zero');
 });

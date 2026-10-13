@@ -80,6 +80,21 @@ function cellText($, td) {
 
 const DETAILS_RE = /(\d+)%\s*transfer bonus\s+from\s+(.+?)\s+to\s+(.+)/i;
 
+// 2026-10-13: both tables gained a "Transfer To" column. Read the column
+// headers so the original four-column archive and the five-column layout
+// keep their dates and details aligned. Unknown layouts fail closed.
+function columnsFor($, table) {
+  const headers = table.find('tr').first().find('th,td')
+    .map((_, el) => $(el).text().replace(/\s+/g, ' ').trim().toLowerCase()).get();
+  const columns = {
+    bank: headers.indexOf('transfer from'),
+    details: headers.indexOf('transfer bonus details'),
+    start: headers.indexOf('start date'),
+    end: headers.indexOf('end date'),
+  };
+  return Object.values(columns).every(index => index >= 0) ? columns : null;
+}
+
 // Parses the historical archive out of the SAME html the current-bonus parse
 // already has — no second HTTP request. Silent by design: ~300 of the 463 rows
 // are banks/partners this product doesn't track (Marriott, Hilton, JetBlue…)
@@ -89,11 +104,13 @@ function parseHistoryFrom($) {
   const out = [];
   const table = findHistoryTable($, findBonusTable($));
   if (!table) return out;
+  const columns = columnsFor($, table);
+  if (!columns) return out;
 
   table.find('tr').each((_, el) => {
     const cells = $(el).find('td');
-    if (cells.length < 4) return; // header / layout rows
-    const details = cellText($, cells[1]);
+    if (cells.length <= Math.max(...Object.values(columns))) return; // header / layout rows
+    const details = cellText($, cells[columns.details]);
     // "[Targeted]" rows are offers mailed to selected cardholders, not public
     // windows — counting them would inflate the odds an ordinary user ever
     // sees a bonus on that route (27 of 462 archive rows on 2026-07-24).
@@ -103,11 +120,11 @@ function parseHistoryFrom($) {
     const match = details.match(DETAILS_RE);
     if (!match) return; // non-percentage promos ("5,000 bonus points…")
     out.push({
-      bankName: cellText($, cells[0]),
+      bankName: cellText($, cells[columns.bank]),
       partnerName: match[3].trim(),
       pct: Number(match[1]),
-      startDateRaw: cellText($, cells[2]),
-      endDateRaw: cellText($, cells[3]),
+      startDateRaw: cellText($, cells[columns.start]),
+      endDateRaw: cellText($, cells[columns.end]),
     });
   });
 
@@ -137,20 +154,26 @@ export const source = {
       console.warn('[frequentmiler] could not locate the current/upcoming bonus table');
       return out;
     }
+    const columns = columnsFor($, table);
+    if (!columns) {
+      console.warn('[frequentmiler] unrecognized current/upcoming bonus table headers');
+      return out;
+    }
+    const requiredCells = Math.max(...Object.values(columns)) + 1;
 
     table.find('tr').each((_, el) => {
       const $row = $(el);
       const cells = $row.find('td');
-      // Header rows (th only) and anything short of the 4 expected columns
+      // Header rows (th only) and anything short of the expected columns
       // are skipped here.
-      if (cells.length < 4) {
-        console.warn(`[frequentmiler] skipping row with ${cells.length} cell(s), expected 4`);
+      if (cells.length < requiredCells) {
+        console.warn(`[frequentmiler] skipping row with ${cells.length} cell(s), expected ${requiredCells}`);
         return;
       }
 
-      const bankName = $(cells[0]).text().trim();
-      const detailsText = $(cells[1]).text().trim();
-      const match = detailsText.match(/(\d+)%\s*transfer bonus\s+from\s+(.+?)\s+to\s+(.+)/i);
+      const bankName = cellText($, cells[columns.bank]);
+      const detailsText = cellText($, cells[columns.details]);
+      const match = detailsText.match(DETAILS_RE);
 
       if (!bankName || !match) {
         console.warn(
@@ -162,7 +185,7 @@ export const source = {
       // The end-date cell holds a hidden sort-serial <p> before the display
       // date, e.g. <p style='display:none'>46233</p>07/30/26 — strip it or
       // the text comes out as "4623307/30/26".
-      const $endCell = $(cells[3]);
+      const $endCell = $(cells[columns.end]);
       $endCell.find('p').remove();
       const endDateRaw = $endCell.text().trim();
 
@@ -179,7 +202,7 @@ export const source = {
       // Transferring on the strength of that gets zero bonus, and transfers are
       // irreversible. Bilt makes it acute: 24 of its 26 archived windows last
       // exactly ONE day and start on the 1st of the month.
-      const $startCell = $(cells[2]);
+      const $startCell = $(cells[columns.start]);
       $startCell.find('p').remove();
       const startDateRaw = $startCell.text().trim();
 

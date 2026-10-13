@@ -26,7 +26,9 @@ test('official campaign pages make Flying Blue, Copa and Etihad visible as activ
 test('expired campaign year is preserved rather than rolled into the next year', async () => {
   const entries = await source.parse(fixture('livelo-october'), { loadPage });
   const af = normalize(entries, new Date('2027-01-01'), new Map()).routes.find(r => r.id === 'liv-af');
-  assert.equal(af.active?.endDate, '2026-10-31');
+  assert.equal(af.active, undefined);
+  assert.equal(af.ended, undefined, 'old campaigns are not recently ended');
+  assert.equal(entries.find(e => /Flying Blue/i.test(e.partnerName)).endDateRaw, '10/31/2026');
 });
 
 test('dates can come from campaign description and cross a year boundary', async () => {
@@ -74,4 +76,12 @@ test('fixture pipeline enriches campaigns without network and surfaces unresolve
     console.warn = original;
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('countdown keeps its explicit year and Brazilian closing day', async () => {
+  const html = fixture('livelo-october').replaceAll('"endDate":null', '"endDate":"2026-11-01T02:59:59Z"');
+  const entries = await source.parse(html);
+  const route = normalize(entries, new Date('2027-10-01'), new Map()).routes.find(r => r.id === 'liv-af');
+  assert.equal(route.active, undefined, 'an old countdown must not become a current promotion');
+  assert.equal(entries.find(e => /Flying Blue/i.test(e.partnerName)).endDateRaw, '10/31/2026');
 });

@@ -30,7 +30,6 @@ import { canonical } from '../src/sources/partner-directory.mjs';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PARTNERS = path.join(ROOT, 'sample', 'partners.json');
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
-const DRY = process.argv.includes('--dry');
 
 // Same buckets the directory uses, so a hotel discovered here lands under
 // `hotel` rather than becoming a phantom airline route.
@@ -75,98 +74,125 @@ async function get(url, { tries = 3, ok = () => true } = {}) {
   throw last;
 }
 
-const doc = JSON.parse(readFileSync(PARTNERS, 'utf8'));
-let added = 0, updated = 0, husks = 0, noRate = 0, healed = 0;
+export async function refreshBrRatios(doc, { getPage = get, wait = sleep, log = console.log, warn = console.warn } = {}) {
+  const before = JSON.stringify(doc);
+  const failures = [];
+  let added = 0, updated = 0, husks = 0, noRate = 0, healed = 0;
 
-// Fold every directory row onto its canonical name first, merging any pair that
-// collides. Without this the script can CREATE the duplicate it is meant to
-// avoid: an alias fix (accent stripping made "Aeroméxico Rewards" resolve to
-// AM) changes what canonical() returns, and the old spelling sitting in the
-// file no longer matches the new one, so the partner gets appended twice.
-// Ratio wins over an em dash when two rows merge.
-for (const [bank, entry] of Object.entries(doc.directory)) {
-  for (const bucket of ['air', 'hotel']) {
-    if (!Array.isArray(entry[bucket])) continue;
-    const merged = new Map();
-    for (const [name, ratio] of entry[bucket]) {
-      const key = canonical(name);
-      if (key !== name) healed += 1;
-      const prev = merged.get(key);
-      merged.set(key, prev && prev !== '—' ? prev : ratio);
-      if (prev !== undefined) console.log(`  [heal] ${bank}/${bucket}: merged "${name}" into "${key}"`);
+  // Fold every directory row onto its canonical name first, merging any pair that
+  // collides. Without this the script can CREATE the duplicate it is meant to
+  // avoid: an alias fix (accent stripping made "Aeroméxico Rewards" resolve to
+  // AM) changes what canonical() returns, and the old spelling sitting in the
+  // file no longer matches the new one, so the partner gets appended twice.
+  // Ratio wins over an em dash when two rows merge.
+  for (const [bank, entry] of Object.entries(doc.directory)) {
+    for (const bucket of ['air', 'hotel']) {
+      if (!Array.isArray(entry[bucket])) continue;
+      const merged = new Map();
+      for (const [name, ratio] of entry[bucket]) {
+        const key = canonical(name);
+        if (key !== name) healed += 1;
+        const prev = merged.get(key);
+        merged.set(key, prev && prev !== '—' ? prev : ratio);
+        if (prev !== undefined) log(`  [heal] ${bank}/${bucket}: merged "${name}" into "${key}"`);
+      }
+      entry[bucket] = [...merged].sort((a, b) => a[0].localeCompare(b[0]));
     }
-    entry[bucket] = [...merged].sort((a, b) => a[0].localeCompare(b[0]));
   }
-}
-if (healed) console.log(`[br] ${healed} row(s) folded onto canonical names`);
+  if (healed) log(`[br] ${healed} row(s) folded onto canonical names`);
 
-for (const { bank, listing, extract, nameFrom } of BANKS) {
-  let partners = [];
-  try {
-    partners = extract(await get(listing, { ok: (html) => extract(html).length > 0 }));
-  } catch (e) {
-    console.warn(`[br] ${bank}: listing unusable after retries (${e.message}) — nothing touched`);
-    continue;
-  }
-  if (!partners.length) {
-    console.warn(`[br] ${bank}: listing parsed to 0 partners — broken parser, not an empty programme; nothing touched`);
-    continue;
-  }
-  console.log(`[br] ${bank}: ${partners.length} candidate page(s)`);
-
-  const seen = new Map(); // canonical name -> ratio or null
-  for (const p of partners) {
-    await sleep(400); // deliberate: a polite guest on someone else's site
-    let html;
+  for (const { bank, listing, extract, nameFrom } of BANKS) {
+    let partners = [];
     try {
-      html = await get(p.url);
+      partners = extract(await getPage(listing, { ok: (html) => extract(html).length > 0 }));
     } catch (e) {
-      console.warn(`  ${p.name ?? p.id}: fetch failed (${e.message}) — keeping whatever is on file`);
+      failures.push({ bank, error: e.message });
+      warn(`[br] ${bank}: listing unusable after retries (${e.message}) — nothing touched`);
       continue;
     }
-    const rawName = p.name ?? nameFrom?.(html);
-    if (!rawName) { husks += 1; continue; } // unpublished id renders the site shell
-    if (NOT_TRAVEL.test(rawName)) continue;
-    const ratio = parsePartnerRatio(html, bank);
-    if (!ratio) noRate += 1;
-    seen.set(canonical(rawName), ratio);
-  }
-  if (!seen.size) {
-    console.warn(`  ${bank}: every page failed — leaving the curated directory alone`);
-    continue;
-  }
-
-  const entry = doc.directory[bank] ?? { air: [], hotel: [] };
-  const existing = new Map();
-  for (const bucket of ['air', 'hotel']) for (const row of entry[bucket] ?? []) existing.set(row[0], { bucket, row });
-
-  for (const [name, ratio] of seen) {
-    const found = existing.get(name);
-    if (found) {
-      if (ratio && found.row[1] !== ratio) {
-        console.log(`  ${name}: ${found.row[1]} -> ${ratio}`);
-        found.row[1] = ratio;
-        updated += 1;
-      }
-    } else {
-      const bucket = HOTELISH.test(name) ? 'hotel' : 'air';
-      entry[bucket] = entry[bucket] ?? [];
-      entry[bucket].push([name, ratio ?? '—']);
-      console.log(`  + ${name} (${bucket}) ${ratio ?? '—'}`);
-      added += 1;
+    if (!partners.length) {
+      failures.push({ bank, error: 'listing parsed to 0 partners' });
+      warn(`[br] ${bank}: listing parsed to 0 partners — broken parser, not an empty programme; nothing touched`);
+      continue;
     }
+    log(`[br] ${bank}: ${partners.length} candidate page(s)`);
+
+    const seen = new Map(); // canonical name -> ratio or null
+    for (const p of partners) {
+      await wait(400); // deliberate: a polite guest on someone else's site
+      let html;
+      try {
+        html = await getPage(p.url);
+      } catch (e) {
+        failures.push({ bank, partner: p.name ?? p.id, error: e.message });
+        warn(`  ${p.name ?? p.id}: fetch failed (${e.message}) — keeping whatever is on file`);
+        continue;
+      }
+      const rawName = p.name ?? nameFrom?.(html);
+      if (!rawName) { husks += 1; continue; } // unpublished id renders the site shell
+      if (NOT_TRAVEL.test(rawName)) continue;
+      const ratio = parsePartnerRatio(html, bank);
+      if (!ratio) noRate += 1;
+      seen.set(canonical(rawName), ratio);
+    }
+    if (!seen.size) {
+      failures.push({ bank, error: 'no partner pages verified' });
+      warn(`  ${bank}: every page failed — leaving the curated directory alone`);
+      continue;
+    }
+
+    const entry = doc.directory[bank] ?? { air: [], hotel: [] };
+    const existing = new Map();
+    for (const bucket of ['air', 'hotel']) for (const row of entry[bucket] ?? []) existing.set(row[0], { bucket, row });
+
+    // Retain on a single incomplete read, but never keep a vanished partner
+    // silently forever. The operator can confirm departure and remove it.
+    for (const name of existing.keys()) {
+      if (!seen.has(name)) {
+        failures.push({ bank, partner: name, error: 'partner no longer verified; review possible departure' });
+        warn(`  ${bank}/${name}: not found among published partner pages — review possible departure`);
+      }
+    }
+
+    for (const [name, ratio] of seen) {
+      const found = existing.get(name);
+      if (found) {
+        if (!ratio && found.row[1] !== '—') {
+          failures.push({ bank, partner: name, error: 'previously known ratio not verifiable' });
+          warn(`  ${bank}/${name}: rate not verifiable — keeping ${found.row[1]}`);
+        }
+        if (ratio && found.row[1] !== ratio) {
+          log(`  ${name}: ${found.row[1]} -> ${ratio}`);
+          found.row[1] = ratio;
+          updated += 1;
+        }
+      } else {
+        const bucket = HOTELISH.test(name) ? 'hotel' : 'air';
+        entry[bucket] = entry[bucket] ?? [];
+        entry[bucket].push([name, ratio ?? '—']);
+        log(`  + ${name} (${bucket}) ${ratio ?? '—'}`);
+        added += 1;
+      }
+    }
+    // Partners that vanished from the source are NOT removed here: one flaky
+    // fetch would silently delete a real partner. The 30-minute directory
+    // scrape owns removals for Livelo; Esfera's are an operator decision.
+    for (const bucket of ['air', 'hotel']) entry[bucket]?.sort((a, b) => a[0].localeCompare(b[0]));
+    doc.directory[bank] = entry;
   }
-  // Partners that vanished from the source are NOT removed here: one flaky
-  // fetch would silently delete a real partner. The 30-minute directory
-  // scrape owns removals for Livelo; Esfera's are an operator decision.
-  for (const bucket of ['air', 'hotel']) entry[bucket]?.sort((a, b) => a[0].localeCompare(b[0]));
-  doc.directory[bank] = entry;
+
+  log(`[br] ${added} partner(s) added, ${updated} rate(s) corrected, ${noRate} page(s) publish no rate, ${husks} unpublished id(s) skipped`);
+  return { ok: failures.length === 0, changed: JSON.stringify(doc) !== before, failures, added, updated, noRate, husks };
 }
 
-console.log(`[br] ${added} partner(s) added, ${updated} rate(s) corrected, ${noRate} page(s) publish no rate, ${husks} unpublished id(s) skipped`);
-if ((added || updated) && !DRY) {
-  writeFileSync(PARTNERS, JSON.stringify(doc, null, 2) + '\n');
-  console.log(`[br] wrote ${path.relative(ROOT, PARTNERS)}`);
-} else if (DRY) {
-  console.log('[br] --dry: nothing written');
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const doc = JSON.parse(readFileSync(PARTNERS, 'utf8'));
+  const result = await refreshBrRatios(doc);
+  if (process.argv.includes('--dry')) {
+    console.log('[br] --dry: nothing written');
+  } else if (result.changed) {
+    writeFileSync(PARTNERS, JSON.stringify(doc, null, 2) + '\n');
+    console.log(`[br] wrote ${path.relative(ROOT, PARTNERS)}`);
+  }
+  if (!result.ok) process.exitCode = 1;
 }
