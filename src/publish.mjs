@@ -11,7 +11,7 @@ import { source as frequentmiler } from './sources/frequentmiler.mjs';
 import { source as awardwallet } from './sources/awardwallet.mjs';
 import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
-import { normalize } from './normalize.mjs';
+import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
@@ -102,8 +102,22 @@ export async function runPipeline({
     entryCounts[src.id] = 0;
     try {
       const html = await fetchHtml(src, fixtures, fixturesDir);
-      const entries = (await src.parse(html)) ?? [];
+      const entries = (await src.parse(html, {
+        loadPage: async (url) => {
+          if (fixtures) {
+            const sku = new URL(url).pathname.split('/').pop();
+            return readFileSync(path.join(fixturesDir, `livelo-${sku}.html`), 'utf8');
+          }
+          const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.text();
+        },
+      })) ?? [];
       entryCounts[src.id] = entries.length;
+      const undated = entries.filter(entry => !parseEndDate(entry.endDateRaw, now));
+      if (undated.length) {
+        console.warn(`::warning::[${src.id}] ${undated.length}/${entries.length} undated bonus(es) cannot be shown as active: ${undated.map(e => `${e.partnerName} +${e.pct}%`).join(', ')}`);
+      }
       // A parse that yields nothing is a broken parser, not an empty listing:
       // none of these four sources is ever legitimately at zero bonuses. The
       // parsers warn-and-skip rather than throw, so this is the only place a

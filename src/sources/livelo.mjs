@@ -63,10 +63,42 @@ function toDayMonth(iso) {
   return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
 }
 
+// Campaign pages carry the validity separately from the undated offer card.
+// Keep explicit years: D/M alone would roll an expired campaign into next year.
+// Return M/D/YYYY, the year-bearing format understood by normalize.mjs.
+function campaignDates(html, pct) {
+  const $ = cheerio.load(html);
+  const data = JSON.parse($('script#__NEXT_DATA__').first().html() || '{}');
+  for (const node of nodes(data)) {
+    const campaign = node.campaign;
+    if (!campaign) continue;
+    const copy = cheerio.load(`${campaign.bonus ?? ''} ${campaign.longDescription ?? ''}`).text();
+    const percentages = [...copy.matchAll(new RegExp(BONUS_PCT.source, 'gi'))]
+      .map(m => Number(m[1].replace(',', '.')));
+    // Avoid combining a stale card's percentage with a different campaign's dates.
+    if (!percentages.includes(pct)) continue;
+    const text = cheerio.load(`${campaign.partnercampaignalert ?? ''} ${campaign.longDescription ?? ''}`)
+      .text().replace(/\s+/g, ' ');
+    const m = text.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\s+at[ée]\s+(?:(?:as|às)\s+)?(?:\d{1,2}(?:h|:)\d{0,2}\s+(?:do\s+dia\s+)?)?(\d{1,2})\/(\d{1,2})\/(\d{4})/i);
+    if (!m) continue;
+    const [, sd, sm, sy, ed, em, ey] = m;
+    const endYear = Number(ey);
+    const startYear = sy ? Number(sy) : endYear - (Number(sm) > Number(em) ? 1 : 0);
+    const valid = (y, month, day) => {
+      const d = new Date(Date.UTC(y, Number(month) - 1, Number(day)));
+      return d.getUTCFullYear() === y && d.getUTCMonth() === Number(month) - 1 && d.getUTCDate() === Number(day);
+    };
+    if (!valid(startYear, sm, sd) || !valid(endYear, em, ed)) continue;
+    if (Date.UTC(startYear, Number(sm) - 1, Number(sd)) > Date.UTC(endYear, Number(em) - 1, Number(ed))) continue;
+    return { startDateRaw: `${sm}/${sd}/${startYear}`, endDateRaw: `${em}/${ed}/${endYear}` };
+  }
+  return null;
+}
+
 export const source = {
   id: 'livelo',
   url: 'https://www.livelo.com.br/ofertas',
-  async parse(html) {
+  async parse(html, { loadPage } = {}) {
     const $ = cheerio.load(html);
     const out = [];
 
@@ -88,12 +120,14 @@ export const source = {
     for (const node of nodes(data)) {
       const variations = node?.status?.variations;
       if (!Array.isArray(variations)) continue;
+      if (node.status.forceClose) continue;
       const countdownEnd = toDayMonth(node?.countdown?.endDate);
 
       for (const v of variations) {
         // "Vigente" = currently running. Anything else is a scheduled or
         // wound-down variation of the same card.
         if (v?.status && !/vigente/i.test(v.status)) continue;
+        if (v?.statusCard && v.statusCard !== 'active') continue;
 
         const title = String(v?.title ?? '');
         const link = String(v?.button?.redirectLink ?? '');
@@ -120,17 +154,26 @@ export const source = {
         if (seen.has(key)) continue;
         seen.add(key);
 
-        // Livelo often publishes a transfer campaign with no machine-readable
-        // deadline (the dates live in prose on the partner's product page).
-        // Emit it undated rather than dropping a real bonus: normalize.mjs
-        // turns a missing endDate into a route with no `active` block, so an
-        // undated entry can never become a phantom live deal.
-        const endDateRaw = countdownEnd || (text.match(UNTIL_DDMM)?.[1] ?? '');
+        // Undated listing cards need the linked campaign's validity. If that
+        // lookup fails, keep the entry undated: normalize.mjs omits `active`
+        // and the pipeline surfaces a coverage warning instead of guessing.
+        let endDateRaw = countdownEnd || (text.match(UNTIL_DDMM)?.[1] ?? '');
+        let startDateRaw;
+        if (!endDateRaw && slug && loadPage) {
+          try {
+            const url = new URL(link, source.url);
+            if (url.origin !== new URL(source.url).origin) throw new Error('unexpected campaign origin');
+            const dates = campaignDates(await loadPage(url.href), pct);
+            if (dates) ({ endDateRaw, startDateRaw } = dates);
+          } catch (e) {
+            console.warn(`[livelo] campaign details unavailable for ${partnerName}: ${e.message}`);
+          }
+        }
         if (!endDateRaw) {
           console.warn(`[livelo] no end date published for ${partnerName} +${pct}% — emitting undated`);
         }
 
-        out.push({ bankName: 'Livelo', partnerName, pct, endDateRaw, sourceUrl: source.url });
+        out.push({ bankName: 'Livelo', partnerName, pct, endDateRaw, ...(startDateRaw ? { startDateRaw } : {}), sourceUrl: source.url });
       }
     }
 
