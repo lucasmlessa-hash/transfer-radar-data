@@ -75,6 +75,7 @@ jobs:
 
       - name: Preserve incomplete public valuation responses for diagnosis
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: valuation-source-diagnostics
