@@ -125,13 +125,13 @@ test('BR refresh flags a disappeared partner for review instead of silently reta
 
 test('curated review distinguishes fresh, stale, missing and future evidence using the supplied date', () => {
   const doc = { directory: {}, ratioProvenance: {} };
-  for (const [bank, asOf] of [['MAR', '2026-09-08'], ['WYN', '2026-09-07'], ['CHO', null], ['OTHER', '2026-10-14']]) {
+  for (const [bank, asOf] of [['MANUAL_A', '2026-09-08'], ['MANUAL_B', '2026-09-07'], ['MANUAL_C', null], ['OTHER', '2026-10-14']]) {
     doc.directory[bank] = { air: [['Airline', '3:1']], hotel: [] };
     if (asOf) doc.ratioProvenance[bank] = { asOf, source: 'https://example.com' };
   }
   const checks = checkCuratedRatios(doc, new Date('2026-10-13T12:00:00Z'));
   assert.deepEqual(checks.map(({ bank, status }) => [bank, status]), [
-    ['MAR', 'fresh'], ['WYN', 'stale'], ['CHO', 'missing'], ['OTHER', 'invalid'],
+    ['MANUAL_A', 'fresh'], ['MANUAL_B', 'stale'], ['MANUAL_C', 'missing'], ['OTHER', 'invalid'],
   ]);
-  assert.equal(doc.ratioProvenance.WYN.asOf, '2026-09-07', 'checking never re-dates evidence');
+  assert.equal(doc.ratioProvenance.MANUAL_B.asOf, '2026-09-07', 'checking never re-dates evidence');
 });

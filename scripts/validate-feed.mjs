@@ -188,7 +188,7 @@ export function validatePartners(doc) {
   // conferida à mão. Razões mudam (desvalorização é rotina), e uma errada
   // corrompe o ¢/pt e a ordenação BEST VALUE sem barulho — por isso a data é
   // obrigatória por banco e um teste falha quando ela envelhece.
-  const optional = ['airlineIconUrls', 'transferTimes', 'airlineValueMeta', 'ratioProvenance'];
+  const optional = ['airlineIconUrls', 'transferTimes', 'transferTimeMeta', 'airlineValueMeta', 'ratioProvenance'];
   checkKeys(doc, required, [...required, ...optional], 'partners');
   if (doc.version !== 1) fail(`partners.version: must be 1, got ${JSON.stringify(doc.version)}`);
 
@@ -246,6 +246,28 @@ export function validatePartners(doc) {
       for (const [code, v] of Object.entries(byCode)) {
         if (!(code in doc.airlineDomains)) fail(`${ctx}.${code}: unknown airline code`);
         if (typeof v !== 'string' || v === '') fail(`${ctx}.${code}: must be a non-empty string`);
+      }
+    }
+  }
+
+  if ('transferTimeMeta' in doc) {
+    if (!isPlainObject(doc.transferTimeMeta)) fail('partners.transferTimeMeta: must be an object');
+    for (const [bank, byCode] of Object.entries(doc.transferTimeMeta)) {
+      const ctx = `partners.transferTimeMeta.${bank}`;
+      if (!(bank in doc.banks)) fail(`${ctx}: unknown bank code`);
+      if (!isPlainObject(byCode)) fail(`${ctx}: must be an object`);
+      for (const [code, m] of Object.entries(byCode)) {
+        const item = `${ctx}.${code}`;
+        if (!isPlainObject(m)) fail(`${item}: must be an object`);
+        checkKeys(m, ['source', 'asOf', 'estimate'], ['source', 'asOf', 'estimate'], item);
+        if (!doc.transferTimes?.[bank]?.[code]) fail(`${item}: no matching transferTimes entry`);
+        let source;
+        try { source = new URL(m.source); } catch { fail(`${item}.source: must be an https URL`); }
+        if (source.protocol !== 'https:' || !source.hostname || source.username || source.password) fail(`${item}.source: must be an https URL`);
+        const date = Date.parse(m.asOf);
+        if (typeof m.asOf !== 'string' || !ISO_DATE.test(m.asOf) || !Number.isFinite(date)
+          || new Date(date).toISOString().slice(0, 10) !== m.asOf) fail(`${item}.asOf: must be a real ISO date`);
+        if (typeof m.estimate !== 'boolean') fail(`${item}.estimate: must be a boolean`);
       }
     }
   }

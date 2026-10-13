@@ -10,8 +10,10 @@ import { normalize } from '../src/normalize.mjs';
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const P = JSON.parse(readFileSync(path.join(ROOT, 'sample', 'partners.json'), 'utf8'));
 
-const air = (bank) => new Map(P.directory[bank].air);
-const hotel = (bank) => new Map(P.directory[bank].hotel);
+// Historical facts belong to a frozen audit, not the daily mutable sample.
+const AUDIT = JSON.parse(readFileSync(path.join(ROOT, 'fixtures', 'partners-audit-2026-10.json'), 'utf8'));
+const air = (bank) => new Map(AUDIT.directory[bank].air);
+const hotel = (bank) => new Map(AUDIT.directory[bank].hotel);
 
 // ponytail: one invariant test instead of one assertion per code -- an airline
 // code is only usable end to end if all three exist (alias, domain, value).
@@ -135,7 +137,7 @@ test('real scraped airline names resolve to their codes', () => {
 // partnership that either no longer exists or never existed (a phantom route
 // sends a user to a transfer page that isn't there), or a ratio that was
 // optimistic enough to change a transfer decision.
-test('dead partnerships stay removed from the directory', () => {
+test('historical audit records departed partnerships', () => {
   assert.equal(air('AMEX').has('Etihad Guest'), false, 'Amex ended Etihad 2026-06-30');
   assert.equal(air('CHASE').has('Emirates Skywards'), false, 'Chase dropped Emirates 2025-10-16');
   assert.equal(air('CITI').has('Aeromexico Rewards'), false, 'Citi ended Aeromexico 2026-01-25');
@@ -150,7 +152,7 @@ test('dead partnerships stay removed from the directory', () => {
 // 1000:800 IS 1:0.8), and curated BR ratios must survive the merge by
 // canonical name. Names here are the CANONICAL spellings the dynamic
 // directory emits; the audit's old spellings are what §1 retired.
-test('devalued and corrected ratios match the audit', () => {
+test('historical audit records corrected base ratios', () => {
   const expected = [
     ['AMEX', 'air', 'Emirates Skywards', '1000:800'],
     ['AMEX', 'air', 'Cathay Pacific Asia Miles', '1000:800'],
@@ -175,7 +177,7 @@ test('devalued and corrected ratios match the audit', () => {
   assert.ok(ratios(air('AMEX').get('Emirates Skywards'), 0.8), 'FM 1000:800 is the audited 1:0.8');
 });
 
-test('added and departed partners match the official pages', () => {
+test('historical audit records official partner changes', () => {
   const added = [
     ['CHASE', 'hotel', 'Wyndham Rewards'], ['CITI', 'air', 'American Airlines AAdvantage'],
     ['C1', 'air', 'Japan Airlines (JAL Mileage Bank)'], ['C1', 'air', 'Qatar Airways Avios'],
@@ -247,13 +249,11 @@ test('normalize reads transfer speed from partners.json, and blanks what it lack
     return routes[0].time;
   };
   assert.equal(timeOf('Amex', 'Avianca LifeMiles'), P.transferTimes.AMEX.AV);
-  assert.equal(timeOf('Amex', 'Avianca LifeMiles'), 'INSTANT');
+  // Values are dynamic; compare the current directory rather than pinning a deadline.
   // same airline, different bank, genuinely different speed
-  assert.equal(timeOf('Amex', 'Cathay Pacific Asia Miles'), '4–8 HOURS');
-  assert.equal(timeOf('Capital One', 'Cathay Pacific Asia Miles'), '1–2 DAYS');
-  // Esfera -> Azul has no published transfer time; it must stay an honest blank
-  assert.equal(P.transferTimes.ESF, undefined);
-  assert.equal(timeOf('Esfera', 'Azul Fidelidade'), '—');
+  assert.equal(timeOf('Amex', 'Cathay Pacific Asia Miles'), P.transferTimes.AMEX.CX);
+  assert.equal(timeOf('Capital One', 'Cathay Pacific Asia Miles'), P.transferTimes.C1.CX);
+  assert.equal(timeOf('Esfera', 'Azul Fidelidade'), P.transferTimes.ESF?.AD ?? '—');
 });
 
 test('a bank never lists the same partner twice', () => {

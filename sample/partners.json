@@ -183,67 +183,87 @@
   "airlineValueMeta": {
     "AF": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "AV": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "VS": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "BA": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "CX": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "QF": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "LH": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "note": "FM lists this as \"Miles & More (Lufthansa)\""
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "AS": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "note": "FM lists this as \"Atmos Rewards (Alaska/Hawaiian)\""
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "AA": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "AC": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "QR": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
     },
     "EI": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
     },
     "G3": {
       "currency": "BRL",
@@ -274,15 +294,17 @@
     },
     "AM": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: Aeromexico Rewards 0.8c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "NH": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: ANA Mileage Club 1.4c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "BR": {
       "currency": "USD",
@@ -300,43 +322,52 @@
     },
     "TK": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: Turkish Airlines Miles&Smiles 1.1c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "EK": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: Emirates Skywards 1.2c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "SQ": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: Singapore KrisFlyer 1.3c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "UA": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "B6": {
       "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/"
+      "asOf": "2026-10-13",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "EY": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 valuation: Etihad Guest 1.2c. Not in Frequent Miler RRV."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
     },
     "IB": {
       "currency": "USD",
-      "asOf": "2026-07-24",
+      "asOf": "2026-10-13",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "note": "TPG July 2026 \"Avios\" 1.4. Avios is a shared currency but each airline publishes its own award chart, so per-programme values are intentional (FM lists only British Airways Avios at 1.1)."
+      "estimate": true,
+      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
     },
     "CM": {
       "currency": "USD",
@@ -352,21 +383,24 @@
     },
     "F9": {
       "currency": "USD",
-      "asOf": "2026-07-27",
+      "asOf": "2026-10-13",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "note": "FM lists this as \"Frontier Bonus Miles\" at 1.0c. TPG says 1.3c; FM is this project's canonical source, so 1.0 stands."
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "WN": {
       "currency": "USD",
-      "asOf": "2026-07-27",
+      "asOf": "2026-10-13",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "note": "FM 1.3c (TPG 1.25c)."
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "DL": {
       "currency": "USD",
-      "asOf": "2026-07-27",
+      "asOf": "2026-10-13",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "note": "FM RRV Delta SkyMiles 1.1c."
+      "estimate": true,
+      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
     },
     "AY": {
       "currency": "USD",
@@ -425,7 +459,11 @@
       "QF": "INSTANT",
       "QR": "12–24 HOURS",
       "SQ": "12–24 HOURS",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "~12–24 HOURS (SLOWER OVER WEEKEND)",
+      "DL": "INSTANT",
+      "AY": "INSTANT",
+      "B6": "INSTANT"
     },
     "CHASE": {
       "EI": "INSTANT",
@@ -434,7 +472,12 @@
       "BA": "INSTANT",
       "QR": "INSTANT",
       "SQ": "~1 DAY",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "INSTANT",
+      "UA": "INSTANT",
+      "AY": "INSTANT",
+      "B6": "INSTANT",
+      "WN": "INSTANT"
     },
     "CITI": {
       "EI": "~1 DAY",
@@ -449,7 +492,14 @@
       "QR": "~1 DAY",
       "SQ": "~1 DAY",
       "TK": "12–24 HOURS",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "~1 DAY",
+      "EY": "~1 HOUR",
+      "AY": "~1 DAY",
+      "9W": "INSTANT",
+      "B6": "INSTANT",
+      "MH": "1–2 DAYS",
+      "TG": "3–7 DAYS"
     },
     "C1": {
       "EI": "INSTANT",
@@ -466,7 +516,11 @@
       "QR": "INSTANT",
       "SQ": "12–24 HOURS",
       "TK": "INSTANT",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "INSTANT",
+      "EY": "INSTANT",
+      "AY": "INSTANT",
+      "B6": "1–2 HOURS"
     },
     "BILT": {
       "EI": "INSTANT",
@@ -480,7 +534,11 @@
       "JL": "INSTANT",
       "QR": "INSTANT",
       "TK": "INSTANT",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "INSTANT",
+      "UA": "INSTANT",
+      "AY": "INSTANT",
+      "WN": "~12 HOURS"
     },
     "WF": {
       "EI": "INSTANT",
@@ -489,7 +547,16 @@
       "BA": "INSTANT",
       "CX": "INSTANT",
       "QR": "INSTANT",
-      "VS": "INSTANT"
+      "VS": "INSTANT",
+      "IB": "INSTANT",
+      "AY": "INSTANT",
+      "B6": "INSTANT"
+    },
+    "ROVE": {
+      "AF": "INSTANT",
+      "JL": "INSTANT",
+      "AI": "~1 DAY",
+      "LH": "INSTANT"
     }
   },
   "directory": {
@@ -1329,7 +1396,7 @@
     "MAR": {
       "asOf": "2026-10-13",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "note": "Oito rotas cadastradas conferidas na tabela oficial em 13/10/2026: razão-base 3:1. Bônus por blocos de 60.000 pontos não faz parte da razão-base; 5.000 milhas extras na maioria das parceiras, 10.000 na United, nenhum na American/Avianca/Delta."
+      "note": "8/8 registered transfer base ratios verified automatically in the official source. Threshold and promotional bonuses are excluded; this check does not certify untracked partners."
     },
     "WYN": {
       "asOf": "2026-10-13",
@@ -1339,7 +1406,513 @@
     "CHO": {
       "asOf": "2026-10-13",
       "source": "https://www.choicehotels.com/en-uk/choice-privileges/rewards-exchange",
-      "note": "Flying Blue e United: tabela pública oficial informa 5.000 pontos Choice para 1.000 milhas (5:1); mínimo de 5.000 pontos para essas rotas. Razão-base sem bônus promocional, conferida em 13/10/2026."
+      "note": "2/2 registered transfer base ratios verified automatically in the official source. Threshold and promotional bonuses are excluded; this check does not certify untracked partners."
+    }
+  },
+  "transferTimeMeta": {
+    "AMEX": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AC": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "NH": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AV": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "CX": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AM": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "DL": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "B6": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "SQ": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "CHASE": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AC": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "UA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "B6": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "SQ": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "WN": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "CITI": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AV": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "CX": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "9W": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "B6": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "MH": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "SQ": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "TG": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "TK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "C1": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AC": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AV": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "CX": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "JL": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AM": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "B6": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "SQ": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "TK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "BILT": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AC": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AV": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "CX": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "JL": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "UA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "EK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "WN": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "TK": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "WF": {
+      "EI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AV": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "BA": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "CX": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "IB": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "QR": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AY": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "B6": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "VS": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
+    },
+    "ROVE": {
+      "AF": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "JL": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "AI": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      },
+      "LH": {
+        "source": "https://frequentmiler.com/transfer-partner-master-list/",
+        "asOf": "2026-10-13",
+        "estimate": true
+      }
     }
   }
 }

@@ -151,3 +151,20 @@ A failed/undated collection does not advance its last successful verification.
 A recognized empty listing can be healthy; missing page structure cannot.
 Clients must show partial coverage even when the build timestamp is recent.
 Expired carried-forward offers never remain `active` in a newly built feed.
+
+### Proveniência dos dados de referência
+
+`partners.transferTimeMeta[bank][code]` é opcional e acompanha a entrada
+correspondente em `transferTimes`, com `source` (URL HTTPS), `asOf` (data real
+YYYY-MM-DD) e `estimate` (boolean). Um prazo observado por uma fonte editorial
+é estimativa, não garantia do programa. Ausência ou revisão vencida deve ficar
+visível. A coleta diária só renova a data quando extrai o prazo daquela rota.
+
+`airlineValueMeta` tem relógio próprio: valor sem fonte verificável ou conferência
+de até 35 dias fica fora de CPP/BEST VALUE. Estimativas editoriais em centavos de
+USD não são preço de compra/venda nem valor garantido de resgate. A atualização
+de promoções não renova automaticamente essas conferências.
+
+Relatórios diários de hotéis, valores e prazos são publicados em
+`hotel-ratios-health.json`, `point-valuations-health.json` e
+`transfer-times-health.json`, com a cobertura efetivamente verificada.

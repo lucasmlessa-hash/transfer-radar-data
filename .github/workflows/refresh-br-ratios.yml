@@ -1,12 +1,11 @@
-# Weekly refresh of the Brazilian programmes' partner lists and conversion
-# rates. Separate from build-feed.yml because it walks ~34 partner pages: at
-# the feed's 30-minute cadence that would be thousands of requests a day for
-# numbers that change maybe twice a year.
+# Daily refresh of partner lists and conversion rates. Build feed follows via
+# workflow_run, after verified changes are committed. Keep the workflow name
+# stable: the downstream trigger matches it exactly.
 name: Refresh BR ratios
 
 on:
-  schedule:
-    - cron: '17 6 * * 1' # Mondays, off the hour to avoid the crowded :00 slot
+  # Cloudflare is the daily clock. Keep manual dispatch for recovery; do not
+  # add an independent GitHub cron that would collect a second time each day.
   workflow_dispatch: {}
 
 # contents: write for the ratio commit; issues: write because the failure
@@ -23,6 +22,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,8 +43,8 @@ jobs:
       # mente. Este passo compara as razões dos bancos US contra as commitadas
       # e GRITA quando alguma mudou; a issue abaixo é o ponto todo, porque uma
       # desvalorização aplicada em silêncio é indistinguível de nada ter
-      # acontecido. Semanal, portanto mais frequente que a revisão mensal que o
-      # teste de ratioProvenance cobra das razões sem scraper.
+      # acontecido. Diário; as razões sem scraper ainda têm um prazo separado
+      # de revisão manual, conferido abaixo.
       - name: Monitor transfer ratios
         id: ratios
         continue-on-error: true
@@ -58,6 +58,21 @@ jobs:
           fi
           exit "$status"
 
+      - name: Refresh hotel conversion ratios
+        id: hotels
+        continue-on-error: true
+        run: node scripts/refresh-hotel-ratios.mjs --partners sample/partners.json --report data/hotel-ratios-health.json
+
+      - name: Refresh published point valuations
+        id: valuations
+        continue-on-error: true
+        run: node scripts/refresh-point-valuations.mjs --partners sample/partners.json --report data/point-valuations-health.json
+
+      - name: Refresh observed transfer times
+        id: times
+        continue-on-error: true
+        run: node scripts/refresh-transfer-times.mjs --partners sample/partners.json --report data/transfer-times-health.json
+
       # The tests are the gate, not the commit: bundled-partners-sync and the
       # canonical-name guard both read sample/partners.json, so a scrape that
       # introduced a duplicate or a non-canonical name fails here and never
@@ -69,12 +84,15 @@ jobs:
 
       - name: Commit if anything changed
         run: |
-          if [ -z "$(git status --porcelain -- sample/partners.json)" ]; then
-            echo "no ratio changes this week"
+          if [ -z "$(git status --porcelain -- sample/partners.json data/hotel-ratios-health.json data/point-valuations-health.json data/transfer-times-health.json)" ]; then
+            echo "no ratio changes in this daily check"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add sample/partners.json
+            for report in data/hotel-ratios-health.json data/point-valuations-health.json data/transfer-times-health.json; do
+              if [ -f "$report" ]; then git add "$report"; fi
+            done
             git commit -m "chore(data): refresh partner ratios $(date -u +%F)"
             git pull --rebase origin "${GITHUB_REF_NAME}"
             git push origin "HEAD:${GITHUB_REF_NAME}"
@@ -108,9 +126,9 @@ jobs:
             --body-file "$RUNNER_TEMP/ratio-issue.md"
 
       - name: Report incomplete ratio verification
-        if: steps.br.outcome == 'failure' || steps.ratios.outcome == 'failure' || steps.curated.outcome == 'failure'
+        if: steps.br.outcome == 'failure' || steps.ratios.outcome == 'failure' || steps.curated.outcome == 'failure' || steps.hotels.outcome == 'failure' || steps.valuations.outcome == 'failure' || steps.times.outcome == 'failure'
         run: |
-          echo '::error::Ratio verification is incomplete. Verified changes were allowed through the validation gate; failed sources retained their previous values. Review the failed source or the overdue curated review above.'
+          echo '::error::Daily reference verification is incomplete. Verified changes passed validation; failed sources retained their previous values and verification dates. Review the failed source above.'
           exit 1
 
       - name: Open issue on failure
@@ -120,7 +138,7 @@ jobs:
         run: |
           # The label may not exist yet; creating it must not itself fail the
           # step, or the alert about the real failure never gets filed.
-          gh label create br-ratios-failure --color B60205 --description "Weekly BR ratio refresh failed" 2>/dev/null || true
+          gh label create br-ratios-failure --color B60205 --description "Daily partner ratio refresh failed" 2>/dev/null || true
           if ! gh issue list --label br-ratios-failure --state open --json number --jq '.[0]' | grep -q .; then
             gh issue create \
               --title "BR ratio refresh failed: $(date -u +%F)" \

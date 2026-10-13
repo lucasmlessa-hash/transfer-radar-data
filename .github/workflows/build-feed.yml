@@ -6,12 +6,12 @@
 name: Build feed
 
 on:
-  schedule:
-    # Best-effort hourly request, not an hourly delivery guarantee.
-    # Audit 2026-10-13: recent actual gaps were 2.9–10.4 hours (median 5.7h).
-    # Use repository_dispatch from an independent cloud scheduler for a
-    # regular cadence; asking GitHub for more cron triggers cannot assure it.
-    - cron: '23 * * * *'
+  # Run after the daily ratio job, including partial-source failures: verified
+  # changes were committed before its final status. Checkout gets latest main.
+  workflow_run:
+    workflows: [Refresh BR ratios]
+    types: [completed]
+    branches: [main]
   workflow_dispatch: {}
   # An independent scheduler can dispatch this without relying on Actions cron.
   repository_dispatch:
@@ -30,6 +30,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -91,6 +92,12 @@ jobs:
       - name: Validate output
         run: node scripts/validate-feed.mjs out/feed.json
 
+      - name: Include reference verification reports
+        run: |
+          for report in data/hotel-ratios-health.json data/point-valuations-health.json data/transfer-times-health.json; do
+            if [ -f "$report" ]; then cp "$report" out/; fi
+          done
+
       - name: Report source coverage
         run: |
           if node scripts/check-feed-health.mjs out/feed.json > /tmp/feed-health.txt; then
@@ -103,7 +110,7 @@ jobs:
       # The pipeline's own memory (src/observed.mjs): live bonuses it saw are
       # appended to a day-granular ledger so Esfera/Livelo/Rove — which no
       # public archive covers — accumulate real history. Day granularity means
-      # this commits at most ~once a day despite the */30 cron. Only after the
+      # this commits at most once a day. Only after the
       # feed validated: a build that failed or shipped garbage must not advance
       # the ledger either.
       #

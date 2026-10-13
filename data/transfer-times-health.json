@@ -1,0 +1,927 @@
+{
+  "ok": true,
+  "changed": true,
+  "checkedAt": "2026-10-13T17:24:10.140Z",
+  "sources": [
+    {
+      "id": "fm-directory",
+      "url": "https://frequentmiler.com/transfer-partner-master-list/",
+      "status": "ok",
+      "tableCount": 4,
+      "observedRoutes": 122,
+      "verifiedRoutes": 98
+    }
+  ],
+  "changes": [
+    {
+      "bank": "AMEX",
+      "code": "IB",
+      "before": null,
+      "after": "~12–24 HOURS (SLOWER OVER WEEKEND)"
+    },
+    {
+      "bank": "AMEX",
+      "code": "DL",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "B6",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "IB",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "UA",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "AY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "B6",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "WN",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "IB",
+      "before": null,
+      "after": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "EY",
+      "before": null,
+      "after": "~1 HOUR"
+    },
+    {
+      "bank": "CITI",
+      "code": "AY",
+      "before": null,
+      "after": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "9W",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "B6",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "MH",
+      "before": null,
+      "after": "1–2 DAYS"
+    },
+    {
+      "bank": "CITI",
+      "code": "TG",
+      "before": null,
+      "after": "3–7 DAYS"
+    },
+    {
+      "bank": "C1",
+      "code": "IB",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "EY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "B6",
+      "before": null,
+      "after": "1–2 HOURS"
+    },
+    {
+      "bank": "BILT",
+      "code": "IB",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "UA",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "WN",
+      "before": null,
+      "after": "~12 HOURS"
+    },
+    {
+      "bank": "WF",
+      "code": "IB",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "AY",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "B6",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AF",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "JL",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AI",
+      "before": null,
+      "after": "~1 DAY"
+    },
+    {
+      "bank": "ROVE",
+      "code": "LH",
+      "before": null,
+      "after": "INSTANT"
+    }
+  ],
+  "verified": [
+    {
+      "bank": "AMEX",
+      "code": "EI",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AC",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "NH",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AV",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "BA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "CX",
+      "time": "4–8 HOURS"
+    },
+    {
+      "bank": "AMEX",
+      "code": "IB",
+      "time": "~12–24 HOURS (SLOWER OVER WEEKEND)"
+    },
+    {
+      "bank": "AMEX",
+      "code": "QR",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AM",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "DL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "EK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "B6",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "QF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "SQ",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "AMEX",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "EI",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "AC",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "BA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "IB",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "QR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "UA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "AY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "B6",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "SQ",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CHASE",
+      "code": "WN",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "EI",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "AA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "AV",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "BA",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "CX",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "BR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "IB",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "QR",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "EK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "EY",
+      "time": "~1 HOUR"
+    },
+    {
+      "bank": "CITI",
+      "code": "AY",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "9W",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "B6",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "MH",
+      "time": "1–2 DAYS"
+    },
+    {
+      "bank": "CITI",
+      "code": "QF",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "SQ",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "TG",
+      "time": "3–7 DAYS"
+    },
+    {
+      "bank": "CITI",
+      "code": "TK",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "CITI",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "EI",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AC",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AV",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "BA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "CX",
+      "time": "1–2 DAYS"
+    },
+    {
+      "bank": "C1",
+      "code": "BR",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "C1",
+      "code": "IB",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "JL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "QR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AM",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "EK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "EY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "B6",
+      "time": "1–2 HOURS"
+    },
+    {
+      "bank": "C1",
+      "code": "QF",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "C1",
+      "code": "SQ",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "C1",
+      "code": "TK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "EI",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AC",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AV",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "BA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "CX",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "IB",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "JL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "QR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "UA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "EK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "AY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "WN",
+      "time": "~12 HOURS"
+    },
+    {
+      "bank": "BILT",
+      "code": "TK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "EI",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "AV",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "BA",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "CX",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "IB",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "QR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "AY",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "B6",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "JL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AI",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "ROVE",
+      "code": "LH",
+      "time": "INSTANT"
+    }
+  ],
+  "missingKnown": [],
+  "unparsed": [
+    {
+      "bank": "ROVE",
+      "code": "EI",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AC",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "AF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "AV",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "BA",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "CX",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "IB",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CITI",
+      "code": "JL",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "QR",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "SK",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "CM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "EY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "EY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "F9",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "HU",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "QF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "C1",
+      "code": "TP",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "TP",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "TG",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "TK",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "VN",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "VS",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    }
+  ],
+  "conflicts": [],
+  "coverage": {
+    "knownBefore": 67,
+    "verifiedKnown": 67,
+    "retainedKnown": 0,
+    "verifiedTotal": 98,
+    "storedTotal": 98,
+    "byBank": {
+      "AMEX": {
+        "knownBefore": 13,
+        "verifiedKnown": 13,
+        "retainedKnown": 0,
+        "verifiedTotal": 17,
+        "status": "ok"
+      },
+      "CHASE": {
+        "knownBefore": 7,
+        "verifiedKnown": 7,
+        "retainedKnown": 0,
+        "verifiedTotal": 12,
+        "status": "ok"
+      },
+      "CITI": {
+        "knownBefore": 13,
+        "verifiedKnown": 13,
+        "retainedKnown": 0,
+        "verifiedTotal": 20,
+        "status": "ok"
+      },
+      "C1": {
+        "knownBefore": 15,
+        "verifiedKnown": 15,
+        "retainedKnown": 0,
+        "verifiedTotal": 19,
+        "status": "ok"
+      },
+      "BILT": {
+        "knownBefore": 12,
+        "verifiedKnown": 12,
+        "retainedKnown": 0,
+        "verifiedTotal": 16,
+        "status": "ok"
+      },
+      "WF": {
+        "knownBefore": 7,
+        "verifiedKnown": 7,
+        "retainedKnown": 0,
+        "verifiedTotal": 10,
+        "status": "ok"
+      },
+      "ROVE": {
+        "knownBefore": 0,
+        "verifiedKnown": 0,
+        "retainedKnown": 0,
+        "verifiedTotal": 4,
+        "status": "ok"
+      }
+    }
+  },
+  "dryRun": false,
+  "written": true
+}

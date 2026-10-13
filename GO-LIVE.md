@@ -84,17 +84,18 @@ published endpoint with:
     node scripts/check-feed-health.mjs https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
 
 Exit 1 means missing coverage, a partial collection, or data/verification older
-than six hours. The deploy job now performs this same check after publishing.
+than 36 hours (daily collection plus grace). The deploy job performs this same check after publishing.
 A validated partial feed can still publish fresh observations from healthy
 sources, but the workflow and extension must expose the degraded status.
 
-GitHub's hourly schedule is best effort: the October audit measured gaps up to
-10.4 hours. `repository_dispatch` type `refresh-feed` is supported for an
-independent cloud scheduler. Use an existing authorized scheduler and a
-repository-scoped credential; do not put tokens in source. This hook alone does
-not install or activate an external scheduler. Check that real runs and the
-published `generatedAt` advance at the intended cadence after activation.
+GitHub's schedule is best effort: the October audit measured gaps up to 10.4
+hours. The user selected daily collection. The Cloudflare production clock
+requests `Refresh BR ratios` at 06:00 Sao Paulo; `Build feed` follows through
+`workflow_run`. A 07:00 check verifies publication and the ratio-job result,
+without a second collection. See [cloud-scheduler/README.md](cloud-scheduler/README.md)
+for activation, cost limits, credentials and coverage gaps. Publish the workflow changes together with the clock. These workflows have no
+other automatic schedule; the default Worker environment deliberately pauses the cron.
 
-Weekly ratio checks commit verified changes before reporting unavailable sources
+Daily ratio checks commit verified changes before reporting unavailable sources
 or overdue manual reviews. `node scripts/check-curated-ratios.mjs` verifies review
 age; never renew a provenance date without checking the official source.

@@ -1,0 +1,18 @@
+{
+  "name": "transfer-radar-daily-scheduler",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-13",
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true, "head_sampling_rate": 1 },
+  // Preparation is inert. Only the explicitly selected production environment
+  // installs a clock. No KV, database, paid plan, or public endpoint is needed.
+  "triggers": { "crons": [] },
+  "env": {
+    "production": {
+      "name": "transfer-radar-daily-scheduler",
+      // UTC: 06:00 Sao Paulo collection; 07:00 verification, no second collect.
+      "triggers": { "crons": ["0 9,10 * * *"] }
+    }
+  }
+}

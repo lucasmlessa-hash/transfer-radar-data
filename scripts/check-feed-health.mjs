@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { validateFeed } from './validate-feed.mjs';
 
-export function checkFeedHealth(feed, now = Date.now(), maxAgeHours = 6) {
+export function checkFeedHealth(feed, now = Date.now(), maxAgeHours = 36) {
   const problems = [];
   try { validateFeed(feed); } catch (error) { return { ok: false, problems: [error.message] }; }
   const age = now - Date.parse(feed.generatedAt);

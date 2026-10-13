@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const AUTOMATED_BANKS = new Set(['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE', 'ESF', 'LIV']);
+const AUTOMATED_BANKS = new Set(['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE', 'ESF', 'LIV', 'MAR', 'WYN', 'CHO']);
 export const RATIO_REVIEW_DAYS = 35;
 
 export function checkCuratedRatios(doc, now = new Date()) {

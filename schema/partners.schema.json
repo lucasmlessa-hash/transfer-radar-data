@@ -113,7 +113,7 @@
           },
           "estimate": {
             "type": "boolean",
-            "description": "OPTIONAL. true when no published source covers this programme and the value is a reasoned estimate — the client should present it as such."
+            "description": "True for a published or derived valuation estimate; never a guaranteed cash value."
           }
         }
       }
@@ -154,6 +154,61 @@
           }
         }
       }
+    },
+    "transferTimeMeta": {
+      "description": "Optional provenance of observed transfer times. Bank and airline must have a matching transferTimes entry. Estimates are not guaranteed deadlines.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "required": [
+            "source",
+            "asOf",
+            "estimate"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "source": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "asOf": {
+              "type": "string",
+              "format": "date"
+            },
+            "estimate": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "ratioProvenance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "source",
+          "asOf"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "source": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^https://"
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
     }
   },
   "$defs": {
@@ -161,14 +216,15 @@
       "type": "array",
       "minItems": 2,
       "maxItems": 2,
-      "items": [
+      "prefixItems": [
         {
           "type": "string"
         },
         {
           "type": "string"
         }
-      ]
+      ],
+      "items": false
     }
   }
 }

@@ -1,0 +1,51 @@
+{
+  "data": [
+    {
+      "redemptionItemCode": "SQ",
+      "description": "Singapore Airlines",
+      "redeemable": false,
+      "faceValue": 1
+    },
+    {
+      "redemptionItemCode": "SQ-MILES-1200",
+      "description": "1200-Singapore Airlines Miles",
+      "currencyRequired": 6000,
+      "redeemable": false,
+      "faceValue": 1200
+    },
+    {
+      "redemptionItemCode": "SQ-MILES-3200",
+      "description": "3200-Singapore Airlines Miles",
+      "currencyRequired": 16000,
+      "redeemable": false,
+      "faceValue": 3200
+    },
+    {
+      "redemptionItemCode": "SQ-MILES-6000",
+      "description": "6000-Singapore Airlines Miles",
+      "currencyRequired": 30000,
+      "redeemable": false,
+      "faceValue": 6000
+    },
+    {
+      "redemptionItemCode": "UA",
+      "description": "United Airlines",
+      "redeemable": false,
+      "faceValue": 1
+    },
+    {
+      "redemptionItemCode": "UA-MILES-0",
+      "description": "0 United MileagePlus Miles",
+      "currencyRequired": 0,
+      "redeemable": false,
+      "faceValue": 0
+    },
+    {
+      "redemptionItemCode": "UA-MILES-2400",
+      "description": "2,400 United MileagePlus Miles",
+      "currencyRequired": 6000,
+      "redeemable": false,
+      "faceValue": 2400
+    }
+  ]
+}
