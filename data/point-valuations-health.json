@@ -1,13 +1,13 @@
 {
-  "ok": true,
-  "checkedAt": "2026-10-13T17:24:09.264Z",
-  "verified": 24,
-  "changed": true,
-  "written": true,
+  "ok": false,
+  "checkedAt": "2026-10-13T17:30:54.399Z",
+  "verified": 20,
+  "changed": false,
+  "written": false,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:24:09.264Z",
+      "checkedAt": "2026-10-13T17:30:54.399Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "verifiedCodes": [
         "AC",
@@ -29,23 +29,35 @@
       "missingCodes": []
     },
     "tpg": {
-      "status": "ok",
-      "checkedAt": "2026-10-13T17:24:09.264Z",
+      "status": "degraded",
+      "checkedAt": "2026-10-13T17:30:54.399Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "verifiedCodes": [
         "AM",
         "NH",
         "QR",
         "EI",
-        "IB",
+        "IB"
+      ],
+      "missingCodes": [
         "EK",
         "EY",
         "SQ",
         "TK"
-      ],
-      "missingCodes": []
+      ]
     }
   },
   "changes": [],
-  "failures": []
+  "failures": [
+    {
+      "source": "tpg",
+      "error": "Missing or unreadable valuation cells",
+      "missingCodes": [
+        "EK",
+        "EY",
+        "SQ",
+        "TK"
+      ]
+    }
+  ]
 }
