@@ -1,14 +1,39 @@
 {
   "ok": true,
-  "checkedAt": "2026-10-13T17:44:36.410Z",
+  "checkedAt": "2026-10-13T17:50:21.499Z",
   "verified": 24,
   "changed": false,
   "written": false,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:44:36.410Z",
+      "checkedAt": "2026-10-13T17:50:21.499Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "selectedAttempt": 1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "ok",
+          "verifiedCodes": [
+            "AC",
+            "AF",
+            "AA",
+            "AS",
+            "AV",
+            "BA",
+            "CX",
+            "DL",
+            "F9",
+            "B6",
+            "LH",
+            "QF",
+            "WN",
+            "UA",
+            "VS"
+          ],
+          "missingCodes": []
+        }
+      ],
       "verifiedCodes": [
         "AC",
         "AF",
@@ -30,8 +55,27 @@
     },
     "tpg": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:44:36.410Z",
+      "checkedAt": "2026-10-13T17:50:21.499Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "selectedAttempt": 1,
+      "attempts": [
+        {
+          "attempt": 1,
+          "status": "ok",
+          "verifiedCodes": [
+            "AM",
+            "NH",
+            "QR",
+            "EI",
+            "IB",
+            "EK",
+            "EY",
+            "SQ",
+            "TK"
+          ],
+          "missingCodes": []
+        }
+      ],
       "verifiedCodes": [
         "AM",
         "NH",
