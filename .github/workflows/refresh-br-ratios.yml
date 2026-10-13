@@ -66,12 +66,21 @@ jobs:
       - name: Refresh published point valuations
         id: valuations
         continue-on-error: true
-        run: node scripts/refresh-point-valuations.mjs --partners sample/partners.json --report data/point-valuations-health.json
+        run: node scripts/refresh-point-valuations.mjs --partners sample/partners.json --report data/point-valuations-health.json --diagnostics-dir "$RUNNER_TEMP/valuation-diagnostics"
 
       - name: Refresh observed transfer times
         id: times
         continue-on-error: true
         run: node scripts/refresh-transfer-times.mjs --partners sample/partners.json --report data/transfer-times-health.json
+
+      - name: Preserve failed public valuation response for diagnosis
+        if: always() && steps.valuations.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: valuation-source-diagnostics
+          path: ${{ runner.temp }}/valuation-diagnostics/
+          retention-days: 1
+          if-no-files-found: ignore
 
       # The tests are the gate, not the commit: bundled-partners-sync and the
       # canonical-name guard both read sample/partners.json, so a scrape that

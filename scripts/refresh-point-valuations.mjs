@@ -2,16 +2,17 @@
 // Refresh the project's 24 traceable editorial estimates. Other valuations
 // retain their value and review date; a successful fetch is not a review unless
 // the matching numeric table cell was actually extracted.
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VALUATION_SOURCES, parsePointValuations } from '../src/sources/point-valuations.mjs';
 import { validatePartners } from './validate-feed.mjs';
 
 const DEFAULT_PARTNERS = fileURLToPath(new URL('../sample/partners.json', import.meta.url));
+const MAX_DIAGNOSTIC_BYTES = 2 * 1024 * 1024;
 
 export async function refreshPointValuations({
-  partnersPath = DEFAULT_PARTNERS, reportPath = null, dryRun = false,
+  partnersPath = DEFAULT_PARTNERS, reportPath = null, dryRun = false, diagnosticsDir = null,
   fetchImpl = fetch, now = new Date(), log = console.log,
 } = {}) {
   const doc = JSON.parse(readFileSync(partnersPath, 'utf8'));
@@ -20,16 +21,18 @@ export async function refreshPointValuations({
   const checkedAt = now.toISOString(), asOf = checkedAt.slice(0, 10);
   const report = { ok: true, checkedAt, verified: 0, changed: false, written: false, sources: {}, changes: [], failures: [] };
   const collected = await Promise.all(VALUATION_SOURCES.map(async source => {
+    let html;
     try {
       const response = await fetchImpl(source.url, {
         headers: { 'User-Agent': 'TransferRadar/1.0 (public editorial valuation check)' },
         signal: AbortSignal.timeout(25000),
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return { source, parsed: parsePointValuations(await response.text(), source.id) };
-    } catch (error) { return { source, error: error.message, diagnostics: error.diagnostics }; }
+      html = await response.text();
+      return { source, parsed: parsePointValuations(html, source.id), html: diagnosticsDir ? html : undefined };
+    } catch (error) { return { source, error: error.message, diagnostics: error.diagnostics, html: diagnosticsDir ? html : undefined }; }
   }));
-  for (const { source, parsed, error, diagnostics } of collected) {
+  for (const { source, parsed, error, diagnostics, html } of collected) {
     const values = parsed?.values ?? {};
     const missingCodes = parsed?.missingCodes ?? source.codes;
     const status = error ? 'failed' : missingCodes.length ? 'degraded' : 'ok';
@@ -40,6 +43,20 @@ export async function refreshPointValuations({
     if (status !== 'ok') {
       report.ok = false;
       report.failures.push({ source: source.id, error: error ?? 'Missing or unreadable valuation cells', missingCodes });
+      // Opt-in capture of responses from the fixed public source list only.
+      // The runner supplies a temporary artifact directory; raw HTML never
+      // enters the partner document, JSON report, or stdout.
+      if (diagnosticsDir && typeof html === 'string') {
+        try {
+          mkdirSync(diagnosticsDir, { recursive: true });
+          const body = Buffer.from(html, 'utf8'), captured = body.subarray(0, MAX_DIAGNOSTIC_BYTES);
+          const file = source.id + '.html';
+          writeFileSync(path.join(diagnosticsDir, file), captured);
+          report.sources[source.id].htmlCapture = { file, bytes: captured.length, truncated: body.length > captured.length };
+        } catch (captureError) {
+          report.sources[source.id].htmlCapture = { error: captureError.message };
+        }
+      }
     }
     for (const [code, value] of Object.entries(values)) {
       const previous = doc.airlineValues[code];
@@ -71,10 +88,11 @@ function cliOptions(args) {
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i];
     if (arg === '--dry-run') options.dryRun = true;
-    else if (arg === '--partners' || arg === '--report') {
+    else if (arg === '--partners' || arg === '--report' || arg === '--diagnostics-dir') {
       const value = args[++i];
       if (!value || value.startsWith('--')) throw new Error(`Missing path after ${arg}`);
-      options[arg === '--partners' ? 'partnersPath' : 'reportPath'] = path.resolve(value);
+      const key = { '--partners': 'partnersPath', '--report': 'reportPath', '--diagnostics-dir': 'diagnosticsDir' }[arg];
+      options[key] = path.resolve(value);
     } else throw new Error(`Unknown argument: ${arg}`);
   }
   return options;

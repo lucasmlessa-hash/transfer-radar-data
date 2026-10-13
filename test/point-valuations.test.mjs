@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, writeFileSync, rmSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { parsePointValuations } from '../src/sources/point-valuations.mjs';
@@ -149,4 +150,33 @@ test('a partial remote valuation result persists the observed cells and preserve
     assert.equal(doc.airlineValues[code],f.before.airlineValues[code]);
     assert.deepEqual(doc.airlineValueMeta[code],f.before.airlineValueMeta[code]);
   }
+});
+
+test('optional capture saves only failed public-source HTML, outside partner data, with a two MiB cap',async t=>{
+  const f=files(t),diagnosticsDir=path.join(path.dirname(f.partnersPath),'captures');
+  const html='<html><body>missing valuation table</body></html>'+' '.repeat(2*1024*1024);
+  const result=await refreshPointValuations({...f,diagnosticsDir,now,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):html})});
+  assert.equal(result.sources.tpg.status,'failed');
+  assert.deepEqual(readdirSync(diagnosticsDir),['tpg.html']);
+  assert.equal(statSync(path.join(diagnosticsDir,'tpg.html')).size,2*1024*1024);
+  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg.html'),'utf8'),html.slice(0,2*1024*1024));
+  assert.deepEqual(result.sources.tpg.htmlCapture,{file:'tpg.html',bytes:2*1024*1024,truncated:true});
+  assert.equal(result.sources.fm.htmlCapture,undefined);
+  const noCapture=path.join(path.dirname(f.partnersPath),'successful-captures');
+  await refreshPointValuations({...f,diagnosticsDir:noCapture,now,log:()=>{},fetchImpl:fetchFixture});
+  assert.equal(existsSync(noCapture),false);
+});
+
+test('partial capture is exact and the CLI accepts --diagnostics-dir without changing parsing rules',async t=>{
+  const f=files(t),diagnosticsDir=path.join(path.dirname(f.partnersPath),'captures');
+  const html=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const result=await refreshPointValuations({...f,diagnosticsDir,now,dryRun:true,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):html})});
+  assert.equal(result.verified,20);assert.equal(result.ok,false);
+  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg.html'),'utf8'),html);
+  assert.equal(result.sources.tpg.htmlCapture.truncated,false);
+  writeFileSync(f.partnersPath,JSON.stringify({...f.before,version:99}));
+  const cli=spawnSync(process.execPath,[new URL('../scripts/refresh-point-valuations.mjs',import.meta.url).pathname,'--diagnostics-dir',diagnosticsDir,'--partners',f.partnersPath],{encoding:'utf8'});
+  assert.equal(cli.status,1);
+  assert.match(cli.stderr,/version/);
+  assert.doesNotMatch(cli.stderr,/Unknown argument/);
 });
