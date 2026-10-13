@@ -574,6 +574,10 @@
           "1:2"
         ],
         [
+          "Leading Hotels Leaders Club",
+          "—"
+        ],
+        [
           "Marriott Bonvoy",
           "1:1"
         ]
@@ -693,6 +697,10 @@
         ],
         [
           "Iberia Avios",
+          "1:1"
+        ],
+        [
+          "Japan Airlines (JAL Mileage Bank)",
           "1:1"
         ],
         [
@@ -876,6 +884,10 @@
           "1:1"
         ],
         [
+          "Amtrak Guest Rewards",
+          "2:1"
+        ],
+        [
           "Avianca LifeMiles",
           "1:1"
         ],
@@ -1024,6 +1036,10 @@
           "1:1"
         ],
         [
+          "Avianca LifeMiles",
+          "1:1"
+        ],
+        [
           "Ethiopian Shebamiles",
           "1:1"
         ],
@@ -1032,7 +1048,12 @@
           "1:1"
         ]
       ],
-      "hotel": []
+      "hotel": [
+        [
+          "ALL Accor Live Limitless",
+          "2:1"
+        ]
+      ]
     },
     "ESF": {
       "air": [
@@ -1153,6 +1174,10 @@
           "1:1"
         ],
         [
+          "Air Canada Aeroplan",
+          "1:1"
+        ],
+        [
           "Air France / KLM Flying Blue",
           "1:1"
         ],
@@ -1166,6 +1191,10 @@
         ],
         [
           "Cathay Pacific Asia Miles",
+          "1:1"
+        ],
+        [
+          "Copa ConnectMiles",
           "1:1"
         ],
         [
@@ -1239,11 +1268,15 @@
           "3:1"
         ],
         [
-          "United MileagePlus",
+          "American Airlines AAdvantage",
           "3:1"
         ],
         [
-          "American Airlines AAdvantage",
+          "Avianca LifeMiles",
+          "3:1"
+        ],
+        [
+          "British Airways Avios",
           "3:1"
         ],
         [
@@ -1255,11 +1288,7 @@
           "3:1"
         ],
         [
-          "British Airways Avios",
-          "3:1"
-        ],
-        [
-          "Avianca LifeMiles",
+          "United MileagePlus",
           "3:1"
         ],
         [
