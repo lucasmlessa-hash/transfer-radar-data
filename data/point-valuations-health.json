@@ -1,13 +1,13 @@
 {
-  "ok": false,
-  "checkedAt": "2026-10-13T17:38:54.039Z",
-  "verified": 20,
+  "ok": true,
+  "checkedAt": "2026-10-13T17:44:36.410Z",
+  "verified": 24,
   "changed": false,
   "written": false,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:38:54.039Z",
+      "checkedAt": "2026-10-13T17:44:36.410Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "verifiedCodes": [
         "AC",
@@ -29,162 +29,23 @@
       "missingCodes": []
     },
     "tpg": {
-      "status": "degraded",
-      "checkedAt": "2026-10-13T17:38:54.039Z",
+      "status": "ok",
+      "checkedAt": "2026-10-13T17:44:36.410Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "verifiedCodes": [
         "AM",
         "NH",
         "QR",
         "EI",
-        "IB"
-      ],
-      "missingCodes": [
+        "IB",
         "EK",
         "EY",
         "SQ",
         "TK"
       ],
-      "diagnostics": {
-        "htmlCharacters": 607951,
-        "tableCount": 24,
-        "matchingTableCount": 1,
-        "tables": [
-          {
-            "index": 0,
-            "header": [
-              "Program",
-              "October 2026 valuation (cents)"
-            ],
-            "rowCount": 5,
-            "rows": [
-              {
-                "program": "American Express Membership Rewards",
-                "valuation": "2.0"
-              },
-              {
-                "program": "Capital One",
-                "valuation": "1.85"
-              },
-              {
-                "program": "Chase Ultimate Rewards",
-                "valuation": "2.05"
-              },
-              {
-                "program": "Citi ThankYou Rewards",
-                "valuation": "1.9"
-              },
-              {
-                "program": "Wells Fargo Rewards",
-                "valuation": "1.75"
-              }
-            ]
-          },
-          {
-            "index": 1,
-            "header": [
-              "Program",
-              "October 2026 valuation (cents)"
-            ],
-            "rowCount": 1,
-            "rows": [
-              {
-                "program": "Bilt",
-                "valuation": "2.2"
-              }
-            ]
-          },
-          {
-            "index": 2,
-            "header": [
-              "Program",
-              "October 2026 valuation (cents)"
-            ],
-            "rowCount": 7,
-            "rows": [
-              {
-                "program": "Aeromexico Rewards",
-                "valuation": "0.8"
-              },
-              {
-                "program": "Air Canada Aeroplan",
-                "valuation": "1.5*"
-              },
-              {
-                "program": "Alaska Airlines Atmos Rewards",
-                "valuation": "1.55*"
-              },
-              {
-                "program": "American Airlines AAdvantage",
-                "valuation": "1.45*"
-              },
-              {
-                "program": "ANA Mileage Club",
-                "valuation": "1.4"
-              },
-              {
-                "program": "Avianca Lifemiles",
-                "valuation": "1.6 (up from 1.55)*"
-              },
-              {
-                "program": "Avios",
-                "valuation": "1.4"
-              }
-            ]
-          },
-          {
-            "index": 3,
-            "header": [
-              "Program",
-              "October 2026 valuation (cents)"
-            ],
-            "rowCount": 7,
-            "rows": [
-              {
-                "program": "Accor Live Limitless",
-                "valuation": "2.3"
-              },
-              {
-                "program": "Best Western Rewards",
-                "valuation": "0.6"
-              },
-              {
-                "program": "Choice Privileges",
-                "valuation": "0.85**"
-              },
-              {
-                "program": "Hilton Honors",
-                "valuation": "0.4**"
-              },
-              {
-                "program": "IHG One Rewards",
-                "valuation": "0.6**"
-              },
-              {
-                "program": "Marriott Bonvoy",
-                "valuation": "0.75**"
-              },
-              {
-                "program": "World of Hyatt",
-                "valuation": "1.65**"
-              }
-            ]
-          }
-        ]
-      }
+      "missingCodes": []
     }
   },
   "changes": [],
-  "failures": [
-    {
-      "source": "tpg",
-      "error": "Missing or unreadable valuation cells",
-      "missingCodes": [
-        "EK",
-        "EY",
-        "SQ",
-        "TK"
-      ]
-    }
-  ]
+  "failures": []
 }
