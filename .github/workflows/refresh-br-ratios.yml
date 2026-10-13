@@ -73,8 +73,8 @@ jobs:
         continue-on-error: true
         run: node scripts/refresh-transfer-times.mjs --partners sample/partners.json --report data/transfer-times-health.json
 
-      - name: Preserve failed public valuation response for diagnosis
-        if: always() && steps.valuations.outcome == 'failure'
+      - name: Preserve incomplete public valuation responses for diagnosis
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: valuation-source-diagnostics

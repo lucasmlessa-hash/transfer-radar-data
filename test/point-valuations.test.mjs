@@ -37,7 +37,7 @@ function files(t) {
   const partnersPath=path.join(dir,'partners.json'),reportPath=path.join(dir,'report.json');
   const before=JSON.parse(readFileSync(new URL('../fixtures/partners-audit-2026-10.json',import.meta.url),'utf8'));
   writeFileSync(partnersPath,JSON.stringify(before,null,2)+'\n');
-  return {partnersPath,reportPath,before};
+  return {partnersPath,reportPath,before,sleepImpl:async()=>{}};
 }
 const now=new Date('2026-10-13T16:00:00Z');
 const fetchFixture=async url=>({ok:true,text:async()=>fixture(url.includes('frequentmiler')?'fm':'tpg')});
@@ -157,10 +157,10 @@ test('optional capture saves only failed public-source HTML, outside partner dat
   const html='<html><body>missing valuation table</body></html>'+' '.repeat(2*1024*1024);
   const result=await refreshPointValuations({...f,diagnosticsDir,now,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):html})});
   assert.equal(result.sources.tpg.status,'failed');
-  assert.deepEqual(readdirSync(diagnosticsDir),['tpg.html']);
-  assert.equal(statSync(path.join(diagnosticsDir,'tpg.html')).size,2*1024*1024);
-  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg.html'),'utf8'),html.slice(0,2*1024*1024));
-  assert.deepEqual(result.sources.tpg.htmlCapture,{file:'tpg.html',bytes:2*1024*1024,truncated:true});
+  assert.deepEqual(readdirSync(diagnosticsDir),['tpg-attempt1.html','tpg-attempt2.html','tpg-attempt3.html']);
+  assert.equal(statSync(path.join(diagnosticsDir,'tpg-attempt1.html')).size,2*1024*1024);
+  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg-attempt1.html'),'utf8'),html.slice(0,2*1024*1024));
+  assert.deepEqual(result.sources.tpg.attempts[0].htmlCapture,{file:'tpg-attempt1.html',bytes:2*1024*1024,truncated:true});
   assert.equal(result.sources.fm.htmlCapture,undefined);
   const noCapture=path.join(path.dirname(f.partnersPath),'successful-captures');
   await refreshPointValuations({...f,diagnosticsDir:noCapture,now,log:()=>{},fetchImpl:fetchFixture});
@@ -172,11 +172,72 @@ test('partial capture is exact and the CLI accepts --diagnostics-dir without cha
   const html=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
   const result=await refreshPointValuations({...f,diagnosticsDir,now,dryRun:true,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):html})});
   assert.equal(result.verified,20);assert.equal(result.ok,false);
-  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg.html'),'utf8'),html);
-  assert.equal(result.sources.tpg.htmlCapture.truncated,false);
+  assert.equal(readFileSync(path.join(diagnosticsDir,'tpg-attempt1.html'),'utf8'),html);
+  assert.equal(result.sources.tpg.attempts[0].htmlCapture.truncated,false);
   writeFileSync(f.partnersPath,JSON.stringify({...f.before,version:99}));
   const cli=spawnSync(process.execPath,[new URL('../scripts/refresh-point-valuations.mjs',import.meta.url).pathname,'--diagnostics-dir',diagnosticsDir,'--partners',f.partnersPath],{encoding:'utf8'});
   assert.equal(cli.status,1);
   assert.match(cli.stderr,/version/);
   assert.doesNotMatch(cli.stderr,/Unknown argument/);
+});
+
+test('a 5/9 response is captured before retry and replaced by one fully verified 9/9 response',async t=>{
+  const f=files(t),diagnosticsDir=path.join(path.dirname(f.partnersPath),'captures');
+  const partial=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  let tpgCalls=0,fmCalls=0;const sleeps=[];
+  const result=await refreshPointValuations({...f,diagnosticsDir,now,log:()=>{},sleepImpl:async ms=>{
+    sleeps.push(ms);assert.equal(readFileSync(path.join(diagnosticsDir,'tpg-attempt1.html'),'utf8'),partial);
+  },fetchImpl:async url=>{
+    if(url.includes('frequentmiler')){fmCalls++;return {ok:true,text:async()=>fixture('fm')};}
+    tpgCalls++;return {ok:true,text:async()=>tpgCalls===1?partial:fixture('tpg')};
+  }});
+  assert.equal(result.ok,true);assert.equal(result.verified,24);
+  assert.equal(tpgCalls,2);assert.equal(fmCalls,1);assert.deepEqual(sleeps,[1000]);
+  assert.deepEqual(result.sources.tpg.attempts.map(a=>a.status),['degraded','ok']);
+  assert.equal(result.sources.tpg.selectedAttempt,2);assert.deepEqual(result.failures,[]);
+  assert.deepEqual(readdirSync(diagnosticsDir),['tpg-attempt1.html']);
+});
+
+test('three partial responses select the last response without combining values or renewing absent estimates',async t=>{
+  const f=files(t);let calls=0;
+  const partial=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const earlier=partial.replace('</tbody>','<tr><td>Emirates Skywards</td><td>9.99</td></tr></tbody>');
+  const result=await refreshPointValuations({...f,now,log:()=>{},fetchImpl:async url=>{
+    if(url.includes('frequentmiler'))return fetchFixture(url);
+    calls++;return {ok:true,text:async()=>calls===1?earlier:partial};
+  }});
+  assert.equal(calls,3);assert.equal(result.ok,false);assert.equal(result.verified,20);
+  assert.equal(result.sources.tpg.attempts.length,3);assert.equal(result.sources.tpg.selectedAttempt,3);
+  const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
+  for(const code of ['EK','EY','SQ','TK']) {
+    assert.equal(doc.airlineValues[code],f.before.airlineValues[code]);
+    assert.deepEqual(doc.airlineValueMeta[code],f.before.airlineValueMeta[code]);
+  }
+});
+
+test('repeated network failures do not block the independent source or erase a previously parsed partial response',async t=>{
+  const f=files(t);const calls={fm:0,tpg:0};
+  const partial=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const result=await refreshPointValuations({...f,now,log:()=>{},fetchImpl:async url=>{
+    const source=url.includes('frequentmiler')?'fm':'tpg';calls[source]++;
+    if(source==='tpg' && calls[source]===1)return {ok:true,text:async()=>partial};
+    throw Error('network unavailable');
+  }});
+  assert.deepEqual(calls,{fm:3,tpg:3});assert.equal(result.verified,5);
+  assert.equal(result.sources.fm.status,'failed');assert.equal(result.sources.tpg.status,'degraded');
+  assert.equal(result.sources.tpg.selectedAttempt,1);
+  assert.deepEqual(result.sources.tpg.attempts.map(a=>a.status),['degraded','failed','failed']);
+  const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
+  assert.deepEqual(doc.airlineValueMeta.AF,f.before.airlineValueMeta.AF);
+});
+
+test('diagnostics retain up to thirty headerless table fragments without accepting their unscoped values',()=>{
+  const partial=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const fragments=Array.from({length:35},(_,i)=>`<table><tr><td>fragment ${i}</td><td>1.2</td><td>excluded third cell</td></tr></table>`).join('');
+  const parsed=parsePointValuations(partial+fragments,'tpg');
+  assert.equal(parsed.diagnostics.tableCount,36);assert.equal(parsed.diagnostics.tables.length,30);
+  assert.deepEqual(parsed.diagnostics.tables[1].header,['fragment 0','1.2']);
+  assert.equal(parsed.diagnostics.tables[1].rows[0].program,'fragment 0');
+  assert.doesNotMatch(JSON.stringify(parsed.diagnostics),/excluded third cell/);
+  assert.deepEqual(parsed.missingCodes,['EK','EY','SQ','TK']);
 });

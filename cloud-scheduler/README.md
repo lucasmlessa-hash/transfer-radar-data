@@ -4,6 +4,12 @@ Configuração de 13/10/2026: coleta diária às 06h e verificação às 07h de
 Brasília. O ambiente `production` ativa o cron; a configuração padrão o pausa.
 A conta Cloudflare foi conferida no plano Free. Nenhum plano pago foi ativado.
 
+**Ativado em 13/10/2026.** Worker e cron confirmados pela API Cloudflare;
+secret `GITHUB_TOKEN` confirmado pelo nome, sem exposição. A coleta manual
+completa passou e disparou o build automático com sucesso. O primeiro disparo
+do relógio é em 14/10/2026 às 06h e ainda não foi observado nesta ativação.
+Versão inicial ativa: `0e595b3b-8527-449d-8009-8a7d167811f7`.
+
 ## Funcionamento
 
 - **06h de Brasília:** Cloudflare solicita `Refresh BR ratios`. O job confere
@@ -117,3 +123,9 @@ Os relatórios `hotel-ratios-health.json`, `point-valuations-health.json` e
 data de conferência, e mudanças verificadas de fontes independentes podem ser
 publicadas mesmo quando outra fonte falha. Nenhum scraper garante cobrir todo o
 mercado ou promoções lançadas e encerradas entre duas coletas diárias.
+
+O TPG apresentou respostas alternadamente completas e parciais no runner.
+O refresh usa até três tentativas limitadas, sem juntar valores de respostas
+diferentes. Se a fonte permanecer incompleta, conserva valores/datas anteriores,
+registra a falha e guarda somente o HTML público em artefato de diagnóstico com
+retenção de um dia. Um resultado parcial nunca é marcado como conferência completa.

@@ -29,16 +29,15 @@ const clean = text => text.replace(/\s+/g, ' ').trim();
 function tableDiagnostics($, tables, matchingTableCount, htmlCharacters) {
   // Only public labels and valuation cells: no article/news text, links,
   // scripts, request headers, or raw document. Bound remote layout failures.
-  const summaries = tables.map((table, index) => {
+  const summaries = tables.slice(0,30).map((table, index) => {
     const header = $(table).find('tr').first().find('th,td').toArray()
       .slice(0,2).map(cell => clean($(cell).text()).slice(0,120));
-    if (header[0] !== 'Program') return null;
     const rows = $(table).find('tr').toArray().filter(row => $(row).find('td').length > 0);
     return { index, header, rowCount: rows.length, rows: rows.slice(0,60).map(row => {
       const cells = $(row).find('td');
       return { program: clean(cells.eq(0).text()).slice(0,120), valuation: clean(cells.eq(1).text()).slice(0,120) };
     }) };
-  }).filter(Boolean).slice(0,8);
+  });
   return { htmlCharacters, tableCount: tables.length, matchingTableCount, tables: summaries };
 }
 
