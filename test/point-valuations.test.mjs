@@ -103,3 +103,50 @@ test('dry run, total failure, and invalid candidate cannot rewrite partner data'
   await assert.rejects(refreshPointValuations({...f,now,fetchImpl:fetchFixture,log:()=>{}}),/version/);
   assert.deepEqual(JSON.parse(readFileSync(f.partnersPath,'utf8')),invalid);
 });
+
+test('an incomplete public table reports its actual cells without accepting the missing estimates',()=>{
+  const html=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const parsed=parsePointValuations(html,'tpg');
+  assert.deepEqual(Object.keys(parsed.values),['AM','NH','QR','EI','IB']);
+  assert.deepEqual(parsed.missingCodes,['EK','EY','SQ','TK']);
+  assert.equal(parsed.diagnostics.matchingTableCount,1);
+  assert.deepEqual(parsed.diagnostics.tables[0].header,['Program','October 2026 valuation (cents)']);
+  assert.equal(parsed.diagnostics.tables[0].rowCount,9);
+  assert.deepEqual(parsed.diagnostics.tables[0].rows[0],{program:'Aeromexico Rewards',valuation:'0.8'});
+  assert.equal(parsed.diagnostics.tables[0].rows.at(-1).program,'Delta SkyMiles');
+  assert.doesNotMatch(JSON.stringify(parsed.diagnostics),/Chase Air Canada|major refresh|<|href/);
+  assert.equal(parsePointValuations(fixture('tpg'),'tpg').diagnostics,undefined);
+});
+
+test('wrong units remain rejected but expose bounded public table diagnostics',()=>{
+  const html=fixture('tpg').replaceAll('valuation (cents)','valuation (euros)');
+  assert.throws(()=>parsePointValuations(html,'tpg'),error=>{
+    assert.match(error.message,/table|tabela/i);
+    assert.equal(error.diagnostics.matchingTableCount,0);
+    assert.ok(error.diagnostics.tables.some(table=>table.header[1]==='October 2026 valuation (euros)'));
+    for(const table of error.diagnostics.tables) {
+      assert.ok(table.rows.length<=60);
+      assert.ok(table.rows.every(row=>row.program.length<=120 && row.valuation.length<=120));
+    }
+    return true;
+  });
+});
+
+test('a partial remote valuation result persists the observed cells and preserves all missing values and dates',async t=>{
+  const f=files(t);
+  const incomplete=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
+  const logs=[];
+  const result=await refreshPointValuations({...f,now,log:line=>logs.push(line),fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):incomplete})});
+  assert.equal(result.ok,false);assert.equal(result.verified,20);
+  const report=JSON.parse(readFileSync(f.reportPath,'utf8'));
+  assert.equal(report.sources.tpg.status,'degraded');
+  assert.equal(report.sources.tpg.diagnostics.tables[0].rowCount,9);
+  assert.equal(report.sources.fm.diagnostics,undefined);
+  assert.ok(logs.some(line=>line.startsWith('[valuations] tpg diagnostics: ') && line.includes('Aeromexico Rewards')));
+  assert.ok(logs.every(line=>!line.startsWith('[valuations] fm diagnostics: ')));
+  const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
+  for(const code of ['EK','EY','SQ','TK']) {
+    assert.equal(doc.airlineValues[code],f.before.airlineValues[code]);
+    assert.deepEqual(doc.airlineValueMeta[code],f.before.airlineValueMeta[code]);
+  }
+});

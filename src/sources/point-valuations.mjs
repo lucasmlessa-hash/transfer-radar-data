@@ -26,18 +26,40 @@ export const VALUATION_SOURCES = [
 ].map(source => ({ ...source, codes: Object.values(PROGRAMS[source.id]).flat() }));
 const clean = text => text.replace(/\s+/g, ' ').trim();
 
+function tableDiagnostics($, tables, matchingTableCount, htmlCharacters) {
+  // Only public labels and valuation cells: no article/news text, links,
+  // scripts, request headers, or raw document. Bound remote layout failures.
+  const summaries = tables.map((table, index) => {
+    const header = $(table).find('tr').first().find('th,td').toArray()
+      .slice(0,2).map(cell => clean($(cell).text()).slice(0,120));
+    if (header[0] !== 'Program') return null;
+    const rows = $(table).find('tr').toArray().filter(row => $(row).find('td').length > 0);
+    return { index, header, rowCount: rows.length, rows: rows.slice(0,60).map(row => {
+      const cells = $(row).find('td');
+      return { program: clean(cells.eq(0).text()).slice(0,120), valuation: clean(cells.eq(1).text()).slice(0,120) };
+    }) };
+  }).filter(Boolean).slice(0,8);
+  return { htmlCharacters, tableCount: tables.length, matchingTableCount, tables: summaries };
+}
+
 export function parsePointValuations(html, sourceId) {
   const programs = PROGRAMS[sourceId];
   if (!programs) throw new Error('Unknown valuation source: ' + sourceId);
   const $ = cheerio.load(html);
-  const tables = $('table').toArray().filter(table => {
+  const allTables = $('table').toArray();
+  const tables = allTables.filter(table => {
     const head = $(table).find('tr').first().find('th,td').map((_, c) => clean($(c).text())).get();
     const correctUnits = sourceId === 'fm' ? head[1] === 'Reasonable Redemption Value'
       : /^[A-Za-z]+ \d{4} valuation \(cents\)$/.test(head[1] ?? '');
     return head[0] === 'Program' && correctUnits && $(table).find('tr').toArray()
       .some(row => programs[clean($(row).find('td').first().text())]);
   });
-  if (tables.length !== 1) throw new Error('Expected one recognizable airline valuation table, found ' + tables.length);
+  const diagnostics = () => tableDiagnostics($, allTables, tables.length, html.length);
+  if (tables.length !== 1) {
+    const error = new Error('Expected one recognizable airline valuation table, found ' + tables.length);
+    error.diagnostics = diagnostics();
+    throw error;
+  }
   const values = {}, invalid = new Set(), seen = new Set();
   $(tables[0]).find('tr').each((_, row) => {
     const cells = $(row).find('td');
@@ -54,6 +76,6 @@ export function parsePointValuations(html, sourceId) {
     }
   });
   for (const code of invalid) delete values[code];
-  return { values, missingCodes: Object.values(programs).flat().filter(code => values[code] === undefined) };
+  const missingCodes = Object.values(programs).flat().filter(code => values[code] === undefined);
+  return { values, missingCodes, ...(missingCodes.length ? { diagnostics: diagnostics() } : {}) };
 }
-

@@ -27,14 +27,16 @@ export async function refreshPointValuations({
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return { source, parsed: parsePointValuations(await response.text(), source.id) };
-    } catch (error) { return { source, error: error.message }; }
+    } catch (error) { return { source, error: error.message, diagnostics: error.diagnostics }; }
   }));
-  for (const { source, parsed, error } of collected) {
+  for (const { source, parsed, error, diagnostics } of collected) {
     const values = parsed?.values ?? {};
     const missingCodes = parsed?.missingCodes ?? source.codes;
     const status = error ? 'failed' : missingCodes.length ? 'degraded' : 'ok';
+    const evidence = parsed?.diagnostics ?? diagnostics;
     report.sources[source.id] = { status, checkedAt, source: source.url,
-      verifiedCodes: Object.keys(values), missingCodes, ...(error ? { error } : {}) };
+      verifiedCodes: Object.keys(values), missingCodes, ...(error ? { error } : {}),
+      ...(status !== 'ok' && evidence ? { diagnostics: evidence } : {}) };
     if (status !== 'ok') {
       report.ok = false;
       report.failures.push({ source: source.id, error: error ?? 'Missing or unreadable valuation cells', missingCodes });
@@ -52,6 +54,7 @@ export async function refreshPointValuations({
       report.verified += 1;
     }
     log(`[valuations] ${source.id}: ${Object.keys(values).length}/${source.codes.length} verified (${status})`);
+    if (status === 'degraded' && evidence) log(`[valuations] ${source.id} diagnostics: ${JSON.stringify(evidence)}`);
   }
   validatePartners(doc);
   report.changed = JSON.stringify(doc) !== before;
@@ -85,4 +88,3 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exitCode = 1;
   }
 }
-
