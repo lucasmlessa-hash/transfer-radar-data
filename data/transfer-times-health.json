@@ -1,14 +1,14 @@
 {
   "ok": true,
-  "changed": false,
-  "checkedAt": "2026-10-13T17:50:21.998Z",
+  "changed": true,
+  "checkedAt": "2026-10-18T23:05:18.676Z",
   "sources": [
     {
       "id": "fm-directory",
       "url": "https://frequentmiler.com/transfer-partner-master-list/",
       "status": "ok",
       "tableCount": 4,
-      "observedRoutes": 122,
+      "observedRoutes": 123,
       "verifiedRoutes": 98
     }
   ],
@@ -628,6 +628,13 @@
     },
     {
       "bank": "ROVE",
+      "code": "B6",
+      "cell": "1 to 1 ()",
+      "time": null,
+      "reason": "no-time"
+    },
+    {
+      "bank": "ROVE",
       "code": "QF",
       "cell": "1 to 1 (Unknown)",
       "time": null,
@@ -736,5 +743,5 @@
     }
   },
   "dryRun": false,
-  "written": false
+  "written": true
 }

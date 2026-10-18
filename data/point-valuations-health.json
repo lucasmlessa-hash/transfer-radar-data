@@ -1,13 +1,13 @@
 {
   "ok": true,
-  "checkedAt": "2026-10-13T17:50:21.499Z",
+  "checkedAt": "2026-10-18T23:05:18.061Z",
   "verified": 24,
-  "changed": false,
-  "written": false,
+  "changed": true,
+  "written": true,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:50:21.499Z",
+      "checkedAt": "2026-10-18T23:05:18.061Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "selectedAttempt": 1,
       "attempts": [
@@ -55,7 +55,7 @@
     },
     "tpg": {
       "status": "ok",
-      "checkedAt": "2026-10-13T17:50:21.499Z",
+      "checkedAt": "2026-10-18T23:05:18.061Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "selectedAttempt": 1,
       "attempts": [
