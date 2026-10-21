@@ -85,3 +85,12 @@ test('countdown keeps its explicit year and Brazilian closing day', async () => 
   assert.equal(route.active, undefined, 'an old countdown must not become a current promotion');
   assert.equal(entries.find(e => /Flying Blue/i.test(e.partnerName)).endDateRaw, '10/31/2026');
 });
+
+test('Azul October campaign accepts às with time, de and a two-digit year', async () => {
+  const listing = '<script id="__NEXT_DATA__">' + JSON.stringify({status:{variations:[{status:'Vigente',title:'Ganhe até 100% de bônus',button:{redirectLink:'/livelo-para-parceiros/azul/AZLTransfer'}}]}}) + '</script>';
+  const entries = await source.parse(listing, {loadPage: async () => fixture('livelo-AZLTransfer-2026-10')});
+  assert.equal(entries[0].startDateRaw, '10/20/2026');
+  assert.equal(entries[0].endDateRaw, '10/21/2026');
+  const expired = normalize(entries, new Date('2026-10-22T12:00:00Z'), new Map()).routes;
+  assert.ok(expired.every(r => !r.active));
+});

@@ -78,10 +78,10 @@ function campaignDates(html, pct) {
     if (!percentages.includes(pct)) continue;
     const text = cheerio.load(`${campaign.partnercampaignalert ?? ''} ${campaign.longDescription ?? ''}`)
       .text().replace(/\s+/g, ' ');
-    const m = text.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\s+at[ée]\s+(?:(?:as|às)\s+)?(?:\d{1,2}(?:h|:)\d{0,2}\s+(?:do\s+dia\s+)?)?(\d{1,2})\/(\d{1,2})\/(\d{4})/i);
+    const m = text.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?\s+(?:at[ée]\s+(?:(?:as|às)\s+)?|às\s+)(?:\d{1,2}(?:h|:)\d{0,2}\s+(?:(?:do\s+dia|de)\s+)?)?(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})\b/i);
     if (!m) continue;
     const [, sd, sm, sy, ed, em, ey] = m;
-    const endYear = Number(ey);
+    const endYear = ey.length === 2 ? 2000 + Number(ey) : Number(ey);
     const startYear = sy ? Number(sy) : endYear - (Number(sm) > Number(em) ? 1 : 0);
     const valid = (y, month, day) => {
       const d = new Date(Date.UTC(y, Number(month) - 1, Number(day)));
