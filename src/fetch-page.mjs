@@ -1,3 +1,5 @@
+export const PUBLIC_CLIENT_USER_AGENT = 'TransferRadar/1.0 (+https://github.com/lucasmlessa-hash/transfer-radar-data)';
+
 // Public source requests get bounded retries. A persistent failure still
 // reaches the caller's health report; old data is never labelled verified.
 export async function fetchPage(url, {

@@ -140,3 +140,22 @@ test('the Brazilian rates are actually populated, and not all 1:1', () => {
   const withRatio = [...doc.directory.LIV.air, ...doc.directory.LIV.hotel].filter(([, r]) => r !== '—');
   assert.ok(withRatio.length >= 10, `Livelo should carry a rate for nearly every partner, got ${withRatio.length}`);
 });
+
+
+test('BR refresh verifies Livelo directory and rates without the browser identity rejected by its public server', async t => {
+  const { refreshBrRatios } = await import('../scripts/refresh-br-ratios.mjs');
+  const listing = nextData({ listPartners: [{nomeParceiro:'Smiles',redirectUrl:'/livelo-para-parceiros/smiles/SMLTransfer',status:'Ativo'}] });
+  const esfera = nextData({ title:'PLP de programas parceiros', showcaseProductsId:'e000100001' });
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (url.startsWith('https://www.livelo.com.br/')) {
+      if (/Chrome\//.test(options.headers?.['User-Agent'] || '')) return new Response('', {status:403});
+      return new Response(url.endsWith('/livelo-para-parceiros') ? listing : '<p>1 ponto Livelo = 1 ponto Smiles</p>');
+    }
+    assert.ok(url.startsWith('https://www.esfera.com.vc/'));
+    return new Response(url.endsWith('/programas-parceiros') ? esfera : '<title>Smiles | Esfera</title><p>1 ponto Esfera = 1 milha Smiles</p>');
+  });
+  const doc = {directory:{LIV:{air:[],hotel:[]},ESF:{air:[],hotel:[]}}};
+  const result = await refreshBrRatios(doc, {wait:async()=>{},log:()=>{},warn:()=>{}});
+  assert.equal(result.ok,true,JSON.stringify(result.failures));
+  assert.deepEqual(doc.directory.LIV.air,[['Smiles (GOL)','1:1']]);
+});

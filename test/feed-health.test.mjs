@@ -66,7 +66,8 @@ test('live directory collection recovers a transient 403 before reporting covera
     'https://www.livelo.com.br/livelo-para-parceiros': 'partner-livelo.html',
   };
   let directoryCalls = 0;
-  t.mock.method(globalThis, 'fetch', async url => {
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    if (url.startsWith('https://www.livelo.com.br/') && /Chrome\//.test(options.headers?.['User-Agent'] || '')) return new Response('', {status:403});
     if (url === 'https://www.livelo.com.br/livelo-para-parceiros' && ++directoryCalls === 1) return new Response('', {status:403});
     const file = names[url];
     assert.ok(file, `unexpected source URL: ${url}`);

@@ -15,7 +15,7 @@ import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
-import { fetchPage } from './fetch-page.mjs';
+import { fetchPage, PUBLIC_CLIENT_USER_AGENT } from './fetch-page.mjs';
 import { validatePartners } from '../scripts/validate-feed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -250,7 +250,8 @@ export async function runPipeline({
       const html = fixtures
         ? readFileSync(path.join(fixturesDir, src.fixture), 'utf8')
         : await fetchPage(src.url, {
-          headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' },
+          // Livelo rejects the legacy Chrome identity on hosted runners.
+          headers: { 'User-Agent': src.id === 'livelo-directory' ? PUBLIC_CLIENT_USER_AGENT : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' },
           ok: body => {
             const parsed = src.parse(body);
             return src.banks.every(bank => parsed?.[bank]?.air?.size || parsed?.[bank]?.hotel?.size);
