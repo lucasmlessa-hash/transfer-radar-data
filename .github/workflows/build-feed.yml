@@ -1,179 +1,32 @@
-# out/ is intentionally gitignored and is never committed to the repository.
-# The generated feed reaches users exclusively through the GitHub Pages
-# deployment artifact (upload-pages-artifact / deploy-pages below), not via
-# a git commit. Branch-based Pages can't serve a /out subdirectory anyway,
-# so committing build output would be both wrong and unnecessary.
 name: Build feed
-
 on:
-  # Run after the daily ratio job, including partial-source failures: verified
-  # changes were committed before its final status. Checkout gets latest main.
-  workflow_run:
-    workflows: [Refresh BR ratios]
-    types: [completed]
-    branches: [main]
   workflow_dispatch: {}
-  # An independent scheduler can dispatch this without relying on Actions cron.
-  repository_dispatch:
-    types: [refresh-feed]
-
-# contents: write exists solely for the observed-windows ledger commit below.
 permissions:
-  contents: write
-  pages: write
-  id-token: write
-  issues: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
-
+  contents: read
 jobs:
-  build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'cancelled'
+  diagnose:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify parsers and safeguards
-        run: npm test
-
-      # The cliff guard in src/publish.mjs compares this run's candidate against
-      # the PREVIOUS feed, which it reads from out/feed.json. out/ is gitignored
-      # and the runner is fresh, so without this step readPreviousFeed() returns
-      # null on every CI run and the guard is dead code in the only place it
-      # matters. Seed it from what is actually published — that is the real
-      # invariant (what users are consuming right now), not whatever a cache
-      # happens to hold.
-      #
-      # Ordering: after `npm ci` (a dependency failure should surface as itself,
-      # not behind an unrelated network step) and before `npm run build` (which
-      # reads out/feed.json at the start, then overwrites it with the new
-      # candidate on success — so the Pages artifact always carries the new feed,
-      # never this seed). On abort the build step exits non-zero, the job fails,
-      # and deploy (needs: build) never runs, so the stale seed is never uploaded.
-      #
-      # Never fails the build: a first-ever deploy 404s and an outage is not our
-      # problem to escalate — in both cases the guard correctly stays off rather
-      # than blocking a legitimate publish. curl -f leaves a 0-byte file behind
-      # on an HTTP error, hence the rm; a truncated-but-200 body is also safe,
-      # readPreviousFeed() JSON.parse-fails and returns null (see the
-      # "unreadable previous feed" test in test/robustness.test.mjs).
-      - name: Seed previous published feed (arms the cliff guard)
-        env:
-          # Literal, not derived from ${{ github.repository }}: this must be the
-          # URL the extension actually reads. If Pages moves, change it here and
-          # in transfer-bonus-radar/config.js together.
-          FEED_URL: https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
+      - name: Compare public Livelo requests
+        shell: bash
         run: |
-          mkdir -p out
-          if curl -fsSL --max-time 30 -o out/feed.json "$FEED_URL"; then
-            # `|| echo ?` so an unparseable body logs oddly instead of erroring here;
-            # publish.mjs is the thing that decides what a bad previous feed means.
-            routes=$(node -p 'JSON.parse(require("fs").readFileSync("out/feed.json","utf8")).routes.length' 2>/dev/null || echo '?')
-            echo "cliff guard armed against $FEED_URL — previous feed: $routes routes"
-          else
-            rm -f out/feed.json
-            echo "no previous feed at $FEED_URL (first deploy, or unreachable) — cliff guard stays off this run"
-          fi
-
-      - name: Run pipeline
-        id: build
-        run: npm run build
-
-      - name: Validate output
-        run: node scripts/validate-feed.mjs out/feed.json
-
-      - name: Include reference verification reports
-        run: |
-          for report in data/hotel-ratios-health.json data/point-valuations-health.json data/transfer-times-health.json; do
-            if [ -f "$report" ]; then cp "$report" out/; fi
-          done
-
-      - name: Report source coverage
-        run: |
-          if node scripts/check-feed-health.mjs out/feed.json > /tmp/feed-health.txt; then
-            cat /tmp/feed-health.txt >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "::warning::Partial collection — see source health in feed.json"
-            cat /tmp/feed-health.txt >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      # The pipeline's own memory (src/observed.mjs): live bonuses it saw are
-      # appended to a day-granular ledger so Esfera/Livelo/Rove — which no
-      # public archive covers — accumulate real history. Day granularity means
-      # this commits at most once a day. Only after the
-      # feed validated: a build that failed or shipped garbage must not advance
-      # the ledger either.
-      #
-      # A losing push race must NOT fail the job. deploy has `needs: build`, so
-      # a hard failure here would hold a perfectly good feed back from users
-      # over bookkeeping — the wrong trade in a fail-safe pipeline. It also
-      # self-heals: the ledger is rebuilt from the live feed every run, so the
-      # same rows reappear in the next diff and get committed then. Warn, never
-      # force, keep going.
-      - name: Persist observed-windows ledger
-        run: |
-          # status --porcelain, not diff --quiet: the latter is blind to an
-          # untracked file, and the ledger's very first appearance is one.
-          if [ -z "$(git status --porcelain -- data/observed-windows.json)" ]; then
-            echo "ledger unchanged"
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/observed-windows.json
-            git commit -m "chore(data): observed-windows ledger $(date -u +%F)"
-            if ! (git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"); then
-              echo "::warning::ledger push failed (concurrent push?) — the feed still publishes and the next run re-appends these rows"
-            fi
-          fi
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: out
-
-      - name: Open issue on failure
-        if: failure()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh label create pipeline-failure --color B60205 --description "Feed pipeline failed" 2>/dev/null || true
-          if ! gh issue list --label pipeline-failure --state open --json number --jq '.[0]' | grep -q .; then
-            gh issue create \
-              --title "Pipeline failure: $(date -u +%FT%TZ)" \
-              --label pipeline-failure \
-              --body "The build-feed workflow failed on run ${{ github.run_id }}. See https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }} for logs. Last known-good out/feed.json remains published; no partial data was written."
-          else
-            echo "An open pipeline-failure issue already exists - skipping to avoid spam."
-          fi
-
-  # deploy needs: build, so a failed/aborted build (invalid data, >50% source
-  # failure) never reaches deploy-pages and the previously published feed
-  # stays live untouched. Do not add `if: always()` here - that would deploy
-  # on build failure and defeat the fail-safe.
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Verify published collection health
-        run: node scripts/check-feed-health.mjs https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
+          node --input-type=module <<'JS'
+          const url='https://www.livelo.com.br/livelo-para-parceiros';
+          const cases=[
+            ['default',url,{}],
+            ['legacy-browser',url,{'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'}],
+            ['identified-client',url,{'User-Agent':'TransferRadar/1.0 (+https://github.com/lucasmlessa-hash/transfer-radar-data)'}],
+            ['offers-default','https://www.livelo.com.br/ofertas',{}],
+          ];
+          for(const [name,url,headers] of cases){
+            try {
+              const response=await fetch(url,{headers,signal:AbortSignal.timeout(20000)});
+              const body=await response.text();
+              console.log(JSON.stringify({name,status:response.status,bytes:body.length,partners:body.includes('listPartners'),nextData:body.includes('__NEXT_DATA__')}));
+            }catch(error){console.log(JSON.stringify({name,error:error.message}));}
+          }
+          JS
