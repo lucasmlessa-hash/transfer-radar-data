@@ -25,7 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parsePartnerRatio, liveloPartnerUrls, esferaPartnerUrls, esferaPartnerName } from '../src/sources/br-ratios.mjs';
-import { fetchPage } from '../src/fetch-page.mjs';
+import { fetchPage, PUBLIC_CLIENT_USER_AGENT } from '../src/fetch-page.mjs';
 import { canonical } from '../src/sources/partner-directory.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -59,7 +59,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // reject a 200 that parsed to nothing so a truncated body retries instead of
 // being read as "this programme has no partners".
 async function get(url, { tries = 3, ok = () => true } = {}) {
-  return fetchPage(url, { tries, ok, timeoutMs: 25000, headers: { 'User-Agent': UA } });
+  // Match the public client that Livelo accepts on GitHub runners.
+  const userAgent = new URL(url).hostname === 'www.livelo.com.br' ? PUBLIC_CLIENT_USER_AGENT : UA;
+  return fetchPage(url, { tries, ok, timeoutMs: 25000, headers: { 'User-Agent': userAgent } });
 }
 
 export async function refreshBrRatios(doc, { getPage = get, wait = sleep, log = console.log, warn = console.warn } = {}) {
