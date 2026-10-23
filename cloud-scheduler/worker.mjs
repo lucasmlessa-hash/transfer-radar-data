@@ -7,7 +7,9 @@ const API = `https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORK
 
 async function request(url, options, fetcher) {
   const response = await fetcher(url, {
-    ...options, redirect: 'error', signal: AbortSignal.timeout(20000),
+    // Workers does not implement redirect:error. Manual keeps credentials on
+    // the original host; the non-2xx guard below rejects every redirect.
+    ...options, redirect: 'manual', signal: AbortSignal.timeout(20000),
   });
   // Do not log response bodies or headers: an upstream error can echo secrets.
   if (!response.ok) throw new Error(`Scheduler request failed: HTTP ${response.status}`);
@@ -33,10 +35,13 @@ function verifyPublished(feed, since, now) {
   if (problems.length) throw new Error(`Daily verification failed: ${problems.join('; ')}`);
 }
 
+// Re-running a workflow retains created_at; its latest attempt has a new start.
+const startedAt = run => Date.parse(run.run_started_at || run.created_at);
+
 export async function runScheduled(scheduledTime, env, fetcher = fetch) {
   const when = new Date(scheduledTime);
   const hour = when.getUTCHours();
-  if (![9, 10].includes(hour)) throw new Error('Unexpected daily schedule hour');
+  if (![9, 10, 11].includes(hour)) throw new Error('Unexpected daily schedule hour');
   const since = Date.UTC(when.getUTCFullYear(), when.getUTCMonth(), when.getUTCDate(), 9);
   if (!env.GITHUB_TOKEN) throw new Error('Missing GITHUB_TOKEN secret');
   const headers = {
@@ -48,21 +53,41 @@ export async function runScheduled(scheduledTime, env, fetcher = fetch) {
   const response = await request(`${API}/runs?branch=main&per_page=20`, { headers }, fetcher);
   const data = await response.json();
   if (!Array.isArray(data.workflow_runs)) throw new Error('Invalid GitHub workflow response');
-  if (hour === 10) {
-    const checked = data.workflow_runs.filter(run => run.head_branch === 'main'
-      && run.status === 'completed' && run.conclusion === 'success'
-      && Date.parse(run.created_at) >= since - 2 * 3600000
-      && Date.parse(run.created_at) <= scheduledTime
-      && Date.parse(run.updated_at) >= since && Date.parse(run.updated_at) <= scheduledTime + 5 * 60000)
-      .sort((a, b) => Date.parse(b.updated_at) - Date.parse(a.updated_at))[0];
-    if (!checked) throw new Error('Daily ratio verification incomplete: no successful run in this daily window');
-    const feedResponse = await request(FEED_URL, { cache: 'no-store' }, fetcher);
-    const feed = await feedResponse.json();
-    verifyPublished(feed, Date.parse(checked.updated_at), scheduledTime);
-    return { status: 'verified', generatedAt: feed.generatedAt };
+  const dispatch = async () => request(`${API}/dispatches`, {
+    method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: 'main' }),
+  }, fetcher);
+  if (hour >= 10) {
+    const runs = data.workflow_runs.filter(run => run.head_branch === 'main'
+      && startedAt(run) >= since - 2 * 3600000
+      && startedAt(run) <= scheduledTime + 5 * 60000)
+      .sort((a, b) => startedAt(b) - startedAt(a));
+    // One recovery window, not a retry loop. An already started recovery,
+    // including a failed one, must not be dispatched again on duplicate ticks.
+    if (hour === 10 && runs.some(run => startedAt(run) >= since + 3600000)) {
+      return { status: 'recovery-already-attempted' };
+    }
+    if (hour === 10 && runs.some(run => ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(run.status)
+      && startedAt(run) >= scheduledTime - 2 * 3600000)) {
+      return { status: 'already-running-or-completed' };
+    }
+    try {
+      const checked = runs[0];
+      if (!checked || checked.status !== 'completed' || checked.conclusion !== 'success'
+        || !(Date.parse(checked.updated_at) >= since && Date.parse(checked.updated_at) <= scheduledTime + 5 * 60000)) {
+        throw new Error('Daily ratio verification incomplete: no successful latest run in this daily window');
+      }
+      const feedResponse = await request(FEED_URL, { cache: 'no-store' }, fetcher);
+      const feed = await feedResponse.json();
+      verifyPublished(feed, Date.parse(checked.updated_at), scheduledTime);
+      return { status: 'verified', generatedAt: feed.generatedAt };
+    } catch (error) {
+      if (hour !== 10) throw error;
+      await dispatch();
+      return { status: 'recovery-dispatched', reason: error.message };
+    }
   }
   const covered = data.workflow_runs.some(run => {
-    const started = Date.parse(run.created_at);
+    const started = startedAt(run);
     if (run.head_branch !== 'main' || !Number.isFinite(started) || started > scheduledTime + 5 * 60000) return false;
     // A queued job from yesterday must not suppress today's attempt forever.
     const active = ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(run.status)
@@ -70,16 +95,14 @@ export async function runScheduled(scheduledTime, env, fetcher = fetch) {
     return active || (run.status === 'completed' && run.conclusion === 'success' && started >= since);
   });
   if (covered) return { status: 'already-running-or-completed' };
-  await request(`${API}/dispatches`, {
-    method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: 'main' }),
-  }, fetcher);
+  await dispatch();
   return { status: 'dispatched' };
 }
 
 export default {
   async scheduled(controller, env) {
     // Throwing records a failed Cron event; a 2xx dispatch is not a claim that
-    // the collection succeeded. The 10 UTC event verifies actual publication.
+    // the collection succeeded. The 10 UTC event recovers failures; 11 UTC verifies publication.
     const result = await runScheduled(controller.scheduledTime, env);
     console.log(JSON.stringify(result));
   },

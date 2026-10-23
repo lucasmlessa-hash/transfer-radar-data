@@ -15,6 +15,7 @@ import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
+import { fetchPage } from './fetch-page.mjs';
 import { validatePartners } from '../scripts/validate-feed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,9 +35,7 @@ async function fetchHtml(src, fixtures, fixturesDir) {
   if (fixtures) {
     return readFileSync(path.join(fixturesDir, `${src.id}.html`), 'utf8');
   }
-  const res = await fetch(src.url, { signal: AbortSignal.timeout(20000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  return fetchPage(src.url);
 }
 
 // Runs the plan-001 validator (scripts/validate-feed.mjs) in-process on the
@@ -114,9 +113,7 @@ export async function runPipeline({
             const sku = new URL(url).pathname.split('/').pop();
             return readFileSync(path.join(fixturesDir, `livelo-${sku}.html`), 'utf8');
           }
-          const res = await fetch(url, { signal: AbortSignal.timeout(20000) });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.text();
+          return fetchPage(url);
         },
       })) ?? [];
       entryCounts[src.id] = entries.length;
@@ -252,11 +249,13 @@ export async function runPipeline({
     try {
       const html = fixtures
         ? readFileSync(path.join(fixturesDir, src.fixture), 'utf8')
-        : await (async () => {
-          const res = await fetch(src.url, { headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' }, signal: AbortSignal.timeout(20000) });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.text();
-        })();
+        : await fetchPage(src.url, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36' },
+          ok: body => {
+            const parsed = src.parse(body);
+            return src.banks.every(bank => parsed?.[bank]?.air?.size || parsed?.[bank]?.hotel?.size);
+          },
+        });
       const parsed = src.parse(html);
       const missing = src.banks.filter(bank => !(parsed[bank]?.air?.size || parsed[bank]?.hotel?.size));
       if (missing.length === src.banks.length) throw new Error('Missing partner listing');

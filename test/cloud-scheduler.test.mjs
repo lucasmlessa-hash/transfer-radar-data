@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import worker, { runScheduled } from '../cloud-scheduler/worker.mjs';
 
 const morning = Date.parse('2026-10-14T09:00:00Z');
-const verification = Date.parse('2026-10-14T10:00:00Z');
+const recovery = Date.parse('2026-10-14T10:00:00Z');
+const verification = Date.parse('2026-10-14T11:00:00Z');
 const env = { GITHUB_TOKEN: 'test-only-not-a-secret' };
 const healthy = () => ({ generatedAt: '2026-10-14T09:05:00Z', routes: [], health: {
   status: 'ok', carriedForwardRoutes: 0,
@@ -27,7 +28,32 @@ test('daily tick dispatches only the ratio workflow, which publishes the feed th
   assert.equal(calls[1].url, 'https://api.github.com/repos/lucasmlessa-hash/transfer-radar-data/actions/workflows/refresh-br-ratios.yml/dispatches');
   assert.deepEqual(JSON.parse(calls[1].options.body), { ref: 'main' });
   assert.equal(calls[1].options.headers.Authorization, 'Bearer test-only-not-a-secret');
-  assert.equal(calls[1].options.redirect, 'error');
+  assert.equal(calls[1].options.redirect, 'manual');
+});
+
+test('edge-compatible fetch dispatches without following redirects', async () => {
+  const result = await runScheduled(morning, env, async (url, options) => {
+    // Workers rejects redirect:error before making any network request.
+    if (!['manual', 'follow'].includes(options.redirect)) throw new TypeError('Invalid redirect value');
+    assert.equal(options.redirect, 'manual');
+    return options.method === 'POST' ? new Response(null, { status: 204 })
+      : Response.json({ workflow_runs: [] });
+  });
+  assert.equal(result.status, 'dispatched');
+});
+
+test('redirects abort both lookup and dispatch without forwarding credentials', async () => {
+  for (const redirectedCall of [1, 2]) {
+    let calls = 0;
+    await assert.rejects(runScheduled(morning, env, async (url, options) => {
+      calls++;
+      assert.equal(options.redirect, 'manual');
+      return calls === redirectedCall
+        ? new Response(null, { status: 302, headers: { Location: 'https://untrusted.example/' } })
+        : Response.json({ workflow_runs: [] });
+    }), /HTTP 302/);
+    assert.equal(calls, redirectedCall);
+  }
 });
 
 test('active runs and successful runs from this daily window prevent another dispatch', async () => {
@@ -116,5 +142,57 @@ test('public requests cannot manually dispatch workflows', async () => {
 });
 
 test('unexpected cron hours fail rather than dispatching extra jobs', async () => {
-  await assert.rejects(runScheduled(Date.parse('2026-10-14T11:00:00Z'), env, () => { throw Error('must not fetch'); }), /schedule/i);
+  await assert.rejects(runScheduled(Date.parse('2026-10-14T12:00:00Z'), env, () => { throw Error('must not fetch'); }), /schedule/i);
+});
+
+const successfulRun = { status: 'completed', conclusion: 'success', head_branch: 'main',
+  created_at: '2026-10-14T09:00:00Z', updated_at: '2026-10-14T09:04:00Z' };
+
+test('recovery hour does not collect again when publication is healthy', async () => {
+  const result = await runScheduled(recovery, env, async (url, options) => {
+    assert.notEqual(options.method, 'POST');
+    return url.startsWith('https://api.github.com/') ? Response.json({ workflow_runs: [successfulRun] }) : Response.json(healthy());
+  });
+  assert.equal(result.status, 'verified');
+});
+
+test('recovery hour retries failed references or partial publication once without claiming success', async () => {
+  for (const failedRatios of [true, false]) {
+    let dispatches = 0;
+    const feed = healthy();
+    feed.health.status = 'degraded';
+    feed.health.directories['livelo-directory'].status = 'failed';
+    const result = await runScheduled(recovery, env, async (url, options) => {
+      if (options.method === 'POST') { dispatches++; return new Response(null, { status: 204 }); }
+      return url.startsWith('https://api.github.com/')
+        ? Response.json({ workflow_runs: [{ ...successfulRun, conclusion: failedRatios ? 'failure' : 'success' }] }) : Response.json(feed);
+    });
+    assert.equal(result.status, 'recovery-dispatched');
+    assert.equal(dispatches, 1);
+  }
+});
+
+test('duplicate recovery tick cannot redispatch an already started recovery even if it failed', async () => {
+  for (const status of ['queued', 'in_progress', 'completed']) {
+    const result = await runScheduled(recovery + 5 * 60000, env, async (url, options) => {
+      assert.notEqual(options.method, 'POST');
+      return Response.json({ workflow_runs: [{ ...successfulRun, status, conclusion: 'failure', created_at: '2026-10-14T10:00:10Z' }] });
+    });
+    assert.equal(result.status, 'recovery-already-attempted');
+  }
+});
+
+test('a newer failed reference run is not hidden by an earlier success', async () => {
+  await assert.rejects(runScheduled(verification, env, async url => url.startsWith('https://api.github.com/')
+    ? Response.json({ workflow_runs: [successfulRun, { ...successfulRun, conclusion: 'failure', created_at: '2026-10-14T10:00:00Z', updated_at: '2026-10-14T10:04:00Z' }] })
+    : Response.json({ ...healthy(), generatedAt: '2026-10-14T10:05:00Z' })), /ratio verification incomplete/i);
+});
+
+test('a failed rerun of an older workflow cannot be hidden by a newer successful workflow', async () => {
+  const feed = JSON.parse(JSON.stringify(healthy()).replaceAll('09:04:00Z', '09:35:00Z').replaceAll('09:05:00Z', '09:35:00Z'));
+  await assert.rejects(runScheduled(verification, env, async url => url.startsWith('https://api.github.com/')
+    ? Response.json({ workflow_runs: [
+      { ...successfulRun, created_at: '2026-10-14T09:30:00Z', updated_at: '2026-10-14T09:34:00Z' },
+      { ...successfulRun, run_attempt: 2, run_started_at: '2026-10-14T10:00:00Z', updated_at: '2026-10-14T10:04:00Z', conclusion: 'failure' },
+    ] }) : Response.json(feed)), /ratio verification incomplete/i);
 });
