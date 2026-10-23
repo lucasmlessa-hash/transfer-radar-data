@@ -1,5 +1,37 @@
 # Atualização diária em nuvem
 
+## Recuperação de cobertura em 23/10/2026
+
+A coleta do feed agora repete falhas transitórias de HTTP/rede até três vezes,
+com intervalos de 1,5 e 3 segundos. Diretórios vazios ou incompletos também
+passam por novas tentativas; uma falha persistente continua explícita.
+
+O relógio mantém a coleta das 06h de Brasília. Às 07h verifica o resultado e
+solicita uma única recuperação se a verificação falhou. Com dados saudáveis,
+não há segunda coleta. Às 08h confere o resultado final, sem nova tentativa.
+Uma execução de recuperação já iniciada impede outro disparo sequencial na
+mesma janela, inclusive quando falhou. Eventos simultâneos ainda podem
+concorrer antes de o GitHub registrar a execução; não há trava distribuída.
+O cron de produção é `0 9,10,11 * * *` UTC. Não foram adicionados serviços,
+segredos, planos pagos ou canais externos de notificação.
+
+
+## Correção de 18/10/2026
+
+Os eventos de 06h e 07h falhavam antes de acessar o GitHub: Workers rejeita
+`redirect: 'error'`. A versão `2fb4743d-443f-4c34-ac89-90622faab56e`, publicada
+em 18/10 às 20h09 BRT, usa `redirect: 'manual'` e rejeita respostas não 2xx,
+sem seguir redirecionamentos ou encaminhar credenciais a outro host.
+Versão ativa, cron e presença do secret foram confirmados pela API.
+O teste no runtime local reproduziu a falha original e confirmou o dispatch
+corrigido e a rejeição de redirecionamentos. Suíte: 201 aprovados, 1 ignorado.
+O próximo evento automático após a correção será em 19/10 às 06h BRT e ainda
+não foi observado. A recuperação manual publicou o feed de 18/10 às 20h05,
+com cobertura parcial: Esfera com timeout e Frequent Miler com uma oferta
+sem data. Evidências locais: `reports/scheduler-fix-2026-10-18/` na raiz do
+workspace. A correção está no Worker e na cópia local; não foi enviada ao
+repositório GitHub nesta intervenção.
+
 Configuração de 13/10/2026: coleta diária às 06h e verificação às 07h de
 Brasília. O ambiente `production` ativa o cron; a configuração padrão o pausa.
 A conta Cloudflare foi conferida no plano Free. Nenhum plano pago foi ativado.
@@ -17,7 +49,8 @@ Versão inicial ativa: `0e595b3b-8527-449d-8009-8a7d167811f7`.
   Sua conclusão dispara `Build feed`: promoções, histórico, validação e Pages.
 - **07h:** verifica o resultado do job de taxas e a publicação efetiva. O feed
   e suas fontes precisam ter sido verificados depois da conclusão do job de
-  taxas. Essa chamada não faz nova coleta.
+  taxas. Se a verificação falhar e não houver uma execução em andamento, solicita uma recuperação limitada.
+- **08h:** verifica a publicação final e registra falha se a cobertura continuar incompleta, sem nova coleta.
 - Não há outro cron no GitHub nessa configuração, evitando a segunda coleta
   diária. Os dois workflows continuam disponíveis para execução manual.
 - A extensão avisa quando o feed passa de **36 horas**. A checagem das 07h
@@ -33,7 +66,7 @@ no GitHub.
 
 ## Custo previsto: zero, dentro das franquias
 
-São um cron e duas invocações por dia, sem KV, banco ou endpoint público.
+São um cron e três invocações por dia, sem KV, banco ou endpoint público.
 O Workers Free inclui 100 mil invocações/dia, 10 ms de CPU/invocação e até cinco
 crons por conta. A espera da rede não conta como CPU. Os limites são
 compartilhados com outros Workers; conferir capacidade antes da ativação.

@@ -11,8 +11,8 @@
   "env": {
     "production": {
       "name": "transfer-radar-daily-scheduler",
-      // UTC: 06:00 Sao Paulo collection; 07:00 verification, no second collect.
-      "triggers": { "crons": ["0 9,10 * * *"] }
+      // UTC: 06:00 Sao Paulo collection; 07:00 conditional recovery; 08:00 verification.
+      "triggers": { "crons": ["0 9,10,11 * * *"] }
     }
   }
 }

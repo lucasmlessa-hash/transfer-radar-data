@@ -25,6 +25,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parsePartnerRatio, liveloPartnerUrls, esferaPartnerUrls, esferaPartnerName } from '../src/sources/br-ratios.mjs';
+import { fetchPage } from '../src/fetch-page.mjs';
 import { canonical } from '../src/sources/partner-directory.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -58,20 +59,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // reject a 200 that parsed to nothing so a truncated body retries instead of
 // being read as "this programme has no partners".
 async function get(url, { tries = 3, ok = () => true } = {}) {
-  let last;
-  for (let i = 0; i < tries; i += 1) {
-    if (i) await sleep(1500 * i);
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(25000) });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const body = await res.text();
-      if (ok(body)) return body;
-      last = new Error('response did not parse');
-    } catch (e) {
-      last = e;
-    }
-  }
-  throw last;
+  return fetchPage(url, { tries, ok, timeoutMs: 25000, headers: { 'User-Agent': UA } });
 }
 
 export async function refreshBrRatios(doc, { getPage = get, wait = sleep, log = console.log, warn = console.warn } = {}) {

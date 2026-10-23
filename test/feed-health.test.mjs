@@ -54,3 +54,28 @@ test('an aborted candidate never changes the observation ledger', async () => sc
   assert.equal(result.ok, false);
   assert.equal(readFileSync(ledgerPath, 'utf8'), original);
 }));
+
+
+test('live directory collection recovers a transient 403 before reporting coverage', async t => scenario(async (dir) => {
+  const names = {
+    'https://frequentmiler.com/current-point-transfer-bonuses/': 'frequentmiler.html',
+    'https://awardwallet.com/news/credit-card-transfer-bonuses/': 'awardwallet.html',
+    'https://www.livelo.com.br/ofertas': 'livelo-shopping-2026-10.html',
+    'https://www.esfera.com.vc/': 'esfera-empty-2026-10.html',
+    'https://frequentmiler.com/transfer-partner-master-list/': 'partner-fm.html',
+    'https://www.livelo.com.br/livelo-para-parceiros': 'partner-livelo.html',
+  };
+  let directoryCalls = 0;
+  t.mock.method(globalThis, 'fetch', async url => {
+    if (url === 'https://www.livelo.com.br/livelo-para-parceiros' && ++directoryCalls === 1) return new Response('', {status:403});
+    const file = names[url];
+    assert.ok(file, `unexpected source URL: ${url}`);
+    return new Response(readFileSync(new URL(file, fixtures), 'utf8'));
+  });
+  const result = await runPipeline({outDir:path.join(dir,'out'), now:NOW});
+  assert.equal(result.ok, true);
+  assert.equal(result.sourcesOk, 4);
+  assert.equal(result.health.status, 'ok');
+  assert.equal(result.health.directories['livelo-directory'].status, 'ok');
+  assert.equal(directoryCalls, 2);
+}));
