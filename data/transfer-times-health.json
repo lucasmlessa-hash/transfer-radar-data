@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "changed": false,
-  "checkedAt": "2026-10-23T18:10:09.974Z",
+  "changed": true,
+  "checkedAt": "2026-10-24T09:01:44.985Z",
   "sources": [
     {
       "id": "fm-directory",
@@ -750,5 +750,5 @@
     }
   },
   "dryRun": false,
-  "written": false
+  "written": true
 }
