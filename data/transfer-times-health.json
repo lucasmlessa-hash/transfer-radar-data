@@ -1,14 +1,14 @@
 {
   "ok": true,
   "changed": true,
-  "checkedAt": "2026-10-25T09:01:24.737Z",
+  "checkedAt": "2026-10-26T09:01:39.092Z",
   "sources": [
     {
       "id": "fm-directory",
       "url": "https://frequentmiler.com/transfer-partner-master-list/",
       "status": "ok",
       "tableCount": 4,
-      "observedRoutes": 124,
+      "observedRoutes": 125,
       "verifiedRoutes": 98
     }
   ],
@@ -580,6 +580,13 @@
     {
       "bank": "ROVE",
       "code": "AM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CITI",
+      "code": "CM",
       "cell": "1 to 1 (Unknown)",
       "time": null,
       "reason": "unknown"
