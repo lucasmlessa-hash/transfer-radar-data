@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "checkedAt": "2026-10-30T09:01:47.956Z",
-  "changed": true,
+  "checkedAt": "2026-10-30T10:01:25.948Z",
+  "changed": false,
   "changes": [],
   "verified": [
     {
@@ -10,7 +10,7 @@
       "partner": "Air Canada Aeroplan",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -18,7 +18,7 @@
       "partner": "American Airlines AAdvantage",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -26,7 +26,7 @@
       "partner": "Avianca LifeMiles",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -34,7 +34,7 @@
       "partner": "British Airways Avios",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -42,7 +42,7 @@
       "partner": "Cathay Pacific Asia Miles",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -50,7 +50,7 @@
       "partner": "Etihad Guest",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -58,7 +58,7 @@
       "partner": "United MileagePlus",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "MAR",
@@ -66,7 +66,7 @@
       "partner": "Virgin Atlantic Flying Club",
       "ratio": "3:1",
       "source": "https://www.marriott.com/loyalty/redeem/travel/points-to-miles.mi",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "WYN",
@@ -74,7 +74,7 @@
       "partner": "Singapore KrisFlyer",
       "ratio": "5:1",
       "source": "https://www.wyndhamhotels.com/WHGServices/loyalty/V4/member/partners",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "CHO",
@@ -82,7 +82,7 @@
       "partner": "Air France / KLM Flying Blue",
       "ratio": "5:1",
       "source": "https://www.choicehotels.com/en-uk/choice-privileges/rewards-exchange",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     },
     {
       "bank": "CHO",
@@ -90,7 +90,7 @@
       "partner": "United MileagePlus",
       "ratio": "5:1",
       "source": "https://www.choicehotels.com/en-uk/choice-privileges/rewards-exchange",
-      "checkedAt": "2026-10-30T09:01:47.956Z"
+      "checkedAt": "2026-10-30T10:01:25.948Z"
     }
   ],
   "pending": [
@@ -126,5 +126,5 @@
     }
   },
   "dryRun": false,
-  "written": true
+  "written": false
 }
