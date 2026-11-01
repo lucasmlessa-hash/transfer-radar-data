@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import worker, { runScheduled } from '../cloud-scheduler/worker.mjs';
 
 const morning = Date.parse('2026-10-14T09:00:00Z');
@@ -29,6 +30,109 @@ test('daily tick dispatches only the ratio workflow, which publishes the feed th
   assert.deepEqual(JSON.parse(calls[1].options.body), { ref: 'main' });
   assert.equal(calls[1].options.headers.Authorization, 'Bearer test-only-not-a-secret');
   assert.equal(calls[1].options.redirect, 'manual');
+});
+
+test('prepared production schedule collects every four hours while the default remains paused', () => {
+  const config = JSON.parse(readFileSync(new URL('../cloud-scheduler/wrangler.jsonc', import.meta.url), 'utf8')
+    .replace(/^\s*\/\/.*$/gm, ''));
+  assert.deepEqual(config.triggers.crons, []);
+  const hours = config.env.production.triggers.crons.flatMap(cron => {
+    const match = /^0 ([\d,]+) \* \* \*$/.exec(cron);
+    assert.ok(match, 'each event uses a fixed UTC hour');
+    return match[1].split(',').map(Number);
+  }).sort((a, b) => a - b);
+  assert.deepEqual(hours, [1, 5, 9, 10, 11, 13, 17, 21]);
+  const collections = hours.filter(hour => ![10, 11].includes(hour));
+  const gaps = collections.map((hour, index) =>
+    (collections[(index + 1) % collections.length] - hour + 24) % 24);
+  assert.ok(gaps.every(gap => gap === 4), 'collection cadence includes the overnight interval');
+});
+
+test('intermediate ticks dispatch only build-feed without refreshing daily references', async () => {
+  for (const timestamp of ['01:00', '05:00', '13:00', '17:00', '21:00']) {
+    const calls = [];
+    const result = await runScheduled(Date.parse(`2026-10-14T${timestamp}:00Z`), env, async (url, options) => {
+      calls.push({ url, options });
+      return options.method === 'POST' ? new Response(null, { status: 204 })
+        : Response.json({ workflow_runs: [] });
+    });
+    assert.equal(result.status, 'dispatched');
+    assert.deepEqual(calls.map(call => call.url), [
+      'https://api.github.com/repos/lucasmlessa-hash/transfer-radar-data/actions/workflows/build-feed.yml/runs?branch=main&per_page=20',
+      'https://api.github.com/repos/lucasmlessa-hash/transfer-radar-data/actions/workflows/build-feed.yml/dispatches',
+    ]);
+    assert.deepEqual(JSON.parse(calls[1].options.body), { ref: 'main' });
+    assert.equal(calls[1].options.headers.Authorization, 'Bearer test-only-not-a-secret');
+    assert.equal(calls[1].options.redirect, 'manual');
+  }
+});
+
+test('an intermediate cycle is not repeated after it starts, including a completed failure', async () => {
+  for (const run of [
+    { status: 'in_progress', created_at: '2026-10-14T12:59:00Z' },
+    ...['queued', 'in_progress', 'waiting', 'pending', 'requested'].map(status =>
+      ({ status, created_at: '2026-10-14T13:00:10Z' })),
+    { status: 'completed', conclusion: 'success', created_at: '2026-10-14T13:00:10Z' },
+    { status: 'completed', conclusion: 'failure', created_at: '2026-10-14T13:00:10Z' },
+    { status: 'completed', conclusion: 'failure', created_at: '2026-10-14T09:00:00Z', run_started_at: '2026-10-14T13:00:10Z' },
+  ]) {
+    let calls = 0;
+    const result = await runScheduled(Date.parse('2026-10-14T13:05:00Z'), env, async (url, options) => {
+      calls++;
+      assert.notEqual(options.method, 'POST');
+      return Response.json({ workflow_runs: [{ head_branch: 'main', ...run }] });
+    });
+    assert.equal(result.status, 'already-running-or-completed');
+    assert.equal(calls, 1);
+  }
+});
+
+test('a duplicate intermediate event recognizes a delayed run from its original scheduled cycle', async () => {
+  const result = await runScheduled(Date.parse('2026-10-14T13:00:00Z'), env, async (url, options) => {
+    assert.notEqual(options.method, 'POST');
+    return Response.json({ workflow_runs: [{
+      head_branch: 'main', status: 'completed', conclusion: 'failure',
+      created_at: '2026-10-14T13:00:10Z', run_started_at: '2026-10-14T13:20:00Z',
+    }] });
+  });
+  assert.equal(result.status, 'already-running-or-completed');
+});
+
+test('an intermediate tick ignores previous cycles and unrelated or invalid runs', async () => {
+  for (const run of [
+    { status: 'completed', conclusion: 'success', created_at: '2026-10-14T09:00:00Z' },
+    { status: 'completed', conclusion: 'failure', created_at: '2026-10-14T09:00:00Z' },
+    { status: 'queued', created_at: '2026-10-13T13:00:00Z' },
+    { status: 'completed', conclusion: 'success', created_at: '2026-10-14T13:00:00Z', head_branch: 'other' },
+    { status: 'completed', conclusion: 'success', created_at: '2026-10-14T17:00:00Z' },
+    { status: 'completed', conclusion: 'success', created_at: 'invalid' },
+  ]) {
+    let dispatches = 0;
+    const result = await runScheduled(Date.parse('2026-10-14T13:00:00Z'), env, async (url, options) => {
+      if (options.method === 'POST') { dispatches++; return new Response(null, { status: 204 }); }
+      return Response.json({ workflow_runs: [{ head_branch: 'main', ...run }] });
+    });
+    assert.equal(result.status, 'dispatched');
+    assert.equal(dispatches, 1);
+  }
+});
+
+test('intermediate lookup and dispatch failures are explicit and do not retry or expose the token', async () => {
+  for (const failedCall of [1, 2]) {
+    let calls = 0;
+    await assert.rejects(runScheduled(Date.parse('2026-10-14T13:00:00Z'), env, async () => {
+      calls++;
+      return calls === failedCall ? new Response('test-only-not-a-secret', { status: 503 })
+        : Response.json({ workflow_runs: [] });
+    }), error => {
+      assert.match(error.message, /HTTP 503/);
+      assert.doesNotMatch(error.message, /test-only/);
+      return true;
+    });
+    assert.equal(calls, failedCall);
+  }
+  await assert.rejects(runScheduled(Date.parse('2026-10-14T13:00:00Z'), env,
+    async () => Response.json({ message: 'unexpected payload' })), /Invalid GitHub workflow response/);
 });
 
 test('edge-compatible fetch dispatches without following redirects', async () => {
@@ -142,7 +246,10 @@ test('public requests cannot manually dispatch workflows', async () => {
 });
 
 test('unexpected cron hours fail rather than dispatching extra jobs', async () => {
-  await assert.rejects(runScheduled(Date.parse('2026-10-14T12:00:00Z'), env, () => { throw Error('must not fetch'); }), /schedule/i);
+  for (const hour of [0, 2, 3, 4, 6, 7, 8, 12, 14, 15, 16, 18, 19, 20, 22, 23]) {
+    await assert.rejects(runScheduled(Date.UTC(2026, 9, 14, hour), env,
+      () => { throw Error('must not fetch'); }), /schedule/i);
+  }
 });
 
 const successfulRun = { status: 'completed', conclusion: 'success', head_branch: 'main',
@@ -163,7 +270,11 @@ test('recovery hour retries failed references or partial publication once withou
     feed.health.status = 'degraded';
     feed.health.directories['livelo-directory'].status = 'failed';
     const result = await runScheduled(recovery, env, async (url, options) => {
-      if (options.method === 'POST') { dispatches++; return new Response(null, { status: 204 }); }
+      if (options.method === 'POST') {
+        dispatches++;
+        assert.equal(url, 'https://api.github.com/repos/lucasmlessa-hash/transfer-radar-data/actions/workflows/refresh-br-ratios.yml/dispatches');
+        return new Response(null, { status: 204 });
+      }
       return url.startsWith('https://api.github.com/')
         ? Response.json({ workflow_runs: [{ ...successfulRun, conclusion: failedRatios ? 'failure' : 'success' }] }) : Response.json(feed);
     });

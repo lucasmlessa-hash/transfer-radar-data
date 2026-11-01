@@ -28,7 +28,7 @@ Schemas: `schema/feed.schema.json` and `schema/partners.schema.json`
       "typical": "+75–100%",      // free-text typical bonus range, display-only
       "mp": [0.7,0.5,0.5,0.6,0.5,0.7,0.6,0.7,0.5,0.7,0.5,0.8],  // ALWAYS length 12, Jan..Dec, each a probability 0..1
       "p2": [0.8,0.6,0.6,0.7,0.7,0.8,0.8,0.8,0.7,0.8,0.7,0.9],  // OPTIONAL, length 12: P(bonus during the 2-month stretch starting at that month)
-      "wait": [0.13,0.69,0.79],   // OPTIONAL, length 3: cumulative P(>=1 bonus) within 1 / 3 / 6 months of generatedAt
+      "wait": [0.13,0.69,0.79],   // OPTIONAL, length 3: cumulative P(>=1 bonus) during the next 1 / 3 / 6 complete calendar months
       "active":  { "pct": 75, "startDate": "2026-07-01", "endDate": "2026-07-25" },  // OPTIONAL, present iff a bonus is live right now; startDate optional
       "upcoming":{ "pct": 100, "startDate": "2026-09-01", "endDate": "2026-09-01" },  // OPTIONAL, announced but NOT yet running
       "ended":   { "pct": 25, "endedAt": "2026-07-14" },        // OPTIONAL, present iff a bonus just ended
@@ -168,3 +168,97 @@ de promoções não renova automaticamente essas conferências.
 Relatórios diários de hotéis, valores e prazos são publicados em
 `hotel-ratios-health.json`, `point-valuations-health.json` e
 `transfer-times-health.json`, com a cobertura efetivamente verificada.
+
+
+## Forecast evidence and prospective records (2026-11-01)
+
+`route.forecast` is optional for backward compatibility. Production builds use
+`pooled-recurrence-v2`: a regularized empirical first-bonus distribution combined
+with the route's legacy seasonal estimate. Only completed campaigns strictly
+before issue time enter training. The own-seasonal weight is n/(n+5), where n
+is the number of distinct completed campaigns; the complement uses partially
+pooled origin/destination/global frequencies with a 36-month half-life. The
+pooled category counts discount six overlapping monthly origins and use fixed
+regularization strengths 5 (route) and 8 (peers). This is an empirical estimator,
+not a claimed posterior confidence level. The development/validation protocol
+and limitations are in `reports/forecast-model-v2-2026-11-01` in the parent workspace.
+
+Metadata contains `issuedAt`, campaign archive evidence and three calendar
+`horizons` (months/startDate/endDate/probability). Horizons start NEXT month,
+not today, and estimate the presence of ANY bonus, not a better bonus. `wait`
+now mirrors the new cumulative horizon probabilities. `mp`, `p2`, and `next`
+remain legacy compatibility fields; clients must not interpret their peaks as
+the current model's probability. A forecast-only route can have `forecast`
+without `next`; the route cap is 120. Evidence `level` is retained as descriptive
+metadata and never suppresses a numeric v2 forecast. Archive span does not
+certify continuous coverage. Carried routes retain their original issue date.
+
+`route.offerEvidence` preserves `checkedAt`, independent observations and status
+`observed`, `conflict` or `carried`. An observation contains sourceId, an HTTP(S)
+URL, pct, optional startDate/endDate, bonusKind (`fixed`, `up_to`, `unknown`) and
+optional public conditionsText (at most 600 characters). Observed means seen in
+that source, not verified personal eligibility. Conflicting percentages/dates
+must not be presented as mutual corroboration. Carry never advances checkedAt.
+
+Real CLI builds persist `data/forecast-records.json`, separate from the campaign
+ledger. Original timestamps, probability, model and window are immutable.
+New attempts have `publicationStatus:"unconfirmed"` and `publishedAt:null`.
+Persistence must succeed before deployment. Only a successful deployment of
+the exact artifact, or an explicit observation of that exact public feed before
+the forecast window opens, may add a publication confirmation. A local previous
+build is never publication proof. Failed attempts remain unconfirmed; a same-day
+retry can be recorded separately. After confirmation, an identical reissue in
+the same UTC day is omitted; a real probability/window/evidence change or a new
+day gets a new immutable record. Samples are retained on every collection.
+
+`confirmForecastPublication` and `scripts/confirm-forecast-publication.mjs`
+match route/model/issuedAt/horizon/window/probability exactly. The CLI uses an
+atomic replacement and refuses to replace an unreadable or concurrently changed
+ledger. A compact JSON record per line keeps the ledger reviewable without
+repeating indentation. Legacy entries lacking confirmation are not retroactively
+claimed to be published.
+
+Outcomes are `pending`, `observed`, `not_observed` or `unknown`. A negative
+requires healthy declared sources through both boundaries with gaps <=6h.
+Positive observations remain visible immediately, but both positives and
+negatives require a closed window and complete coverage to enter metrics.
+`forecast-evaluation.json` contains operational counts; `forecast-history.json`
+contains original records, publication markers, first observation, eligibility,
+exclusion and metrics. Both expose status/asOf; corrupt ledgers produce an
+explicit unavailable report, without invented counts or history.
+
+Metrics select the first confirmed publication per route/model/start/end before
+looking at its outcome; reissues are correlated, not extra accuracy samples.
+They exclude unpublished, unavailable, late, already-running/announced offers,
+open windows and incomplete collection. They group by horizon/model and include
+n, pending, unknown, mean probability, observed rate, Brier and trend accuracy
+(the prediction is positive at >=50%). `baselineBrier` uses the same sample's
+observed frequency and is only a descriptive fitted reference, not an independent
+forecast benchmark. The UI recomputes these aggregates for its route/search
+filters and offers all/closed/open period filters for the record list.
+
+The cloud scheduler configuration is prepared for feed collection every four
+hours, with daily reference refresh/retries retained. This preparation does not
+activate it. A report served in the same artifact as a newly deployed feed may
+show its confirmation only on the following collection (normally four hours).
+The client loads history separately: a missing/error report cannot invalidate
+a usable feed/partners pair. Old cached history is visibly dated after a failed
+refresh. Tests and fixtures never touch the production ledger unless an explicit
+temporary path is supplied.
+
+The client uses a 36-hour verification-age policy for offers and forecasts;
+forecast windows that have already started are stale. Displayed probabilities
+round to whole percentage points, with <1% and >99% replacing apparent certainty.
+The original raw values stay in the feed and ledger. Missing metadata never
+implies a verified offer. Divergence is derived from observations as well as
+status, so a carried conflict retains its range and warning.
+
+All four parsers mark incomplete transfer entries with `coverageComplete=false`.
+The publisher reports `degraded`, preserves lastSuccessAt, and the ledger cannot
+count such samples toward a negative result. Header rows, ordinary shopping
+cards and Livelo financial-acquisition ads do not trigger this signal.
+
+The evaluation summary includes `status` and `asOf`. An unreadable ledger emits
+an `unavailable` summary without counts; old counts must not masquerade as a new
+measurement. Workflow ledger persistence must succeed before deployment:
+original predictions cannot be reconstructed by the next run after a failed push.

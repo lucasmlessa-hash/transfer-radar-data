@@ -20,11 +20,11 @@ const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', '
 const NO_HISTORY_MP = Array(12).fill(0);
 
 // Forecast-only routes are capped so the feed can't balloon as the archive
-// grows. 60 comfortably fits every real bank x airline pair with >=2 archived
-// windows (37 as of 2026-07-25) — the old cap of 25 silently dropped routes
+// grows. 120 also accommodates pairs with one archived campaign under the
+// pooled model — the old cap of 25 silently dropped routes
 // like c1-af and bilt-vs, so the client's by-airline cards showed an airline
 // with HALF its banks missing, which reads as "this bank never bonuses here".
-const MAX_FORECAST_ROUTES = 60;
+const MAX_FORECAST_ROUTES = 120;
 
 // `time` (transfer speed) is curated partner metadata, not something any
 // source publishes per bonus. It used to come from the simulated sample feed;
@@ -138,6 +138,8 @@ export function parseEndDate(raw, now = new Date()) {
 export function normalize(rawBonuses, now = new Date(), history = deriveHistory(now)) {
   const unmapped = [];
   const byId = new Map(); // id -> { route: {..., pct, endDate}, sourceUrls: Set }
+  const observationsById = new Map();
+  const safeUrl = value => { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; } };
   const today = now.toISOString().slice(0, 10);
   const campaignRank = (r) => !r.endDate ? 0 : r.endDate < today ? 1 : r.startDate > today ? 2 : 3;
 
@@ -166,6 +168,17 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
     // Current observations beat expired/undated rows regardless of percentage.
     // Only compare bonuses within the same temporal state.
     const rank = campaignRank({ endDate, startDate });
+    const url = safeUrl(raw.campaignUrl) || safeUrl(raw.sourceUrl);
+    if (url) {
+      const observation = {
+        sourceId: raw.sourceId || new URL(url).hostname, url, pct: raw.pct,
+        ...(startDate ? { startDate } : {}), ...(endDate ? { endDate } : {}),
+        bonusKind: ['fixed', 'up_to'].includes(raw.bonusKind) ? raw.bonusKind : 'unknown',
+        ...(raw.conditionsText ? { conditionsText: String(raw.conditionsText).slice(0, 600) } : {}),
+      };
+      const values = observationsById.get(id) ?? [];
+      values.push({ rank, observation }); observationsById.set(id, values);
+    }
     const previousRank = existing ? campaignRank(existing.route) : -1;
     if (existing && (previousRank > rank || (previousRank === rank && existing.route.pct >= raw.pct))) {
       existing.sourceUrls.add(raw.sourceUrl);
@@ -185,6 +198,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       // absent, not zeroed, when the archive cannot support the estimate —
       // see history.mjs; the client omits the card rather than showing 0%
       ...(h?.wait === undefined ? {} : { wait: h.wait }),
+      ...(h?.forecast ? { forecast: h.forecast } : {}),
       hist: h?.hist ?? [],
       pct: raw.pct,
       endDate,
@@ -204,6 +218,13 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   for (const [id, { route, sourceUrls }] of byId) {
     const { pct, endDate, startDate, ended, ...rest } = route;
     const out = { ...rest };
+    const observations = [...new Map((observationsById.get(id) ?? [])
+      .filter(o => o.rank === campaignRank({ endDate, startDate }))
+      .map(o => [JSON.stringify(o.observation), o.observation])).values()];
+    if (observations.length) {
+      const disagrees = key => new Set(observations.map(o => o[key]).filter(v => v != null && v !== 'unknown')).size > 1;
+      out.offerEvidence = { status: ['pct', 'startDate', 'endDate', 'bonusKind'].some(disagrees) ? 'conflict' : 'observed', checkedAt: now.toISOString(), observations };
+    }
     // unparseable/missing end date -> published WITHOUT `active` (forecast
     // row, never a phantom live deal). A source still listing the route but
     // with no parseable date is exactly when `ended` earns its keep.
@@ -240,7 +261,8 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   const endedOnly = [];
   for (const [id, h] of history) {
     if (byId.has(id)) continue;
-    if (!h.next && !h.ended) continue;
+    const hasForecast = h.forecast?.horizons?.length > 0;
+    if (!h.next && !h.ended && !hasForecast) continue;
     const row = {
       id,
       bank: h.bank,
@@ -251,20 +273,22 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
       mp: h.mp,
       p2: h.p2,
       ...(h.wait === undefined ? {} : { wait: h.wait }),
+      ...(h.forecast ? { forecast: h.forecast } : {}),
       hist: h.hist,
       ...(h.ended === undefined ? {} : { ended: h.ended }),
       ...(h.next === undefined ? {} : { next: h.next }),
     };
-    (h.next ? forecasts : endedOnly).push(row);
+    (h.next || hasForecast ? forecasts : endedOnly).push(row);
   }
   // `ended` rows sort to the front so the cap can never silently swallow one:
   // there are at most a handful at a time (a 30-day window), and losing one
   // costs a whole section of the Live tab, where losing a low-probability
   // forecast row costs one card in a list of forty.
-  forecasts.sort((a, b) => Number(Boolean(b.ended)) - Number(Boolean(a.ended)) || b.next.prob - a.next.prob);
+  const probability = r => (r.forecast?.horizons?.[0]?.probability ?? (r.next?.prob ?? 0)/100)*100;
+  forecasts.sort((a, b) => Number(Boolean(b.ended)) - Number(Boolean(a.ended)) || probability(b) - probability(a));
   const dropped = forecasts.slice(MAX_FORECAST_ROUTES);
   if (dropped.length) {
-    console.log(`[normalize] forecast cap ${MAX_FORECAST_ROUTES}: dropped ${dropped.length} lower-probability route(s): ${dropped.map((r) => `${r.id}@${r.next.prob}%`).join(', ')}`);
+    console.log(`[normalize] forecast cap ${MAX_FORECAST_ROUTES}: dropped ${dropped.length} lower-probability route(s): ${dropped.map((r) => `${r.id}@${probability(r)}%`).join(', ')}`);
   }
   routes.push(...forecasts.slice(0, MAX_FORECAST_ROUTES), ...endedOnly);
 

@@ -2,8 +2,10 @@
 // The secret only needs Actions:write on transfer-radar-data, never Contents.
 const REPOSITORY = 'lucasmlessa-hash/transfer-radar-data';
 const WORKFLOW = 'refresh-br-ratios.yml';
+const FEED_WORKFLOW = 'build-feed.yml';
+const FEED_ONLY_HOURS = [1, 5, 13, 17, 21];
 const FEED_URL = 'https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json';
-const API = `https://api.github.com/repos/${REPOSITORY}/actions/workflows/${WORKFLOW}`;
+const API = `https://api.github.com/repos/${REPOSITORY}/actions/workflows`;
 
 async function request(url, options, fetcher) {
   const response = await fetcher(url, {
@@ -41,8 +43,9 @@ const startedAt = run => Date.parse(run.run_started_at || run.created_at);
 export async function runScheduled(scheduledTime, env, fetcher = fetch) {
   const when = new Date(scheduledTime);
   const hour = when.getUTCHours();
-  if (![9, 10, 11].includes(hour)) throw new Error('Unexpected daily schedule hour');
-  const since = Date.UTC(when.getUTCFullYear(), when.getUTCMonth(), when.getUTCDate(), 9);
+  const feedOnly = FEED_ONLY_HOURS.includes(hour);
+  if (!feedOnly && ![9, 10, 11].includes(hour)) throw new Error('Unexpected schedule hour');
+  const since = Date.UTC(when.getUTCFullYear(), when.getUTCMonth(), when.getUTCDate(), feedOnly ? hour : 9);
   if (!env.GITHUB_TOKEN) throw new Error('Missing GITHUB_TOKEN secret');
   const headers = {
     Accept: 'application/vnd.github+json',
@@ -50,13 +53,14 @@ export async function runScheduled(scheduledTime, env, fetcher = fetch) {
     'User-Agent': 'transfer-radar-daily-scheduler',
     'X-GitHub-Api-Version': '2026-03-10',
   };
-  const response = await request(`${API}/runs?branch=main&per_page=20`, { headers }, fetcher);
+  const workflowApi = `${API}/${feedOnly ? FEED_WORKFLOW : WORKFLOW}`;
+  const response = await request(`${workflowApi}/runs?branch=main&per_page=20`, { headers }, fetcher);
   const data = await response.json();
   if (!Array.isArray(data.workflow_runs)) throw new Error('Invalid GitHub workflow response');
-  const dispatch = async () => request(`${API}/dispatches`, {
+  const dispatch = async () => request(`${workflowApi}/dispatches`, {
     method: 'POST', headers: { ...headers, 'Content-Type': 'application/json' }, body: JSON.stringify({ ref: 'main' }),
   }, fetcher);
-  if (hour >= 10) {
+  if (!feedOnly && hour >= 10) {
     const runs = data.workflow_runs.filter(run => run.head_branch === 'main'
       && startedAt(run) >= since - 2 * 3600000
       && startedAt(run) <= scheduledTime + 5 * 60000)
@@ -88,11 +92,16 @@ export async function runScheduled(scheduledTime, env, fetcher = fetch) {
   }
   const covered = data.workflow_runs.some(run => {
     const started = startedAt(run);
-    if (run.head_branch !== 'main' || !Number.isFinite(started) || started > scheduledTime + 5 * 60000) return false;
-    // A queued job from yesterday must not suppress today's attempt forever.
+    if (run.head_branch !== 'main' || !Number.isFinite(started)) return false;
+    // Duplicate delivery retains the original scheduledTime, even if the run
+    // only started later. Recognize its whole cycle without covering the next.
+    if (feedOnly ? started >= since + 4 * 3600000 : started > scheduledTime + 5 * 60000) return false;
+    // A stale queued job must not suppress the next collection forever.
     const active = ['queued', 'in_progress', 'waiting', 'pending', 'requested'].includes(run.status)
       && started >= scheduledTime - 2 * 3600000;
-    return active || (run.status === 'completed' && run.conclusion === 'success' && started >= since);
+    // Intermediate ticks make one attempt per cycle, even if it failed.
+    // The existing daily attempt still permits retrying a failed ratio run.
+    return active || (started >= since && (feedOnly || (run.status === 'completed' && run.conclusion === 'success')));
   });
   if (covered) return { status: 'already-running-or-completed' };
   await dispatch();
@@ -102,7 +111,8 @@ export async function runScheduled(scheduledTime, env, fetcher = fetch) {
 export default {
   async scheduled(controller, env) {
     // Throwing records a failed Cron event; a 2xx dispatch is not a claim that
-    // the collection succeeded. The 10 UTC event recovers failures; 11 UTC verifies publication.
+    // the collection succeeded. The 10 UTC event recovers daily failures;
+    // 11 UTC verifies publication. Intermediate events only request the feed.
     const result = await runScheduled(controller.scheduledTime, env);
     console.log(JSON.stringify(result));
   },

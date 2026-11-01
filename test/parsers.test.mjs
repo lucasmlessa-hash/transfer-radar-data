@@ -88,7 +88,7 @@ test('livelo: fixture spot-check (saved snapshot)', async () => {
   const entries = await livelo.parse(fixture('livelo'));
 
   assert.equal(entries.length, 1);
-  assert.deepEqual(entries[0], {
+  assert.deepEqual(coreEntry(entries[0]), {
     bankName: 'Livelo',
     partnerName: 'Hilton Honors',
     pct: 50,
@@ -101,7 +101,7 @@ test('esfera: fixture spot-check (saved snapshot)', async () => {
   const entries = await esfera.parse(fixture('esfera'));
 
   assert.equal(entries.length, 1);
-  assert.deepEqual(entries[0], {
+  assert.deepEqual(coreEntry(entries[0]), {
     bankName: 'Esfera',
     partnerName: 'Azul',
     pct: 115,
@@ -113,7 +113,7 @@ test('esfera: fixture spot-check (saved snapshot)', async () => {
 test('frequentmiler: added destination column preserves current offers and date positions', async () => {
   const entries = await frequentmiler.parse(fixture('frequentmiler-2026-10'));
   assert.equal(entries.length, 3);
-  assert.deepEqual(entries[0], {
+  assert.deepEqual(coreEntry(entries[0]), {
     bankName: 'Citi ThankYou Rewards',
     partnerName: 'JAL (Japan Airlines) Mileage Bank',
     pct: 30,
@@ -166,4 +166,14 @@ test('livelo: known shopping cards distinguish zero transfer bonuses from a brok
   assert.equal(livelo.isValidEmpty?.(fixture('livelo')), false);
   const changedTransfer = html.replace('Ganhe em suas compras:', 'Transfira pontos e ganhe cinquenta por cento de bônus');
   assert.equal(livelo.isValidEmpty?.(changedTransfer), false, 'a changed transfer-bonus format cannot become healthy zero');
+});
+
+// Legacy extraction assertions omit the additive evidence fields, verified below.
+function coreEntry({ sourceId, bonusKind, conditionsText, campaignUrl, ...entry }) { return entry; }
+
+test('parser evidence retains the source, public terms and conditional maximum', async () => {
+  const rows = await frequentmiler.parse(fixture('frequentmiler-2026-10'));
+  assert.equal(rows[2].sourceId, 'frequentmiler');
+  assert.equal(rows[2].bonusKind, 'up_to');
+  assert.match(rows[2].conditionsText, /35%/);
 });

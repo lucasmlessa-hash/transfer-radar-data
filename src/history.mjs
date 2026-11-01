@@ -340,6 +340,32 @@ function typicalRange(pcts) {
   return lo === hi ? `+${lo}%` : `+${lo}–${hi}%`;
 }
 
+// Describes the existing estimator; does not alter its fitted probabilities.
+// Archive span is not a claim of continuous source coverage. The evidence
+// threshold is a conservative presentation policy, not a calibrated score.
+function forecastMetadata(windows, wait, now) {
+  const today = isoDay(now);
+  const completed = [...new Map(windows.filter(w => isoDay(w.end) < today)
+    .map(w => [`${isoDay(w.start)}:${isoDay(w.end)}`, w])).values()];
+  const first = completed.length ? new Date(Math.min(...completed.map(w => w.start.getTime()))) : null;
+  const last = completed.length ? new Date(Math.max(...completed.map(w => w.end.getTime()))) : null;
+  const spanMonths = first && last ? ami(last) - ami(first) + 1 : 0;
+  return {
+    modelVersion: 'seasonal-wait-v1', issuedAt: now.toISOString(),
+    evidence: {
+      windowCount: completed.length, firstDate: first ? isoDay(first) : null,
+      lastDate: last ? isoDay(last) : null, spanMonths,
+      level: completed.length >= 6 && spanMonths >= 24 ? 'established_history' : 'limited',
+    },
+    horizons: wait ? HORIZONS.map((months, i) => ({
+      months,
+      startDate: isoDay(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1))),
+      endDate: isoDay(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + months + 1, 0))),
+      probability: wait[i],
+    })) : [],
+  };
+}
+
 /**
  * Groups raw archived windows by route id and derives the display/forecast
  * fields for each.
@@ -426,6 +452,7 @@ export function deriveHistory(now = new Date(), raw = rawHistory()) {
       mp,
       p2,
       ...(wait === undefined ? {} : { wait }),
+      forecast: forecastMetadata(windows, wait, now),
       typical: typicalRange(windows.map((w) => w.pct)),
       hist: windows.map((w) => ({ w: windowLabel(w.start), pct: w.pct, len: lengthLabel(w.start, w.end) })),
     };

@@ -11,8 +11,9 @@
   "env": {
     "production": {
       "name": "transfer-radar-daily-scheduler",
-      // UTC: 06:00 Sao Paulo collection; 07:00 conditional recovery; 08:00 verification.
-      "triggers": { "crons": ["0 9,10,11 * * *"] }
+      // Prepared locally, not activated: collect every 4h at 01/05/09/13/17/21 UTC.
+      // Only 09 UTC refreshes references; 10 UTC recovers it and 11 UTC verifies.
+      "triggers": { "crons": ["0 1,5,9,10,11,13,17,21 * * *"] }
     }
   }
 }

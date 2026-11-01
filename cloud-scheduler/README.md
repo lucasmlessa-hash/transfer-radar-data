@@ -1,4 +1,32 @@
-# Atualização diária em nuvem
+# Coletas em nuvem
+
+## Preparação local de 01/11/2026 — intervalo de quatro horas
+
+A nova frequência está preparada no código e na configuração, **sem publicação
+ou ativação externa nesta alteração**. O ambiente padrão continua sem crons.
+O ambiente `production` está preparado com `0 1,5,9,10,11,13,17,21 * * *` UTC:
+
+- **01, 05, 13, 17 e 21 UTC:** solicita somente `build-feed.yml`, para coletar
+  promoções e registrar observações do histórico. Não repete o workflow de
+  taxas nem a atualização diária de referências.
+- **09 UTC:** mantém `refresh-br-ratios.yml` e o build encadeado ao final.
+- **10 e 11 UTC:** mantém, respectivamente, a recuperação diária condicional
+  e a verificação final, sem uma nova tentativa às 11 UTC.
+
+Assim, as seis coletas programadas ficam separadas por quatro horas, incluindo
+a virada do dia. O histórico só pode resolver uma janela como “não observada”
+quando há amostras saudáveis com lacunas de no máximo seis horas. A frequência
+preparada permite formar essa evidência; não comprova que a coleta ocorreu.
+Falhas, atrasos e lacunas maiores continuam como coleta incompleta, fora das
+métricas de resultado. O acompanhamento prospectivo depende da ativação e da
+persistência das observações em cada execução do feed.
+
+Nos horários extras, uma execução do feed em andamento recente ou já iniciada
+no mesmo ciclo impede outro disparo sequencial. Uma tentativa concluída com
+falha também bloqueia ticks duplicados daquele ciclo; o próximo horário tem
+seu próprio ciclo. A resposta de dispatch não declara coleta ou publicação
+concluída. Permanece a limitação de concorrência antes de o GitHub registrar
+a execução: não há trava distribuída nem garantia de execução exatamente uma vez.
 
 ## Recuperação de cobertura em 23/10/2026
 
@@ -12,7 +40,7 @@ não há segunda coleta. Às 08h confere o resultado final, sem nova tentativa.
 Uma execução de recuperação já iniciada impede outro disparo sequencial na
 mesma janela, inclusive quando falhou. Eventos simultâneos ainda podem
 concorrer antes de o GitHub registrar a execução; não há trava distribuída.
-O cron de produção é `0 9,10,11 * * *` UTC. Não foram adicionados serviços,
+O cron preparado nessa intervenção era `0 9,10,11 * * *` UTC. Não foram adicionados serviços,
 segredos, planos pagos ou canais externos de notificação.
 
 
@@ -42,7 +70,7 @@ completa passou e disparou o build automático com sucesso. O primeiro disparo
 do relógio é em 14/10/2026 às 06h e ainda não foi observado nesta ativação.
 Versão inicial ativa: `0e595b3b-8527-449d-8009-8a7d167811f7`.
 
-## Funcionamento
+## Funcionamento preparado para a próxima ativação
 
 - **06h de Brasília:** Cloudflare solicita `Refresh BR ratios`. O job confere
   parceiros, taxas, estimativas de valor e prazos com fonte, testa e salva as mudanças verificadas.
@@ -51,8 +79,10 @@ Versão inicial ativa: `0e595b3b-8527-449d-8009-8a7d167811f7`.
   e suas fontes precisam ter sido verificados depois da conclusão do job de
   taxas. Se a verificação falhar e não houver uma execução em andamento, solicita uma recuperação limitada.
 - **08h:** verifica a publicação final e registra falha se a cobertura continuar incompleta, sem nova coleta.
-- Não há outro cron no GitHub nessa configuração, evitando a segunda coleta
-  diária. Os dois workflows continuam disponíveis para execução manual.
+- **02h, 10h, 14h, 18h e 22h de Brasília:** solicita somente `Build feed`,
+  complementando a coleta das 06h para manter o intervalo de quatro horas.
+- O Worker centraliza o agendamento; não é necessário acrescentar outro cron
+  no GitHub. Os dois workflows continuam disponíveis para execução manual.
 - A extensão avisa quando o feed passa de **36 horas**. A checagem das 07h
   detecta a falta da publicação do dia antes desse prazo. A expiração das
   promoções continua ocorrendo pelo relógio, sem depender de nova coleta.
@@ -66,7 +96,9 @@ no GitHub.
 
 ## Custo previsto: zero, dentro das franquias
 
-São um cron e três invocações por dia, sem KV, banco ou endpoint público.
+Na configuração preparada, são um cron e oito invocações por dia: seis coletas
+programadas e duas verificações, com uma recuperação diária possível. Não há
+KV, banco ou endpoint público.
 O Workers Free inclui 100 mil invocações/dia, 10 ms de CPU/invocação e até cinco
 crons por conta. A espera da rede não conta como CPU. Os limites são
 compartilhados com outros Workers; conferir capacidade antes da ativação.
@@ -105,8 +137,10 @@ usando o prompt interativo do Wrangler ou o campo protegido do Cloudflare.
    npx wrangler@4.92.0 secret put GITHUB_TOKEN --config cloud-scheduler/wrangler.jsonc --env production
    ```
 
-3. Publicar os workflows, testes e prazo de 36h no repositório de dados,
-   preservando ledger remoto e commits do bot. Nunca usar force-push.
+3. Publicar os workflows e testes no repositório de dados, preservando ledger
+   remoto e commits do bot. O `Build feed` deve persistir as observações do
+   histórico em cada coleta, além de manter a primeira emissão da coorte diária.
+   Nunca usar force-push.
 4. Disparar `Refresh BR ratios` manualmente. Conferir seu resultado, o build
    encadeado e a data do feed publicado. Se falhar, manter/restaurar o cron antigo
    até o reparo, sem apagar o último feed válido.
@@ -117,7 +151,8 @@ usando o prompt interativo do Wrangler ou o campo protegido do Cloudflare.
    ```
 
 6. Confirmar que o secret existe pelo nome, sem imprimir o valor. A propagação
-   do cron pode levar 15 minutos. Acompanhar as execuções reais das 06h/07h:
+   do cron pode levar 15 minutos. Acompanhar as execuções reais diárias e as
+   coletas intermediárias, inclusive o intervalo entre amostras saudáveis:
    dry-run e aceite HTTP do GitHub não comprovam coleta concluída. Recarregar
    a extensão para aplicar o prazo diário no painel.
 
@@ -134,9 +169,11 @@ npx wrangler@4.92.0 deploy --dry-run --config cloud-scheduler/wrangler.jsonc --e
 ```
 
 Os testes simulam apenas o transporte HTTP: token ausente/negado, aceite 200/204,
-duplicatas, falha nas taxas, feed antigo ou anterior às taxas, fonte ausente,
-cobertura parcial, datas futuras e isolamento da credencial. Não disparam
-workflows reais nem usam tokens reais.
+duplicatas por ciclo, falha nas taxas, feed antigo ou anterior às taxas, fonte
+ausente, cobertura parcial, datas futuras e isolamento da credencial. Também
+conferem a cadência de quatro horas, o dispatch exclusivo do feed nos novos
+horários, a preservação do fluxo diário e a rejeição dos demais horários.
+Não disparam workflows reais nem usam tokens reais.
 
 ## Cobertura e limites
 
@@ -155,7 +192,7 @@ Os relatórios `hotel-ratios-health.json`, `point-valuations-health.json` e
 `transfer-times-health.json` acompanham o feed publicado. Falha não renova a
 data de conferência, e mudanças verificadas de fontes independentes podem ser
 publicadas mesmo quando outra fonte falha. Nenhum scraper garante cobrir todo o
-mercado ou promoções lançadas e encerradas entre duas coletas diárias.
+mercado ou promoções lançadas e encerradas entre duas coletas.
 
 O TPG apresentou respostas alternadamente completas e parciais no runner.
 O refresh usa até três tentativas limitadas, sem juntar valores de respostas

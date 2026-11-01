@@ -38,8 +38,11 @@ function validateRoute(r, i) {
   // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
   // routes from feeds that predate it, and a required key would turn a source
   // outage into a publish abort. New builds always emit it (see normalize.mjs).
-  const allowed = [...required, 'p2', 'wait', 'active', 'upcoming', 'ended', 'next', 'summary'];
+  const allowed = [...required, 'p2', 'wait', 'forecast', 'offerEvidence', 'active', 'upcoming', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
+
+  if (r.forecast !== undefined) validateForecast(r.forecast, `${ctx}.forecast`);
+  if (r.offerEvidence !== undefined) validateOfferEvidence(r.offerEvidence, `${ctx}.offerEvidence`);
 
   for (const k of ['id', 'bank', 'airline', 'code', 'time', 'typical']) {
     if (typeof r[k] !== 'string') fail(`${ctx}.${k}: must be a string`);
@@ -136,6 +139,51 @@ function validateRoute(r, i) {
   }
 
   if ('summary' in r && typeof r.summary !== 'string') fail(`${ctx}.summary: must be a string`);
+}
+
+const validDate = value => typeof value === 'string' && ISO_DATE.test(value)
+  && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
+
+function validateForecast(f, ctx) {
+  if (!isPlainObject(f)) fail(`${ctx}: must be an object`);
+  checkKeys(f, ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ctx);
+  if (typeof f.modelVersion !== 'string' || !f.modelVersion || !ISO_DATETIME.test(f.issuedAt) || !Number.isFinite(Date.parse(f.issuedAt))) fail(`${ctx}: invalid version or issue date`);
+  const e = f.evidence;
+  if (!isPlainObject(e)) fail(`${ctx}.evidence: must be an object`);
+  checkKeys(e, ['windowCount', 'firstDate', 'lastDate', 'spanMonths', 'level'], ['windowCount', 'firstDate', 'lastDate', 'spanMonths', 'level'], `${ctx}.evidence`);
+  if (![e.windowCount, e.spanMonths].every(n => Number.isInteger(n) && n >= 0)
+    || !['limited', 'established_history'].includes(e.level)) fail(`${ctx}: invalid evidence`);
+  if (e.windowCount ? (!validDate(e.firstDate) || !validDate(e.lastDate) || e.firstDate > e.lastDate)
+    : (e.firstDate !== null || e.lastDate !== null || e.spanMonths !== 0)) fail(`${ctx}: invalid evidence date`);
+  if (e.level === 'established_history' && (e.windowCount < 6 || e.spanMonths < 24)) fail(`${ctx}: insufficient evidence for level`);
+  if (!Array.isArray(f.horizons) || ![0, 3].includes(f.horizons.length)) fail(`${ctx}: invalid horizons`);
+  f.horizons.forEach((h, i) => {
+    if (!isPlainObject(h)) fail(`${ctx}: invalid horizon`);
+    checkKeys(h, ['months', 'startDate', 'endDate', 'probability'], ['months', 'startDate', 'endDate', 'probability'], ctx);
+    if (h.months !== [1, 3, 6][i] || !validDate(h.startDate) || !validDate(h.endDate) || h.startDate > h.endDate) fail(`${ctx}: invalid horizon date`);
+    const issue = new Date(f.issuedAt);
+    const expectedStart = new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
+    const expectedEnd = new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + h.months + 1, 0)).toISOString().slice(0, 10);
+    if (h.startDate !== expectedStart || h.endDate !== expectedEnd) fail(`${ctx}: horizon date does not match issue date`);
+    if (!Number.isFinite(h.probability) || h.probability < 0 || h.probability > 1) fail(`${ctx}: invalid probability`);
+  });
+}
+
+function validateOfferEvidence(e, ctx) {
+  if (!isPlainObject(e)) fail(`${ctx}: must be an object`);
+  checkKeys(e, ['status', 'checkedAt', 'observations'], ['status', 'checkedAt', 'observations'], ctx);
+  if (!['observed', 'conflict', 'carried'].includes(e.status) || !ISO_DATETIME.test(e.checkedAt) || !Number.isFinite(Date.parse(e.checkedAt))) fail(`${ctx}: invalid status or date`);
+  if (!Array.isArray(e.observations) || !e.observations.length) fail(`${ctx}: missing observations`);
+  for (const o of e.observations) {
+    if (!isPlainObject(o)) fail(`${ctx}: invalid observation`);
+    checkKeys(o, ['sourceId', 'url', 'pct', 'bonusKind'], ['sourceId', 'url', 'pct', 'bonusKind', 'startDate', 'endDate', 'conditionsText'], ctx);
+    if (typeof o.sourceId !== 'string' || !o.sourceId || !Number.isFinite(o.pct) || o.pct < 0 || !['fixed', 'up_to', 'unknown'].includes(o.bonusKind)) fail(`${ctx}: invalid observation`);
+    let url; try { url = new URL(o.url); } catch { fail(`${ctx}: invalid url`); }
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) fail(`${ctx}: invalid url`);
+    for (const key of ['startDate', 'endDate']) if (o[key] !== undefined && !validDate(o[key])) fail(`${ctx}: invalid date`);
+    if (o.startDate && o.endDate && o.startDate > o.endDate) fail(`${ctx}: reversed dates`);
+    if (o.conditionsText !== undefined && (typeof o.conditionsText !== 'string' || o.conditionsText.length > 600)) fail(`${ctx}: invalid conditions`);
+  }
 }
 
 export function validateFeed(doc) {

@@ -231,14 +231,14 @@ test('normalize emits forecast routes for archived routes with no live bonus', (
   assert.equal(forecast.typical, '+25%');
 });
 
-test('forecast routes are capped at 60, dropping the least likely — and real pairs all fit', () => {
-  // 63 synthetic routes (9 banks x 7 partners), each with a distinct
+test('forecast routes are capped at 120 while accommodating short-history pairs', () => {
+  // 126 synthetic routes (9 banks x 14 partners), each with a distinct
   // probability via a distinct number of observed years. The cap exists as a
   // balloon guard only: every REAL bank x airline pair with >=2 windows must
   // fit under it, because a capped-out route makes the client's by-airline
   // card silently lose a bank (the "Virgin only shows 2 banks" bug).
   const banks = ['Amex', 'Citi', 'Chase', 'Capital One', 'Bilt', 'Wells Fargo', 'Rove', 'Esfera', 'Livelo'];
-  const partners = ['Avianca LifeMiles', 'Air France', 'Virgin Atlantic', 'British Airways', 'Cathay Pacific', 'Qatar Airways Avios', 'Aer Lingus AerClub'];
+  const partners = ['Avianca LifeMiles', 'Air France', 'Virgin Atlantic', 'British Airways', 'Cathay Pacific', 'Qatar Airways Avios', 'Aer Lingus AerClub', 'Japan Airlines', 'Air Canada', 'United Airlines', 'Emirates', 'Etihad', 'Qantas', 'Singapore Airlines'];
   const raw = [];
   let i = 0;
   for (const bank of banks) {
@@ -251,7 +251,7 @@ test('forecast routes are capped at 60, dropping the least likely — and real p
     }
   }
   const history = deriveHistory(NOW, raw);
-  assert.equal(history.size, 63);
+  assert.equal(history.size, 126);
 
   const logged = [];
   const originalLog = console.log;
@@ -263,9 +263,9 @@ test('forecast routes are capped at 60, dropping the least likely — and real p
     console.log = originalLog;
   }
 
-  assert.equal(routes.length, 60);
+  assert.equal(routes.length, 120);
   assert.equal(logged.length, 1);
-  assert.match(logged[0], /dropped 3 lower-probability route/);
+  assert.match(logged[0], /dropped 6 lower-probability route/);
   const probs = routes.map((r) => r.next.prob);
   assert.deepEqual(probs, [...probs].sort((a, b) => b - a), 'kept routes are the highest-probability ones, sorted');
 });

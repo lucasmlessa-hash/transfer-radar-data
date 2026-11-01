@@ -2,7 +2,7 @@
 // Parse -> normalize -> validate -> publish, with a fail-safe: invalid or
 // mostly-failed source data never overwrites out/feed.json.
 
-import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, rmSync, renameSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
@@ -13,10 +13,12 @@ import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
 import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
+import {fitPooledForecast,predictPooledForecast,derivePooledHistory} from './pooled-forecast.mjs';
 import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
 import { fetchPage, PUBLIC_CLIENT_USER_AGENT } from './fetch-page.mjs';
 import { validatePartners } from '../scripts/validate-feed.mjs';
+import { loadForecastRecords, updateForecastRecords, summarizeForecastRecords, forecastHistoryReport, confirmForecastPublication, serializeForecastRecords } from './forecast-records.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -89,6 +91,10 @@ export async function runPipeline({
   // so tests importing runPipeline can never touch the real committed ledger;
   // the CLI entrypoint below is what passes the production path.
   ledgerPath = null,
+  forecastLedgerPath = null,
+  // Explicit proof from the public URL. A previous local out/feed.json alone
+  // is not proof that a deployment succeeded.
+  publicationProof = null,
 } = {}) {
   mkdirSync(outDir, { recursive: true });
 
@@ -133,8 +139,9 @@ export async function runPipeline({
         failedSources.push(src.id);
         continue;
       }
-      health.status = undated.length ? 'degraded' : 'ok';
-      if (!undated.length) health.lastSuccessAt = now.toISOString();
+      health.status = undated.length || entries.coverageComplete === false ? 'degraded' : 'ok';
+      if (entries.coverageComplete === false) health.error = 'One or more offer rows could not be parsed completely';
+      if (health.status === 'ok') health.lastSuccessAt = now.toISOString();
       raw.push(...entries);
     } catch (e) {
       console.warn(`[publish] source "${src.id}" failed: ${e.message}`);
@@ -165,7 +172,13 @@ export async function runPipeline({
     console.log(`[observed] ledger: ${ledger.windows.length} window(s), ${observedRaw.length} feeding history after FM dedupe`);
   }
 
-  const { routes: candidateRoutes, unmapped } = normalize(raw, now);
+  const model = fitPooledForecast(rawHistory(),now);
+  const { routes: candidateRoutes, unmapped } = normalize(raw, now,derivePooledHistory(rawHistory(),now,model));
+  for (const route of candidateRoutes) {
+    if (route.forecast?.modelVersion === 'pooled-recurrence-v2') continue;
+    const forecast = predictPooledForecast(model,route);
+    if (forecast) { route.forecast=forecast; route.wait=forecast.horizons.map(h=>h.probability); }
+  }
 
   // Read BEFORE the ledger update, not just for the merge below: at this point
   // out/feed.json is still what users were actually served (CI seeds it from
@@ -178,6 +191,8 @@ export async function runPipeline({
   const updatedLedger = ledgerPath && ledger.ok
     ? updateLedger(ledger.windows, candidateRoutes.filter((r) => r.active), now.toISOString().slice(0, 10), previous)
     : null;
+  // Save the actual sightings before the fallback merge adds older routes.
+  const observedRoutes = [...candidateRoutes];
 
   // ponytail: a route in the contract carries no source tag, so a failed
   // source's prior contribution can't be pulled out individually. The
@@ -192,6 +207,7 @@ export async function runPipeline({
     for (const r of previous.routes ?? []) {
       if (!candidateIds.has(r.id)) {
         const carried = { ...r };
+        if (r.offerEvidence) carried.offerEvidence = { ...r.offerEvidence, status: 'carried' };
         if (carried.active?.endDate < now.toISOString().slice(0, 10)) {
           if (!carried.ended || carried.active.endDate > carried.ended.endedAt) {
             carried.ended = { pct: carried.active.pct, endedAt: carried.active.endDate };
@@ -276,6 +292,28 @@ export async function runPipeline({
   }
   writeFileSync(path.join(outDir, 'partners.json'), JSON.stringify(partnersDoc, null, 2));
   writeFileSync(path.join(outDir, 'feed.json'), JSON.stringify(candidate, null, 2));
+  if (forecastLedgerPath) {
+    const prospective = loadForecastRecords(forecastLedgerPath);
+    if (prospective.ok) {
+      let confirmed = prospective.state;
+      if (publicationProof && Number.isFinite(Date.parse(publicationProof.observedAt)) && Date.parse(publicationProof.observedAt) <= now.getTime()) {
+        try { confirmed = confirmForecastPublication(confirmed,publicationProof.feed,publicationProof.observedAt); }
+        catch (error) { console.warn(`[forecast-records] ignored invalid publication proof: ${error.message}`); }
+      }
+      const updated = updateForecastRecords(confirmed, candidate, observedRoutes);
+      const serialized = serializeForecastRecords(updated);
+      if (JSON.stringify(updated) !== JSON.stringify(prospective.state)) {
+        mkdirSync(path.dirname(forecastLedgerPath), { recursive: true });
+        writeFileSync(forecastLedgerPath + '.tmp', serialized);
+        renameSync(forecastLedgerPath + '.tmp', forecastLedgerPath);
+      }
+      writeFileSync(path.join(outDir, 'forecast-evaluation.json'), JSON.stringify(summarizeForecastRecords(updated), null, 2) + '\n');
+      writeFileSync(path.join(outDir, 'forecast-history.json'), JSON.stringify(forecastHistoryReport(updated)) + '\n');
+    } else {
+      writeFileSync(path.join(outDir, 'forecast-evaluation.json'), JSON.stringify({version:1,status:'unavailable',asOf:candidate.generatedAt,reason:'Forecast ledger is unreadable; existing records preserved.'},null,2)+'\n');
+      writeFileSync(path.join(outDir, 'forecast-history.json'), JSON.stringify({version:1,status:'unavailable',asOf:candidate.generatedAt,records:[],metrics:[]},null,2)+'\n');
+    }
+  }
   if (updatedLedger && JSON.stringify(updatedLedger) !== JSON.stringify(ledger.windows)) {
     mkdirSync(path.dirname(ledgerPath), { recursive: true });
     writeFileSync(ledgerPath, JSON.stringify({ version: 1, windows: updatedLedger }, null, 2) + '\n');
@@ -303,7 +341,14 @@ if (isMain) {
   // Real builds (CI cron and operator runs) maintain the ledger; fixture runs
   // must not pollute it with fixture sightings.
   const ledgerPath = fixtures ? null : path.join(ROOT, 'data', 'observed-windows.json');
-  runPipeline({ fixtures, ledgerPath }).then((result) => {
+  const forecastLedgerPath = fixtures ? null : path.join(ROOT, 'data', 'forecast-records.json');
+  let publicationProof = null;
+  if (!fixtures) {
+    const proofFile = path.join(ROOT,'out','previous-publication.json');
+    try { publicationProof = JSON.parse(readFileSync(proofFile,'utf8')); } catch { /* No prior public observation. */ }
+    rmSync(proofFile,{force:true});
+  }
+  runPipeline({ fixtures, ledgerPath, forecastLedgerPath, publicationProof }).then((result) => {
     process.exit(result.ok ? 0 : 2);
   });
 }

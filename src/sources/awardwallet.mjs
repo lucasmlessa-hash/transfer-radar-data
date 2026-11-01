@@ -22,6 +22,7 @@ export const source = {
     const $grid = $('#Current_Transfer_Bonuses').closest('h2').nextAll('.transfer-times').first();
     const $rows = ($grid.length ? $grid : $('.transfer-times').first()).find('.tt-row');
     const out = [];
+    Object.defineProperty(out, 'coverageComplete', {value: true, writable: true});
 
     $rows.each((_, el) => {
       const $row = $(el);
@@ -46,13 +47,15 @@ export const source = {
         : '';
 
       if (!bankName || !partnerName || !pctMatch || !endDateRaw) {
+        out.coverageComplete = false;
         console.warn(
           `[awardwallet] skipping malformed entry: bank=${JSON.stringify(bankName)} partner=${JSON.stringify(partnerName)} bonus=${JSON.stringify(bonus)}`,
         );
         return;
       }
 
-      out.push({ bankName, partnerName, pct: Number(pctMatch[1]), endDateRaw, sourceUrl: source.url });
+      out.push({ bankName, partnerName, pct: Number(pctMatch[1]), endDateRaw, sourceUrl: source.url,
+        sourceId: source.id, bonusKind: /up\s+to\s+\d+(?:\.\d+)?\s*%/i.test(bonus) ? 'up_to' : 'fixed', conditionsText: bonus.slice(0, 600) });
     });
 
     return out;

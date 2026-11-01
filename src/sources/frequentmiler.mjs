@@ -144,6 +144,7 @@ export const source = {
   async parse(html) {
     const $ = cheerio.load(html);
     const out = [];
+    Object.defineProperty(out, 'coverageComplete', {value: true, writable: true});
     const table = findBonusTable($);
 
     // Hand the archive off before parsing current bonuses: the loop below
@@ -167,6 +168,7 @@ export const source = {
       // Header rows (th only) and anything short of the expected columns
       // are skipped here.
       if (cells.length < requiredCells) {
+        if (cells.length) out.coverageComplete = false;
         console.warn(`[frequentmiler] skipping row with ${cells.length} cell(s), expected ${requiredCells}`);
         return;
       }
@@ -176,6 +178,7 @@ export const source = {
       const match = detailsText.match(DETAILS_RE);
 
       if (!bankName || !match) {
+        out.coverageComplete = false;
         console.warn(
           `[frequentmiler] skipping malformed row: bank=${JSON.stringify(bankName)} details=${JSON.stringify(detailsText)}`,
         );
@@ -190,6 +193,7 @@ export const source = {
       const endDateRaw = $endCell.text().trim();
 
       if (!endDateRaw) {
+        out.coverageComplete = false;
         console.warn(`[frequentmiler] skipping row with no end date: bank=${JSON.stringify(bankName)}`);
         return;
       }
@@ -213,6 +217,12 @@ export const source = {
         startDateRaw,
         endDateRaw,
         sourceUrl: source.url,
+        sourceId: source.id,
+        bonusKind: /up\s+to\s+\d+(?:\.\d+)?\s*%/i.test(detailsText) ? 'up_to' : 'fixed',
+        conditionsText: detailsText.slice(0, 600),
+        ...($(cells[columns.details]).find('a[href]').first().attr('href') ? {
+          campaignUrl: new URL($(cells[columns.details]).find('a[href]').first().attr('href'), source.url).href,
+        } : {}),
       });
     });
 

@@ -47,18 +47,21 @@ export const source = {
   async parse(html) {
     const $ = cheerio.load(html);
     const out = [];
+    Object.defineProperty(out, 'coverageComplete', {value: true, writable: true});
     const seen = new Set();
 
     $('img[alt]').each((_, el) => {
       const alt = $(el).attr('alt') ?? '';
       const pctMatch = alt.match(PCT);
-      if (!pctMatch || !TRANSFER_CTA.test(alt)) return; // not a transfer-bonus banner
+      if (!TRANSFER_CTA.test(alt)) return;
+      if (!pctMatch) { out.coverageComplete = false; return; }
 
       const slug = $(el).closest('a[href*="/p/"]').attr('href')?.split('/')[2];
       const partnerName = alt.match(PARTNER)?.[1]?.trim() || slug?.replace(/-/g, ' ') || '';
       const endDateRaw = alt.match(END_DATE)?.[1] ?? '';
 
       if (!partnerName || !endDateRaw) {
+        out.coverageComplete = false;
         console.warn(`[esfera] skipping malformed banner: alt=${JSON.stringify(alt.slice(0, 180))}`);
         return;
       }
@@ -74,6 +77,9 @@ export const source = {
         pct: Number(pctMatch[1].replace(',', '.')),
         endDateRaw,
         sourceUrl: source.url,
+        sourceId: source.id,
+        bonusKind: /at[ée]\s+\d+(?:[.,]\d+)?\s*%/i.test(alt) ? 'up_to' : 'fixed',
+        conditionsText: alt.slice(0, 600),
       });
     });
 

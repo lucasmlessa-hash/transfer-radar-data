@@ -113,6 +113,9 @@ export const source = {
         if (variation?.statusCard && variation.statusCard !== 'active') continue;
         const link = String(variation?.button?.redirectLink ?? '');
         const copy = `${variation?.title ?? ''} ${variation?.description ?? ''}`;
+        // Money-transfer acquisition offers are not loyalty-point transfers.
+        // Keep unknown point-transfer cards conservative below.
+        if (/\/instituicoes-financeiras\//i.test(link)) continue;
         // Reject any transfer-shaped card, including new percentage formats
         // that the parser might not yet understand. Zero is then degraded.
         if (PDP_LINK.test(link) || /transf(?:er|ir)/i.test(copy)) return false;
@@ -126,6 +129,7 @@ export const source = {
   async parse(html, { loadPage } = {}) {
     const $ = cheerio.load(html);
     const out = [];
+    Object.defineProperty(out, 'coverageComplete', {value: true, writable: true});
 
     const payload = $('script#__NEXT_DATA__').first().html();
     if (!payload) {
@@ -161,13 +165,15 @@ export const source = {
 
         // Not a points-transfer card at all -> silently ignore (most of
         // /ofertas is shopping promos; warning on each would be noise).
-        if (!slug && !/transfer/i.test(text)) continue;
+        if (/\/instituicoes-financeiras\//i.test(link)) continue;
+        if (!slug && !/transf(?:er|ir)/i.test(text)) continue;
         const pctMatch = text.match(BONUS_PCT);
-        if (!pctMatch) continue;
+        if (!pctMatch) { out.coverageComplete = false; continue; }
 
         const partnerName = slug ? fromSlug(slug) : (title.match(PARA_TAIL)?.[1] ?? '').trim();
         const pct = Number(pctMatch[1].replace(',', '.'));
         if (!partnerName || !Number.isFinite(pct)) {
+          out.coverageComplete = false;
           console.warn(
             `[livelo] skipping malformed offer: title=${JSON.stringify(title)} link=${JSON.stringify(link)}`,
           );
@@ -198,7 +204,10 @@ export const source = {
           console.warn(`[livelo] no end date published for ${partnerName} +${pct}% — emitting undated`);
         }
 
-        out.push({ bankName: 'Livelo', partnerName, pct, endDateRaw, ...(startDateRaw ? { startDateRaw } : {}), sourceUrl: source.url });
+        out.push({ bankName: 'Livelo', partnerName, pct, endDateRaw, ...(startDateRaw ? { startDateRaw } : {}), sourceUrl: source.url,
+          sourceId: source.id, bonusKind: /at[ée]\s+\d+(?:[.,]\d+)?\s*%/i.test(text) ? 'up_to' : 'fixed',
+          conditionsText: text.trim().slice(0, 600), ...(slug ? { campaignUrl: new URL(link, source.url).href } : {}),
+        });
       }
     }
 

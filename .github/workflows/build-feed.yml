@@ -76,12 +76,15 @@ jobs:
         run: |
           mkdir -p out
           if curl -fsSL --max-time 30 -o out/feed.json "$FEED_URL"; then
+            # This is evidence of a publicly served feed, unlike a local build.
+            node --input-type=module -e 'import fs from "node:fs";try{fs.writeFileSync("out/previous-publication.json",JSON.stringify({observedAt:new Date().toISOString(),feed:JSON.parse(fs.readFileSync("out/feed.json","utf8"))}));}catch{}'
             # `|| echo ?` so an unparseable body logs oddly instead of erroring here;
             # publish.mjs is the thing that decides what a bad previous feed means.
             routes=$(node -p 'JSON.parse(require("fs").readFileSync("out/feed.json","utf8")).routes.length' 2>/dev/null || echo '?')
             echo "cliff guard armed against $FEED_URL — previous feed: $routes routes"
           else
             rm -f out/feed.json
+            rm -f out/previous-publication.json
             echo "no previous feed at $FEED_URL (first deploy, or unreachable) — cliff guard stays off this run"
           fi
 
@@ -108,33 +111,38 @@ jobs:
           fi
 
       # The pipeline's own memory (src/observed.mjs): live bonuses it saw are
-      # appended to a day-granular ledger so Esfera/Livelo/Rove — which no
-      # public archive covers — accumulate real history. Day granularity means
-      # this commits at most once a day. Only after the
+      # appended to a day-granular campaign ledger so Esfera/Livelo/Rove — which
+      # no public archive covers — accumulate real history. Forecast records
+      # and observation samples advance on every collection. Only after the
       # feed validated: a build that failed or shipped garbage must not advance
       # the ledger either.
       #
-      # A losing push race must NOT fail the job. deploy has `needs: build`, so
-      # a hard failure here would hold a perfectly good feed back from users
-      # over bookkeeping — the wrong trade in a fail-safe pipeline. It also
-      # self-heals: the ledger is rebuilt from the live feed every run, so the
-      # same rows reappear in the next diff and get committed then. Warn, never
-      # force, keep going.
-      - name: Persist observed-windows ledger
+      # Forecasts cannot be reconstructed later without hindsight. Persist the
+      # unconfirmed issue before deployment; a failed push must keep the previous
+      # published feed in place rather than silently losing its new cohort.
+      - name: Persist campaign and forecast ledgers
         run: |
           # status --porcelain, not diff --quiet: the latter is blind to an
           # untracked file, and the ledger's very first appearance is one.
-          if [ -z "$(git status --porcelain -- data/observed-windows.json)" ]; then
+          if [ -z "$(git status --porcelain -- data/observed-windows.json data/forecast-records.json)" ]; then
             echo "ledger unchanged"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/observed-windows.json
-            git commit -m "chore(data): observed-windows ledger $(date -u +%F)"
+            git add data/observed-windows.json data/forecast-records.json
+            git commit -m "chore(data): campaign and forecast ledgers $(date -u +%F)"
             if ! (git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"); then
-              echo "::warning::ledger push failed (concurrent push?) — the feed still publishes and the next run re-appends these rows"
+              echo "::error::ledger push failed — refusing to publish unrecorded forecasts"
+              exit 1
             fi
           fi
+
+      - name: Save exact feed for publication confirmation
+        uses: actions/upload-artifact@v4
+        with:
+          name: forecast-publication-input
+          path: out/feed.json
+          retention-days: 7
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -172,8 +180,25 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - uses: actions/download-artifact@v4
+        with:
+          name: forecast-publication-input
+          path: .forecast-publication
+      - name: Confirm forecasts from the successful deployment
+        run: |
+          node scripts/confirm-forecast-publication.mjs --ledger data/forecast-records.json --feed .forecast-publication/feed.json
+          if [ -n "$(git status --porcelain -- data/forecast-records.json)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add data/forecast-records.json
+            git commit -m "chore(data): confirm published forecasts $(date -u +%FT%TZ)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
       - name: Verify published collection health
         run: node scripts/check-feed-health.mjs https://lucasmlessa-hash.github.io/transfer-radar-data/feed.json
