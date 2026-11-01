@@ -282,6 +282,7 @@
 ],
 "samples":[
 {"at":"2026-11-01T17:27:52.072Z","sources":{"frequentmiler":"ok","awardwallet":"ok","livelo":"ok","esfera":"ok"},"offers":[{"id":"rove-b6","pct":20},{"id":"citi-cx","pct":10},{"id":"c1-vs","pct":30},{"id":"c1-af","pct":20},{"id":"chase-ba","pct":30},{"id":"chase-ib","pct":30},{"id":"chase-ei","pct":30}],"uncertainRoutes":[]},
-{"at":"2026-11-01T17:28:58.069Z","sources":{"frequentmiler":"ok","awardwallet":"ok","livelo":"ok","esfera":"ok"},"offers":[{"id":"rove-b6","pct":20},{"id":"citi-cx","pct":10},{"id":"c1-vs","pct":30},{"id":"c1-af","pct":20},{"id":"chase-ba","pct":30},{"id":"chase-ib","pct":30},{"id":"chase-ei","pct":30}],"uncertainRoutes":[]}
+{"at":"2026-11-01T17:28:58.069Z","sources":{"frequentmiler":"ok","awardwallet":"ok","livelo":"ok","esfera":"ok"},"offers":[{"id":"rove-b6","pct":20},{"id":"citi-cx","pct":10},{"id":"c1-vs","pct":30},{"id":"c1-af","pct":20},{"id":"chase-ba","pct":30},{"id":"chase-ib","pct":30},{"id":"chase-ei","pct":30}],"uncertainRoutes":[]},
+{"at":"2026-11-01T21:00:47.788Z","sources":{"frequentmiler":"ok","awardwallet":"ok","livelo":"ok","esfera":"ok"},"offers":[{"id":"rove-b6","pct":20},{"id":"citi-cx","pct":10},{"id":"c1-vs","pct":30},{"id":"c1-af","pct":20},{"id":"chase-ba","pct":30},{"id":"chase-ib","pct":30},{"id":"chase-ei","pct":30}],"uncertainRoutes":[]}
 ]
 }
