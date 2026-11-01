@@ -459,7 +459,7 @@
       "code": "B6",
       "pct": 20,
       "firstSeen": "2026-10-18",
-      "lastSeen": "2026-10-31",
+      "lastSeen": "2026-11-01",
       "endDate": "2026-11-14",
       "pred": {
         "absent": true,
@@ -486,7 +486,7 @@
       "code": "VS",
       "pct": 30,
       "firstSeen": "2026-10-21",
-      "lastSeen": "2026-10-31",
+      "lastSeen": "2026-11-01",
       "endDate": "2026-11-20",
       "pred": {
         "p2": 0.336,
@@ -540,7 +540,7 @@
       "code": "CX",
       "pct": 10,
       "firstSeen": "2026-10-26",
-      "lastSeen": "2026-10-31",
+      "lastSeen": "2026-11-01",
       "endDate": "2026-11-14",
       "pred": {
         "p2": 0.156,
