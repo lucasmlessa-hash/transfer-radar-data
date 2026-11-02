@@ -1,3 +1,4 @@
+import {monthlyWindows} from './forecast-windows.mjs';
 // Prospective predictions and their observation coverage. Never train on this
 // ledger here, never turn a failed/missing collection into a negative result.
 import { readFileSync } from 'node:fs';
@@ -16,6 +17,7 @@ const fieldOf = record => record.forecastField ?? 'forecast';
 const fieldMetadata = field => field === 'forecast' ? {} : { forecastField: field };
 const forecastEntries = routes => routes.flatMap(route => [
   { route, forecastField: 'forecast', forecast: route.forecast },
+  ...(route.monthlyCampaignForecast ? [{route,forecastField:'monthlyCampaignForecast',forecast:route.monthlyCampaignForecast}] : []),
   ...(route.nextCampaignForecast ? [{ route, forecastField: 'nextCampaignForecast', forecast: route.nextCampaignForecast }] : []),
 ]);
 const campaignStartOf = offer => Object.hasOwn(offer,'campaignStartDate') ? offer.campaignStartDate : offer.startDate;
@@ -46,9 +48,8 @@ function validLedger(state) {
     && state.records.every(r => typeof r.key === 'string' && typeof r.routeId === 'string'
       && states.includes(r.status) && isoDate(r.startDate) && isoDate(r.endDate) && r.startDate <= r.endDate
       && Number.isFinite(Date.parse(r.issuedAt)) && Number.isFinite(Date.parse(r.recordedAt))
-      && [1, 3, 6].includes(r.months) && Array.isArray(r.requiredSources) && r.requiredSources.length
-      && (r.target === undefined || (r.target === 'campaign_start' && r.horizonMode === 'rolling_days'
-        && r.days === ({ 1: 30, 3: 90, 6: 180 })[r.months]))
+      && (r.horizonMode==='rolling_months'?[1,2,3]:[1,3,6]).includes(r.months) && Array.isArray(r.requiredSources) && r.requiredSources.length
+      && (r.target === undefined || (r.target === 'campaign_start' && ((r.horizonMode === 'rolling_days' && r.days === ({1:30,3:90,6:180})[r.months]) || (r.horizonMode==='rolling_months' && monthlyWindows(r.issuedAt).some(w=>w.months===r.months&&w.days===r.days&&w.startDate===r.startDate&&w.endDate===r.endDate)))))
       && r.requiredSources.every(s => typeof s === 'string')
       && (r.probability === null || (Number.isFinite(r.probability) && r.probability >= 0 && r.probability <= 1)))
     && state.samples.every(s => Number.isFinite(Date.parse(s.at)) && s.sources && typeof s.sources === 'object'

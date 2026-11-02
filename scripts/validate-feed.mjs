@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {monthlyWindows} from '../src/forecast-windows.mjs';
 // ponytail: hand-rolled checks for exactly the constraints in CONTRACT.md /
 // schema/*.json, not a generic JSON-Schema engine — add ajv if the schema
 // grows past what a few functions can enforce.
@@ -38,10 +39,14 @@ function validateRoute(r, i) {
   // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
   // routes from feeds that predate it, and a required key would turn a source
   // outage into a publish abort. New builds always emit it (see normalize.mjs).
-  const allowed = [...required, 'p2', 'wait', 'forecast', 'nextCampaignForecast', 'offerEvidence', 'active', 'upcoming', 'ended', 'next', 'summary'];
+  const allowed = [...required, 'p2', 'wait', 'forecast', 'nextCampaignForecast', 'monthlyCampaignForecast', 'offerEvidence', 'active', 'upcoming', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
 
   if (r.forecast !== undefined) validateForecast(r.forecast, `${ctx}.forecast`);
+  if(r.monthlyCampaignForecast!==undefined) {
+    validateForecast(r.monthlyCampaignForecast,`${ctx}.monthlyCampaignForecast`);
+    if(r.monthlyCampaignForecast.modelVersion!=='recurrence-hazard-v4'||r.monthlyCampaignForecast.horizonMode!=='rolling_months') fail(`${ctx}.monthlyCampaignForecast: invalid monthly model`);
+  }
   if (r.nextCampaignForecast !== undefined) {
     validateForecast(r.nextCampaignForecast, `${ctx}.nextCampaignForecast`);
     if (r.nextCampaignForecast.modelVersion !== 'recurrence-hazard-v3' || r.nextCampaignForecast.target !== 'campaign_start') {
@@ -157,11 +162,13 @@ function validateForecast(f, ctx) {
   if (!isPlainObject(f)) fail(`${ctx}: must be an object`);
   checkKeys(f, ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ['modelVersion', 'issuedAt', 'evidence', 'horizons', 'target', 'horizonMode', 'context'], ctx);
   if (typeof f.modelVersion !== 'string' || !f.modelVersion || !ISO_DATETIME.test(f.issuedAt) || !Number.isFinite(Date.parse(f.issuedAt))) fail(`${ctx}: invalid version or issue date`);
-  const rolling = f.target === 'campaign_start';
+  const rolling = f.target === 'campaign_start', monthly=f.horizonMode==='rolling_months';
+  if(f.modelVersion==='recurrence-hazard-v4'&&!monthly) fail(`${ctx}: invalid monthly target`);
+  if(f.modelVersion==='recurrence-hazard-v3'&&f.horizonMode!=='rolling_days') fail(`${ctx}: invalid daily target`);
   if (rolling) {
-    if (f.horizonMode !== 'rolling_days') fail(`${ctx}: invalid campaign-start horizon mode`);
+    if (!['rolling_days','rolling_months'].includes(f.horizonMode) || (monthly && f.modelVersion!=='recurrence-hazard-v4')) fail(`${ctx}: invalid campaign-start horizon mode`);
     validateForecastContext(f.context, `${ctx}.context`);
-  } else if (f.target !== undefined || f.horizonMode !== undefined || f.context !== undefined || f.modelVersion === 'recurrence-hazard-v3') {
+  } else if (f.target !== undefined || f.horizonMode !== undefined || f.context !== undefined || ['recurrence-hazard-v3','recurrence-hazard-v4'].includes(f.modelVersion)) {
     fail(`${ctx}: invalid forecast target definition`);
   }
   const e = f.evidence;
@@ -177,10 +184,10 @@ function validateForecast(f, ctx) {
     if (!isPlainObject(h)) fail(`${ctx}: invalid horizon`);
     checkKeys(h, ['months', 'startDate', 'endDate', 'probability', ...(rolling ? ['days'] : [])],
       ['months', 'startDate', 'endDate', 'probability', ...(rolling ? ['days'] : [])], ctx);
-    if (h.months !== [1, 3, 6][i] || !validDate(h.startDate) || !validDate(h.endDate) || h.startDate > h.endDate) fail(`${ctx}: invalid horizon date`);
+    if (h.months !== (monthly?[1,2,3]:[1,3,6])[i] || !validDate(h.startDate) || !validDate(h.endDate) || h.startDate > h.endDate) fail(`${ctx}: invalid horizon date`);
     const issue = new Date(f.issuedAt);
     const day = Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth(), issue.getUTCDate());
-    if (rolling && h.days !== [30, 90, 180][i]) fail(`${ctx}: invalid horizon days`);
+    if (rolling && h.days !== (monthly?monthlyWindows(f.issuedAt)[i].days:[30,90,180][i])) fail(`${ctx}: invalid horizon days`);
     const expectedStart = rolling ? new Date(day + 86400000).toISOString().slice(0, 10)
       : new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
     const expectedEnd = rolling ? new Date(day + h.days * 86400000).toISOString().slice(0, 10)

@@ -333,3 +333,11 @@ invalidate an otherwise healthy legacy overlap observation. Both positive
 and negative metrics still require publication confirmation, a closed window,
 healthy sources and complete collection with gaps no longer than six hours.
 One observed start never fills gaps in the rest of its evaluation window.
+
+## Monthly campaign forecasts (v4)
+
+`monthlyCampaignForecast` adds modelVersion `recurrence-hazard-v4`, target `campaign_start`, horizonMode `rolling_months`, and ordered horizons of 1, 2 and 3 months. `days` records the actual duration. Windows begin tomorrow UTC and end on the issuance day's month anniversary, clamped to the last valid day. Each anniversary is computed directly from issuance, never by chaining clamps. The fitted daily hazard model is unchanged.
+
+`forecast` and `nextCampaignForecast` preserve v2/v3 wire semantics. Updated clients prefer the monthly field without modifying the raw payload. The ledger records and confirms all fields independently. Previously issued windows remain unchanged.
+
+`forecast-history.json` preserves v2/v3 for older clients. `forecast-history-monthly.json` includes all versions and monthly records; models and horizons remain separate. The UI displays three probabilities for the same named origin together, with exact end dates. History retains model and horizon filters.

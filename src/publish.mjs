@@ -13,7 +13,7 @@ import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
 import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
-import {fitRecurrenceForecast,predictRecurrenceForecast} from './recurrence-forecast.mjs';
+import {fitRecurrenceForecast,predictRecurrenceForecast,predictMonthlyRecurrenceForecast} from './recurrence-forecast.mjs';
 import {fitPooledForecast,predictPooledForecast,derivePooledHistory} from './pooled-forecast.mjs';
 import { loadLedger, updateLedger, toRawWindows, toRecurrenceWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
@@ -196,7 +196,7 @@ export async function runPipeline({
       if (forecast) { route.forecast=forecast; route.wait=forecast.horizons.map(h=>h.probability); }
     }
     const nextCampaignForecast = predictRecurrenceForecast(model,route);
-    if (nextCampaignForecast) route.nextCampaignForecast=nextCampaignForecast;
+    if (nextCampaignForecast) {route.nextCampaignForecast=nextCampaignForecast;route.monthlyCampaignForecast=predictMonthlyRecurrenceForecast(model,route);}
   }
 
   // Read BEFORE the ledger update, not just for the merge below: at this point
@@ -327,10 +327,12 @@ export async function runPipeline({
         renameSync(forecastLedgerPath + '.tmp', forecastLedgerPath);
       }
       writeFileSync(path.join(outDir, 'forecast-evaluation.json'), JSON.stringify(summarizeForecastRecords(updated), null, 2) + '\n');
-      writeFileSync(path.join(outDir, 'forecast-history.json'), JSON.stringify(forecastHistoryReport(updated)) + '\n');
+      writeFileSync(path.join(outDir, 'forecast-history.json'), JSON.stringify(forecastHistoryReport({...updated,records:updated.records.filter(r=>r.horizonMode!=='rolling_months')})) + '\n');
+      writeFileSync(path.join(outDir,'forecast-history-monthly.json'),JSON.stringify(forecastHistoryReport(updated))+'\n');
     } else {
       writeFileSync(path.join(outDir, 'forecast-evaluation.json'), JSON.stringify({version:1,status:'unavailable',asOf:candidate.generatedAt,reason:'Forecast ledger is unreadable; existing records preserved.'},null,2)+'\n');
       writeFileSync(path.join(outDir, 'forecast-history.json'), JSON.stringify({version:1,status:'unavailable',asOf:candidate.generatedAt,records:[],metrics:[]},null,2)+'\n');
+      writeFileSync(path.join(outDir,'forecast-history-monthly.json'),JSON.stringify({version:1,status:'unavailable',asOf:candidate.generatedAt,records:[],metrics:[]})+'\n');
     }
   }
   if (updatedLedger && JSON.stringify(updatedLedger) !== JSON.stringify(ledger.windows)) {

@@ -1,3 +1,4 @@
+import {monthlyWindows} from './forecast-windows.mjs';
 // Daily recurrent-event survival model. The outcome is a NEW campaign start,
 // not a campaign overlapping a future month. All effects are fitted jointly;
 // there is no annual quota and no manual probability discount after an event.
@@ -239,13 +240,16 @@ export function recurrenceContext(model,identity,at=new Date(model.issuedAt)) {
     medianIntervalDays:median(state.intervals),recentIntervalsDays:state.intervals.slice(-2),nextCampaignOrdinal:nYear+1};
 }
 
-export function predictRecurrenceForecast(model,identity) {
+export function predictRecurrenceForecast(model,identity) { return predictWindows(model,identity,false); }
+export function predictMonthlyRecurrenceForecast(model,identity) { return predictWindows(model,identity,true); }
+function predictWindows(model,identity,monthly) {
   if(!model.coefficients)return null;
   if(!model.diagnostics.converged)throw new Error('recurrence solver did not converge; refusing an unstable forecast');
   const route=model.routes.get(identity.id),ws=route?.windows??[];
   const groups=[`bank:${identity.bank}`,`partner:${identity.code}`,`route:${identity.id}`].map(k=>model.groupIndices.get(k)).filter(j=>j!==undefined);
+  const windows=monthly?monthlyWindows(model.issuedAt):[[1,30],[3,90],[6,180]].map(([months,days])=>({months,days,startDate:iso(model.cut+1),endDate:iso(model.cut+days)}));
   let logSurvival=0;const horizonProbabilities=new Map();
-  for(let ahead=1;ahead<=180;ahead++) {
+  for(let ahead=1;ahead<=windows.at(-1).days;ahead++) {
     const day=model.cut+ahead;
     const state=stateAt(route,day,model.cut);
     if(!ws.some(w=>w.s<=model.cut&&w.e>=day)) {
@@ -254,18 +258,18 @@ export function predictRecurrenceForecast(model,identity) {
       for(const j of groups)eta+=model.coefficients[j];
       logSurvival-=softplus(eta);
     }
-    if([30,90,180].includes(ahead))horizonProbabilities.set(ahead,-Math.expm1(logSurvival));
+    if(windows.some(w=>w.days===ahead))horizonProbabilities.set(ahead,-Math.expm1(logSurvival));
   }
   const first=ws[0],last=ws.length?Math.max(...ws.map(w=>Math.min(w.e,model.cut))):null;
   const spanMonths=first?date(last).getUTCFullYear()*12+date(last).getUTCMonth()-first.start.getUTCFullYear()*12-first.start.getUTCMonth()+1:0;
   // Context is anchored on the issuance day, rather than tomorrow's covariate
   // state: on 31 December the label must still describe the outgoing year.
-  return {modelVersion:RECURRENCE_MODEL_VERSION,issuedAt:model.issuedAt,target:'campaign_start',horizonMode:'rolling_days',
+  return {modelVersion:monthly?'recurrence-hazard-v4':RECURRENCE_MODEL_VERSION,issuedAt:model.issuedAt,target:'campaign_start',horizonMode:monthly?'rolling_months':'rolling_days',
     evidence:{windowCount:ws.length,firstDate:first?iso(first.s):null,lastDate:last==null?null:iso(last),spanMonths,
       level:ws.length>=6&&spanMonths>=24?'established_history':'limited'},
     context:recurrenceContext(model,identity),
-    horizons:[[1,30],[3,90],[6,180]].map(([months,days])=>({months,days,startDate:iso(model.cut+1),endDate:iso(model.cut+days),
-      probability:clip(Math.round(horizonProbabilities.get(days)*1000)/1000,.001,.999)}))};
+    horizons:windows.map(window=>({...window,
+      probability:clip(Math.round(horizonProbabilities.get(window.days)*1000)/1000,.001,.999)}))};
 }
 
 export function deriveRecurrenceHistory(raw,now=new Date(),model=fitRecurrenceForecast(raw,now)) {

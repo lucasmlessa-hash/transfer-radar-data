@@ -196,7 +196,7 @@
               "format": "date"
             }
           },
-          "description": "Announced but not yet running. Mutually exclusive with `active` — the source table lists current AND upcoming bonuses, and treating an unstarted one as live tells the user to transfer for nothing."
+          "description": "Announced but not yet running. Mutually exclusive with `active` \u2014 the source table lists current AND upcoming bonuses, and treating an unstarted one as live tells the user to transfer for nothing."
         },
         "forecast": {
           "type": "object",
@@ -573,6 +573,209 @@
             },
             "horizonMode": {
               "const": "rolling_days"
+            }
+          }
+        },
+        "monthlyCampaignForecast": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "modelVersion",
+            "issuedAt",
+            "evidence",
+            "horizons",
+            "target",
+            "horizonMode",
+            "context"
+          ],
+          "properties": {
+            "modelVersion": {
+              "const": "recurrence-hazard-v4"
+            },
+            "issuedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "evidence": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "windowCount",
+                "firstDate",
+                "lastDate",
+                "spanMonths",
+                "level"
+              ],
+              "properties": {
+                "windowCount": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "firstDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date"
+                },
+                "lastDate": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date"
+                },
+                "spanMonths": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "level": {
+                  "enum": [
+                    "limited",
+                    "established_history"
+                  ]
+                }
+              }
+            },
+            "horizons": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "months",
+                  "startDate",
+                  "endDate",
+                  "probability",
+                  "days"
+                ],
+                "properties": {
+                  "months": {
+                    "enum": [
+                      1,
+                      2,
+                      3
+                    ]
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "probability": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 28,
+                    "maximum": 92
+                  }
+                }
+              },
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "properties": {
+                    "months": {
+                      "const": 1
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "months": {
+                      "const": 2
+                    }
+                  }
+                },
+                {
+                  "properties": {
+                    "months": {
+                      "const": 3
+                    }
+                  }
+                }
+              ]
+            },
+            "target": {
+              "const": "campaign_start"
+            },
+            "horizonMode": {
+              "const": "rolling_months"
+            },
+            "context": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "campaignsThisYear",
+                "campaignsLast365Days",
+                "annualMedian",
+                "completeYears",
+                "daysSinceLastStart",
+                "daysSinceLastEnd",
+                "medianIntervalDays",
+                "recentIntervalsDays",
+                "nextCampaignOrdinal"
+              ],
+              "properties": {
+                "campaignsThisYear": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "campaignsLast365Days": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completeYears": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "nextCampaignOrdinal": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "daysSinceLastStart": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "daysSinceLastEnd": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "annualMedian": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "medianIntervalDays": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "recentIntervalsDays": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
             }
           }
         }
