@@ -617,6 +617,37 @@
       },
       "startDate": "2026-11-01",
       "startKnownAt": "2026-11-02"
+    },
+    {
+      "id": "amex-vs",
+      "bank": "AMEX",
+      "code": "VS",
+      "pct": 30,
+      "firstSeen": "2026-11-02",
+      "lastSeen": "2026-11-02",
+      "endDate": "2026-11-30",
+      "startDate": "2026-11-02",
+      "startKnownAt": "2026-11-02",
+      "pred": {
+        "p2": 0.419,
+        "w1": 0.308,
+        "asOf": "2026-11-02"
+      }
+    },
+    {
+      "id": "c1-cm",
+      "bank": "C1",
+      "code": "CM",
+      "pct": 30,
+      "firstSeen": "2026-11-02",
+      "lastSeen": "2026-11-02",
+      "endDate": "2026-12-01",
+      "startDate": "2026-11-02",
+      "startKnownAt": "2026-11-02",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-11-02"
+      }
     }
   ]
 }
