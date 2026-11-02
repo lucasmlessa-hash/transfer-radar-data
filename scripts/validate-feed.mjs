@@ -38,10 +38,16 @@ function validateRoute(r, i) {
   // p2 is allowed-not-required: the merge-from-previous fallback re-publishes
   // routes from feeds that predate it, and a required key would turn a source
   // outage into a publish abort. New builds always emit it (see normalize.mjs).
-  const allowed = [...required, 'p2', 'wait', 'forecast', 'offerEvidence', 'active', 'upcoming', 'ended', 'next', 'summary'];
+  const allowed = [...required, 'p2', 'wait', 'forecast', 'nextCampaignForecast', 'offerEvidence', 'active', 'upcoming', 'ended', 'next', 'summary'];
   checkKeys(r, required, allowed, ctx);
 
   if (r.forecast !== undefined) validateForecast(r.forecast, `${ctx}.forecast`);
+  if (r.nextCampaignForecast !== undefined) {
+    validateForecast(r.nextCampaignForecast, `${ctx}.nextCampaignForecast`);
+    if (r.nextCampaignForecast.modelVersion !== 'recurrence-hazard-v3' || r.nextCampaignForecast.target !== 'campaign_start') {
+      fail(`${ctx}.nextCampaignForecast: must describe the v3 campaign-start model`);
+    }
+  }
   if (r.offerEvidence !== undefined) validateOfferEvidence(r.offerEvidence, `${ctx}.offerEvidence`);
 
   for (const k of ['id', 'bank', 'airline', 'code', 'time', 'typical']) {
@@ -70,6 +76,9 @@ function validateRoute(r, i) {
     // defect during development.
     if (r.wait[0] > r.wait[1] + 1e-9 || r.wait[1] > r.wait[2] + 1e-9) {
       fail(`${ctx}.wait: cumulative curve must not decrease (${r.wait.join(' / ')})`);
+    }
+    if (r.forecast?.horizons?.length === 3 && r.wait.some((p, j) => Math.abs(p - r.forecast.horizons[j].probability) > 1e-9)) {
+      fail(`${ctx}.wait: must match the primary forecast, not an additive model`);
     }
   }
 
@@ -146,8 +155,15 @@ const validDate = value => typeof value === 'string' && ISO_DATE.test(value)
 
 function validateForecast(f, ctx) {
   if (!isPlainObject(f)) fail(`${ctx}: must be an object`);
-  checkKeys(f, ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ctx);
+  checkKeys(f, ['modelVersion', 'issuedAt', 'evidence', 'horizons'], ['modelVersion', 'issuedAt', 'evidence', 'horizons', 'target', 'horizonMode', 'context'], ctx);
   if (typeof f.modelVersion !== 'string' || !f.modelVersion || !ISO_DATETIME.test(f.issuedAt) || !Number.isFinite(Date.parse(f.issuedAt))) fail(`${ctx}: invalid version or issue date`);
+  const rolling = f.target === 'campaign_start';
+  if (rolling) {
+    if (f.horizonMode !== 'rolling_days') fail(`${ctx}: invalid campaign-start horizon mode`);
+    validateForecastContext(f.context, `${ctx}.context`);
+  } else if (f.target !== undefined || f.horizonMode !== undefined || f.context !== undefined || f.modelVersion === 'recurrence-hazard-v3') {
+    fail(`${ctx}: invalid forecast target definition`);
+  }
   const e = f.evidence;
   if (!isPlainObject(e)) fail(`${ctx}.evidence: must be an object`);
   checkKeys(e, ['windowCount', 'firstDate', 'lastDate', 'spanMonths', 'level'], ['windowCount', 'firstDate', 'lastDate', 'spanMonths', 'level'], `${ctx}.evidence`);
@@ -156,17 +172,37 @@ function validateForecast(f, ctx) {
   if (e.windowCount ? (!validDate(e.firstDate) || !validDate(e.lastDate) || e.firstDate > e.lastDate)
     : (e.firstDate !== null || e.lastDate !== null || e.spanMonths !== 0)) fail(`${ctx}: invalid evidence date`);
   if (e.level === 'established_history' && (e.windowCount < 6 || e.spanMonths < 24)) fail(`${ctx}: insufficient evidence for level`);
-  if (!Array.isArray(f.horizons) || ![0, 3].includes(f.horizons.length)) fail(`${ctx}: invalid horizons`);
+  if (!Array.isArray(f.horizons) || !(rolling ? [3] : [0, 3]).includes(f.horizons.length)) fail(`${ctx}: invalid horizons`);
   f.horizons.forEach((h, i) => {
     if (!isPlainObject(h)) fail(`${ctx}: invalid horizon`);
-    checkKeys(h, ['months', 'startDate', 'endDate', 'probability'], ['months', 'startDate', 'endDate', 'probability'], ctx);
+    checkKeys(h, ['months', 'startDate', 'endDate', 'probability', ...(rolling ? ['days'] : [])],
+      ['months', 'startDate', 'endDate', 'probability', ...(rolling ? ['days'] : [])], ctx);
     if (h.months !== [1, 3, 6][i] || !validDate(h.startDate) || !validDate(h.endDate) || h.startDate > h.endDate) fail(`${ctx}: invalid horizon date`);
     const issue = new Date(f.issuedAt);
-    const expectedStart = new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
-    const expectedEnd = new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + h.months + 1, 0)).toISOString().slice(0, 10);
+    const day = Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth(), issue.getUTCDate());
+    if (rolling && h.days !== [30, 90, 180][i]) fail(`${ctx}: invalid horizon days`);
+    const expectedStart = rolling ? new Date(day + 86400000).toISOString().slice(0, 10)
+      : new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + 1, 1)).toISOString().slice(0, 10);
+    const expectedEnd = rolling ? new Date(day + h.days * 86400000).toISOString().slice(0, 10)
+      : new Date(Date.UTC(issue.getUTCFullYear(), issue.getUTCMonth() + h.months + 1, 0)).toISOString().slice(0, 10);
     if (h.startDate !== expectedStart || h.endDate !== expectedEnd) fail(`${ctx}: horizon date does not match issue date`);
     if (!Number.isFinite(h.probability) || h.probability < 0 || h.probability > 1) fail(`${ctx}: invalid probability`);
+    if (i && h.probability < f.horizons[i - 1].probability) fail(`${ctx}: cumulative probabilities must not decrease`);
   });
+}
+
+function validateForecastContext(c, ctx) {
+  if (!isPlainObject(c)) fail(`${ctx}: must be an object`);
+  const counts = ['campaignsThisYear', 'campaignsLast365Days', 'completeYears', 'nextCampaignOrdinal'];
+  const intervals = ['daysSinceLastStart', 'daysSinceLastEnd'];
+  const rates = ['annualMedian', 'medianIntervalDays'];
+  const keys = [...counts, ...intervals, ...rates, 'recentIntervalsDays'];
+  checkKeys(c, keys, keys, ctx);
+  for (const key of counts) if (!Number.isInteger(c[key]) || c[key] < 0) fail(`${ctx}: invalid count`);
+  if (c.nextCampaignOrdinal !== c.campaignsThisYear + 1) fail(`${ctx}: invalid next campaign ordinal`);
+  for (const key of intervals) if (c[key] !== null && (!Number.isInteger(c[key]) || c[key] < 0)) fail(`${ctx}: invalid interval`);
+  for (const key of rates) if (c[key] !== null && (!Number.isFinite(c[key]) || c[key] < 0)) fail(`${ctx}: invalid historical value`);
+  if (!Array.isArray(c.recentIntervalsDays) || c.recentIntervalsDays.some(n => !Number.isFinite(n) || n < 0)) fail(`${ctx}: invalid recent intervals`);
 }
 
 function validateOfferEvidence(e, ctx) {

@@ -76,6 +76,8 @@ function sameWindow(e, endDate, todayIso) {
 }
 
 const dayDiff = (aIso, bIso) => Math.round((Date.parse(bIso) - Date.parse(aIso)) / 86400000);
+const validIsoDay = value => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)
+  && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value;
 
 /**
  * Reads the ledger. `ok: false` means the file exists but is unreadable —
@@ -122,6 +124,8 @@ export function updateLedger(windows, activeRoutes, todayIso, prevFeed = null) {
   const openMonth = Number(todayIso.slice(5, 7)) - 1;
   for (const r of activeRoutes) {
     const end = r.active.endDate ?? null;
+    const start = r.offerEvidence?.status === 'observed' && validIsoDay(r.active.startDate)
+      && r.active.startDate <= todayIso && (!end || r.active.startDate <= end) ? r.active.startDate : null;
     // Data de fim no passado não é bônus vivo, é a fonte atrasada em remover a
     // listagem. O painel já ignora (daysUntil <= 0); o ledger passa a ignorar
     // também, em vez de arquivar um avistamento que não aconteceu. Inclusivo:
@@ -132,10 +136,13 @@ export function updateLedger(windows, activeRoutes, todayIso, prevFeed = null) {
       if (todayIso > e.lastSeen) e.lastSeen = todayIso;
       if (r.active.pct > e.pct) e.pct = r.active.pct;
       if (end) e.endDate = end;
+      if (start && !e.startDate) { e.startDate = start; e.startKnownAt = todayIso; }
+      else if (start && e.startDate !== start) e.startDateConflict = true;
       // never touch e.pred: hindsight must not overwrite the prospective record
     } else {
       const entry = { id: r.id, bank: r.bank, code: r.code, pct: r.active.pct, firstSeen: todayIso, lastSeen: todayIso };
       if (end) entry.endDate = end;
+      if (start) { entry.startDate = start; entry.startKnownAt = todayIso; }
       if (asOf) {
         const p = prevById.get(r.id);
         entry.pred = p
@@ -186,4 +193,13 @@ export function toRawWindows(windows, fmRaw = []) {
     out.push({ bankName: w.bank, partnerName: w.code, pct: w.pct, startDateRaw: mdy(w.firstSeen), endDateRaw: mdy(end) });
   }
   return out;
+}
+
+// A first sighting establishes that an offer exists, not when it began.
+// Keep the legacy overlap archive intact; only explicit starts feed recurrence.
+export function toRecurrenceWindows(windows, fmRaw = []) {
+  return windows.filter(w => validIsoDay(w.startDate) && validIsoDay(w.endDate)
+    && w.startDate <= w.endDate && !w.startDateConflict && validIsoDay(w.startKnownAt))
+    .flatMap(w => toRawWindows([{...w,firstSeen:w.startDate}],fmRaw)
+      .map(raw => ({...raw,knownAt:new Date(w.startKnownAt).toISOString()})));
 }

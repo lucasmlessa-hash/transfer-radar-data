@@ -172,7 +172,7 @@ Relatórios diários de hotéis, valores e prazos são publicados em
 
 ## Forecast evidence and prospective records (2026-11-01)
 
-`route.forecast` is optional for backward compatibility. Production builds use
+`route.forecast` is optional for backward compatibility. The v2 builds use
 `pooled-recurrence-v2`: a regularized empirical first-bonus distribution combined
 with the route's legacy seasonal estimate. Only completed campaigns strictly
 before issue time enter training. The own-seasonal weight is n/(n+5), where n
@@ -262,3 +262,74 @@ The evaluation summary includes `status` and `asOf`. An unreadable ledger emits
 an `unavailable` summary without counts; old counts must not masquerade as a new
 measurement. Workflow ledger persistence must succeed before deployment:
 original predictions cannot be reconstructed by the next run after a failed push.
+
+## Recurring campaign starts (v3, 2026-11-02)
+
+`recurrence-hazard-v3` uses explicit `target:"campaign_start"` and
+`horizonMode:"rolling_days"`. It forecasts the beginning of a new campaign,
+not merely an offer remaining available during a calendar month. Its three
+horizons keep `months:1|3|6` as compatibility slots, and additionally require
+`days:30|90|180`. All begin on the UTC day after issuance; each ends inclusively
+on the issue day plus its stated number of days. For an issue on 2026-11-02,
+the windows are 2026-11-03 through 2026-12-02, 2027-01-31, and 2027-05-01.
+Only metadata, not the compatibility
+slot named `months`, defines the target and actual interval.
+
+Public feeds deliver this model additively as `route.nextCampaignForecast`.
+`route.forecast` and `route.wait` retain the v2 calendar-window values so an
+installed 1.1.0 client continues interpreting them correctly. The additive
+property must contain the v3 model and full target/mode/context metadata;
+it cannot contain a legacy or unidentified model. Validators compare `wait`
+only with the primary `forecast`, never with `nextCampaignForecast`. New
+clients validate the wire representation before promoting the additive
+forecast for display. A direct v3 `forecast` remains valid for local callers
+and fixtures, with `wait` matching that primary forecast.
+
+The required `context` snapshot contains `campaignsThisYear`,
+`campaignsLast365Days`, `annualMedian`, `completeYears`, `daysSinceLastStart`,
+`daysSinceLastEnd`, `medianIntervalDays`, `recentIntervalsDays` and
+`nextCampaignOrdinal`. Counts are nonnegative integers; the next ordinal is
+the year-to-date count plus one. Missing median/interval evidence is null,
+never a fictitious zero; `daysSinceLastEnd` is null for a still-active last
+campaign. Complete years exclude the first partially observed year and the
+current year. These facts explain the estimate, not causal contributions or
+an annual cap. The evidence object retains its existing shape.
+
+Old forecasts omit the new target/mode/day/context fields. Their meaning
+remains `bonus_available` in `calendar_months`, including bonus overlap with
+the target month. Loading or serializing a ledger does not add these fields
+to old records or rewrite their outcomes. Comparisons between v2 and v3 must
+use the same target and interval; different definitions are not interchangeable
+Brier measurements.
+
+New records snapshot target, horizonMode, days and context. Issuance identity,
+daily deduplication, exact publication confirmation, metric grouping and the
+first-publication-per-window cohort all include the target and interval
+definition. Context is immutable and a meaningful context change retains a
+new same-day issuance. v3 metric objects expose target, horizonMode and days;
+legacy metric objects keep their previous shape.
+
+The ledger records both forecasts when a route supplies both. Additive records
+also preserve `forecastField:"nextCampaignForecast"`; omitted field metadata
+means the primary `forecast`, including every legacy record. Issuance identity,
+daily deduplication and publication confirmation include the original field:
+moving a forecast to another property cannot confirm a different artifact.
+Metrics remain grouped by the prediction's semantics, so moving the same
+definition between fields cannot create an additional accuracy sample.
+
+Observation samples preserve active and announced campaign dates, canonical
+campaign identity, and first observation time. Listings overlapping an already
+observed campaign keep its original start/identity so an extension or
+republication cannot generate a new start. A v3 positive requires a known
+canonical start inside the target window and a campaign first known after
+issuance. A last-day start may be observed at the closing collection boundary.
+An announcement known before issuance is excluded as `offer_present`, including
+when a later feed omits that announcement. Previously recorded overlap-target
+outcomes retain their original rules.
+
+Unknown campaign starts mark `uncertainStartRoutes`, distinct from general
+offer conflicts: such samples invalidate new-start coverage but do not
+invalidate an otherwise healthy legacy overlap observation. Both positive
+and negative metrics still require publication confirmation, a closed window,
+healthy sources and complete collection with gaps no longer than six hours.
+One observed start never fills gaps in the rest of its evaluation window.

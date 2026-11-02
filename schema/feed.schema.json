@@ -173,7 +173,7 @@
             "minimum": 0,
             "maximum": 1
           },
-          "description": "P(at least one bonus) in 1 / 3 / 6 full calendar months starting NEXT month after generation; see forecast.horizons for exact dates."
+          "description": "Mirrors the primary forecast.horizons, not nextCampaignForecast. Public compatibility feeds retain v2 calendar-month probabilities here."
         },
         "upcoming": {
           "type": "object",
@@ -289,11 +289,202 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1
+                  },
+                  "days": {
+                    "enum": [
+                      30,
+                      90,
+                      180
+                    ]
+                  }
+                }
+              }
+            },
+            "target": {
+              "const": "campaign_start"
+            },
+            "horizonMode": {
+              "const": "rolling_days"
+            },
+            "context": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "campaignsThisYear",
+                "campaignsLast365Days",
+                "annualMedian",
+                "completeYears",
+                "daysSinceLastStart",
+                "daysSinceLastEnd",
+                "medianIntervalDays",
+                "recentIntervalsDays",
+                "nextCampaignOrdinal"
+              ],
+              "properties": {
+                "campaignsThisYear": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "campaignsLast365Days": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "completeYears": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "nextCampaignOrdinal": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "daysSinceLastStart": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "daysSinceLastEnd": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "annualMedian": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "medianIntervalDays": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "recentIntervalsDays": {
+                  "type": "array",
+                  "items": {
+                    "type": "number",
+                    "minimum": 0
                   }
                 }
               }
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "target"
+                ],
+                "properties": {
+                  "target": {
+                    "const": "campaign_start"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "target",
+                  "horizonMode",
+                  "context"
+                ],
+                "properties": {
+                  "horizons": {
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": {
+                      "required": [
+                        "days"
+                      ]
+                    },
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "months": {
+                            "const": 1
+                          },
+                          "days": {
+                            "const": 30
+                          }
+                        }
+                      },
+                      {
+                        "properties": {
+                          "months": {
+                            "const": 3
+                          },
+                          "days": {
+                            "const": 90
+                          }
+                        }
+                      },
+                      {
+                        "properties": {
+                          "months": {
+                            "const": 6
+                          },
+                          "days": {
+                            "const": 180
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "horizonMode"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "context"
+                      ]
+                    }
+                  ]
+                },
+                "properties": {
+                  "horizons": {
+                    "items": {
+                      "not": {
+                        "required": [
+                          "days"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "required": [
+                  "modelVersion"
+                ],
+                "properties": {
+                  "modelVersion": {
+                    "const": "recurrence-hazard-v3"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "target",
+                  "horizonMode",
+                  "context"
+                ]
+              }
+            }
+          ]
         },
         "offerEvidence": {
           "type": "object",
@@ -362,6 +553,26 @@
                   }
                 }
               }
+            }
+          }
+        },
+        "nextCampaignForecast": {
+          "$ref": "#/$defs/route/properties/forecast",
+          "description": "Additive v3 forecast for new campaign starts. The primary forecast and wait retain their legacy meaning for older clients.",
+          "required": [
+            "target",
+            "horizonMode",
+            "context"
+          ],
+          "properties": {
+            "modelVersion": {
+              "const": "recurrence-hazard-v3"
+            },
+            "target": {
+              "const": "campaign_start"
+            },
+            "horizonMode": {
+              "const": "rolling_days"
             }
           }
         }

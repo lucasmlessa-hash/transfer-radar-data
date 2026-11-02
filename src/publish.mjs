@@ -13,8 +13,9 @@ import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
 import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
+import {fitRecurrenceForecast,predictRecurrenceForecast} from './recurrence-forecast.mjs';
 import {fitPooledForecast,predictPooledForecast,derivePooledHistory} from './pooled-forecast.mjs';
-import { loadLedger, updateLedger, toRawWindows } from './observed.mjs';
+import { loadLedger, updateLedger, toRawWindows, toRecurrenceWindows } from './observed.mjs';
 import { DIRECTORY_SOURCES, mergeDirectory } from './sources/partner-directory.mjs';
 import { fetchPage, PUBLIC_CLIENT_USER_AGENT } from './fetch-page.mjs';
 import { validatePartners } from '../scripts/validate-feed.mjs';
@@ -166,18 +167,36 @@ export async function runPipeline({
   // Always re-record, even with nothing to feed: the history store is
   // replace-by-source, so an unconditional call is what clears a previous
   // in-process run's observed windows instead of leaking them into this one.
-  const observedRaw = ledger.ok ? toRawWindows(ledger.windows, rawHistory()) : [];
+  recordHistory('observed', []);
+  const archivedRaw = rawHistory();
+  const observedRaw = ledger.ok ? toRawWindows(ledger.windows, archivedRaw) : [];
   recordHistory('observed', observedRaw);
   if (ledger.windows.length) {
     console.log(`[observed] ledger: ${ledger.windows.length} window(s), ${observedRaw.length} feeding history after FM dedupe`);
   }
 
-  const model = fitPooledForecast(rawHistory(),now);
-  const { routes: candidateRoutes, unmapped } = normalize(raw, now,derivePooledHistory(rawHistory(),now,model));
+  // A listing's discovery date is not a verified campaign start. Keep those
+  // legacy display records, but train recurrence only on explicit start dates.
+  const mdy = iso => { const [year,month,day]=iso.split('-');return `${Number(month)}/${Number(day)}/${year}`; };
+  const currentStarts = normalize(raw,now,new Map()).routes
+    .filter(r=>r.active?.startDate && r.offerEvidence?.status==='observed')
+    .map(r=>({bankName:r.bank,partnerName:r.airline,pct:r.active.pct,
+      startDateRaw:mdy(r.active.startDate),endDateRaw:mdy(r.active.endDate),knownAt:now.toISOString()}));
+  const recurrenceRaw = [...archivedRaw,...(ledger.ok?toRecurrenceWindows(ledger.windows,archivedRaw):[]),...currentStarts];
+  const model = fitRecurrenceForecast(recurrenceRaw,now);
+  if(model.diagnostics.converged===false) return {ok:false,reason:'Recurrence model did not converge; previous feed preserved'};
+  // Older installed clients validate calendar windows strictly. Keep their
+  // forecast and wait contract intact; updated clients opt into the new field.
+  const legacyModel = fitPooledForecast(rawHistory(),now);
+  const history = derivePooledHistory(rawHistory(),now,legacyModel);
+  const { routes: candidateRoutes, unmapped } = normalize(raw, now,history);
   for (const route of candidateRoutes) {
-    if (route.forecast?.modelVersion === 'pooled-recurrence-v2') continue;
-    const forecast = predictPooledForecast(model,route);
-    if (forecast) { route.forecast=forecast; route.wait=forecast.horizons.map(h=>h.probability); }
+    if (route.forecast?.modelVersion !== 'pooled-recurrence-v2') {
+      const forecast = predictPooledForecast(legacyModel,route);
+      if (forecast) { route.forecast=forecast; route.wait=forecast.horizons.map(h=>h.probability); }
+    }
+    const nextCampaignForecast = predictRecurrenceForecast(model,route);
+    if (nextCampaignForecast) route.nextCampaignForecast=nextCampaignForecast;
   }
 
   // Read BEFORE the ledger update, not just for the merge below: at this point
