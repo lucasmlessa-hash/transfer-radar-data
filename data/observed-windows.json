@@ -696,6 +696,21 @@
         "w1": 0.085,
         "asOf": "2026-11-09"
       }
+    },
+    {
+      "id": "c1-qr",
+      "bank": "C1",
+      "code": "QR",
+      "pct": 15,
+      "firstSeen": "2026-11-15",
+      "lastSeen": "2026-11-15",
+      "endDate": "2026-12-14",
+      "startDate": "2026-11-15",
+      "startKnownAt": "2026-11-15",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-11-15"
+      }
     }
   ]
 }
