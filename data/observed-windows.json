@@ -711,6 +711,22 @@
         "absent": true,
         "asOf": "2026-11-15"
       }
+    },
+    {
+      "id": "liv-ad",
+      "bank": "LIV",
+      "code": "AD",
+      "pct": 120,
+      "firstSeen": "2026-11-16",
+      "lastSeen": "2026-11-16",
+      "endDate": "2026-11-19",
+      "startDate": "2026-11-16",
+      "startKnownAt": "2026-11-16",
+      "pred": {
+        "p2": 0,
+        "w1": 0.085,
+        "asOf": "2026-11-16"
+      }
     }
   ]
 }
