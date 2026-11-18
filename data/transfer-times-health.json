@@ -1,14 +1,14 @@
 {
   "ok": true,
-  "changed": false,
-  "checkedAt": "2026-11-17T10:01:32.407Z",
+  "changed": true,
+  "checkedAt": "2026-11-18T09:01:23.272Z",
   "sources": [
     {
       "id": "fm-directory",
       "url": "https://frequentmiler.com/transfer-partner-master-list/",
       "status": "ok",
       "tableCount": 4,
-      "observedRoutes": 126,
+      "observedRoutes": 127,
       "verifiedRoutes": 98
     }
   ],
@@ -655,6 +655,13 @@
       "reason": "unknown"
     },
     {
+      "bank": "USB",
+      "code": "QF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
       "bank": "ROVE",
       "code": "QF",
       "cell": "1 to 1 (Unknown)",
@@ -764,5 +771,5 @@
     }
   },
   "dryRun": false,
-  "written": false
+  "written": true
 }
