@@ -1,20 +1,21 @@
 {
-  "ok": true,
-  "checkedAt": "2026-11-18T09:01:22.390Z",
-  "verified": 24,
-  "changed": true,
-  "written": true,
+  "ok": false,
+  "checkedAt": "2026-11-18T10:01:59.609Z",
+  "verified": 9,
+  "changed": false,
+  "written": false,
   "sources": {
     "fm": {
-      "status": "ok",
-      "checkedAt": "2026-11-18T09:01:22.390Z",
+      "status": "failed",
+      "checkedAt": "2026-11-18T10:01:59.609Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "selectedAttempt": 1,
+      "selectedAttempt": 3,
       "attempts": [
         {
           "attempt": 1,
-          "status": "ok",
-          "verifiedCodes": [
+          "status": "failed",
+          "verifiedCodes": [],
+          "missingCodes": [
             "AC",
             "AF",
             "AA",
@@ -31,10 +32,57 @@
             "UA",
             "VS"
           ],
-          "missingCodes": []
+          "error": "The operation was aborted due to timeout"
+        },
+        {
+          "attempt": 2,
+          "status": "failed",
+          "verifiedCodes": [],
+          "missingCodes": [
+            "AC",
+            "AF",
+            "AA",
+            "AS",
+            "AV",
+            "BA",
+            "CX",
+            "DL",
+            "F9",
+            "B6",
+            "LH",
+            "QF",
+            "WN",
+            "UA",
+            "VS"
+          ],
+          "error": "HTTP 504"
+        },
+        {
+          "attempt": 3,
+          "status": "failed",
+          "verifiedCodes": [],
+          "missingCodes": [
+            "AC",
+            "AF",
+            "AA",
+            "AS",
+            "AV",
+            "BA",
+            "CX",
+            "DL",
+            "F9",
+            "B6",
+            "LH",
+            "QF",
+            "WN",
+            "UA",
+            "VS"
+          ],
+          "error": "HTTP 504"
         }
       ],
-      "verifiedCodes": [
+      "verifiedCodes": [],
+      "missingCodes": [
         "AC",
         "AF",
         "AA",
@@ -51,11 +99,11 @@
         "UA",
         "VS"
       ],
-      "missingCodes": []
+      "error": "HTTP 504"
     },
     "tpg": {
       "status": "ok",
-      "checkedAt": "2026-11-18T09:01:22.390Z",
+      "checkedAt": "2026-11-18T10:01:59.609Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "selectedAttempt": 1,
       "attempts": [
@@ -91,5 +139,27 @@
     }
   },
   "changes": [],
-  "failures": []
+  "failures": [
+    {
+      "source": "fm",
+      "error": "HTTP 504",
+      "missingCodes": [
+        "AC",
+        "AF",
+        "AA",
+        "AS",
+        "AV",
+        "BA",
+        "CX",
+        "DL",
+        "F9",
+        "B6",
+        "LH",
+        "QF",
+        "WN",
+        "UA",
+        "VS"
+      ]
+    }
+  ]
 }
