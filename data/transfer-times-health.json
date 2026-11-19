@@ -1,768 +1,789 @@
 {
-  "ok": false,
-  "changed": false,
-  "checkedAt": "2026-11-18T10:02:42.047Z",
+  "ok": true,
+  "changed": true,
+  "checkedAt": "2026-11-19T09:01:30.995Z",
   "sources": [
     {
       "id": "fm-directory",
       "url": "https://frequentmiler.com/transfer-partner-master-list/",
-      "status": "failed",
-      "error": "The operation was aborted due to timeout",
-      "tableCount": 0,
-      "observedRoutes": 0,
-      "verifiedRoutes": 0
+      "status": "ok",
+      "tableCount": 4,
+      "observedRoutes": 129,
+      "verifiedRoutes": 98
     }
   ],
   "changes": [],
-  "verified": [],
-  "missingKnown": [
+  "verified": [
     {
       "bank": "AMEX",
       "code": "EI",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "AM",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "AC",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "NH",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "AMEX",
       "code": "AV",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "BA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "CX",
-      "retainedTime": "4–8 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "EK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "QF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "QR",
-      "retainedTime": "12–24 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "SQ",
-      "retainedTime": "12–24 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "AMEX",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "4–8 HOURS"
     },
     {
       "bank": "AMEX",
       "code": "IB",
-      "retainedTime": "~12–24 HOURS (SLOWER OVER WEEKEND)",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~12–24 HOURS (SLOWER OVER WEEKEND)"
+    },
+    {
+      "bank": "AMEX",
+      "code": "QR",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "AMEX",
+      "code": "AM",
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "DL",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "EK",
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "AY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "AMEX",
       "code": "B6",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "QF",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "AMEX",
+      "code": "SQ",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "AMEX",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "EI",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "AC",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "BA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CHASE",
-      "code": "QR",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CHASE",
-      "code": "SQ",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CHASE",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "IB",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "QR",
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "UA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "AY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CHASE",
       "code": "B6",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "SQ",
+      "time": "~1 DAY"
     },
     {
       "bank": "CHASE",
       "code": "WN",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CHASE",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "EI",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "CITI",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "AA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "AV",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "BA",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "CITI",
       "code": "CX",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "EK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "BR",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "QF",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "QR",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "SQ",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "TK",
-      "retainedTime": "12–24 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "CITI",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "IB",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "QR",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "EK",
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "EY",
-      "retainedTime": "~1 HOUR",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 HOUR"
     },
     {
       "bank": "CITI",
       "code": "AY",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "CITI",
       "code": "9W",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "B6",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "CITI",
       "code": "MH",
-      "retainedTime": "1–2 DAYS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "1–2 DAYS"
+    },
+    {
+      "bank": "CITI",
+      "code": "QF",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "CITI",
+      "code": "SQ",
+      "time": "~1 DAY"
     },
     {
       "bank": "CITI",
       "code": "TG",
-      "retainedTime": "3–7 DAYS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "3–7 DAYS"
+    },
+    {
+      "bank": "CITI",
+      "code": "TK",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "CITI",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "EI",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "AM",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "AC",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "AV",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "BA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "CX",
-      "retainedTime": "1–2 DAYS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "EK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "1–2 DAYS"
     },
     {
       "bank": "C1",
       "code": "BR",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "JL",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "QF",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "QR",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "SQ",
-      "retainedTime": "12–24 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "TK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "C1",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "C1",
       "code": "IB",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "JL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "QR",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "AM",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "EK",
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "EY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "AY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "C1",
       "code": "B6",
-      "retainedTime": "1–2 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "1–2 HOURS"
+    },
+    {
+      "bank": "C1",
+      "code": "QF",
+      "time": "~1 DAY"
+    },
+    {
+      "bank": "C1",
+      "code": "SQ",
+      "time": "12–24 HOURS"
+    },
+    {
+      "bank": "C1",
+      "code": "TK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "C1",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "EI",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "AC",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "AS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "AV",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "BA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "CX",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "BILT",
-      "code": "EK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "BILT",
-      "code": "JL",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "BILT",
-      "code": "QR",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "BILT",
-      "code": "TK",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "BILT",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "IB",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "JL",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "QR",
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "UA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "EK",
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "AY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "BILT",
       "code": "WN",
-      "retainedTime": "~12 HOURS",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~12 HOURS"
+    },
+    {
+      "bank": "BILT",
+      "code": "TK",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "BILT",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "EI",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "AV",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "BA",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "CX",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "WF",
-      "code": "QR",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
-    },
-    {
-      "bank": "WF",
-      "code": "VS",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "IB",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "QR",
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "AY",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "WF",
       "code": "B6",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
+    },
+    {
+      "bank": "WF",
+      "code": "VS",
+      "time": "INSTANT"
     },
     {
       "bank": "ROVE",
       "code": "AF",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "ROVE",
       "code": "JL",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     },
     {
       "bank": "ROVE",
       "code": "AI",
-      "retainedTime": "~1 DAY",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "~1 DAY"
     },
     {
       "bank": "ROVE",
       "code": "LH",
-      "retainedTime": "INSTANT",
-      "reason": "source-failed",
-      "retainedAsOf": "2026-11-18"
+      "time": "INSTANT"
     }
   ],
-  "unparsed": [],
+  "missingKnown": [],
+  "unparsed": [
+    {
+      "bank": "ROVE",
+      "code": "EI",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AC",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "AF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "AV",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "BA",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CHASE",
+      "code": "CX",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "CX",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "IB",
+      "cell": "1 to 1 via Qatar (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CITI",
+      "code": "JL",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "QR",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "SK",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CITI",
+      "code": "CM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "C1",
+      "code": "CM",
+      "cell": "1 to 750 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "CM",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "EY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "EY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "AY",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "F9",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "HU",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "B6",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "B6",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "CHASE",
+      "code": "QF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "QF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "QF",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "C1",
+      "code": "TP",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "TP",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "TG",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "TK",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "VN",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "VS",
+      "cell": "1 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    }
+  ],
   "conflicts": [],
   "coverage": {
     "knownBefore": 98,
-    "verifiedKnown": 0,
-    "retainedKnown": 98,
-    "verifiedTotal": 0,
+    "verifiedKnown": 98,
+    "retainedKnown": 0,
+    "verifiedTotal": 98,
     "storedTotal": 98,
     "byBank": {
       "AMEX": {
         "knownBefore": 17,
-        "verifiedKnown": 0,
-        "retainedKnown": 17,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 17,
+        "retainedKnown": 0,
+        "verifiedTotal": 17,
+        "status": "ok"
       },
       "CHASE": {
         "knownBefore": 12,
-        "verifiedKnown": 0,
-        "retainedKnown": 12,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 12,
+        "retainedKnown": 0,
+        "verifiedTotal": 12,
+        "status": "ok"
       },
       "CITI": {
         "knownBefore": 20,
-        "verifiedKnown": 0,
-        "retainedKnown": 20,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 20,
+        "retainedKnown": 0,
+        "verifiedTotal": 20,
+        "status": "ok"
       },
       "C1": {
         "knownBefore": 19,
-        "verifiedKnown": 0,
-        "retainedKnown": 19,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 19,
+        "retainedKnown": 0,
+        "verifiedTotal": 19,
+        "status": "ok"
       },
       "BILT": {
         "knownBefore": 16,
-        "verifiedKnown": 0,
-        "retainedKnown": 16,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 16,
+        "retainedKnown": 0,
+        "verifiedTotal": 16,
+        "status": "ok"
       },
       "WF": {
         "knownBefore": 10,
-        "verifiedKnown": 0,
-        "retainedKnown": 10,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 10,
+        "retainedKnown": 0,
+        "verifiedTotal": 10,
+        "status": "ok"
       },
       "ROVE": {
         "knownBefore": 4,
-        "verifiedKnown": 0,
-        "retainedKnown": 4,
-        "verifiedTotal": 0,
-        "status": "failed"
+        "verifiedKnown": 4,
+        "retainedKnown": 0,
+        "verifiedTotal": 4,
+        "status": "ok"
       }
     }
   },
   "dryRun": false,
-  "written": false
+  "written": true
 }
