@@ -1161,10 +1161,6 @@
           "1:1"
         ],
         [
-          "Club Iberia Plus",
-          "2:1"
-        ],
-        [
           "Copa ConnectMiles",
           "3:1"
         ],
@@ -1409,7 +1405,7 @@
         ],
         [
           "United MileagePlus",
-          "—"
+          "5:1"
         ]
       ],
       "hotel": []
@@ -1435,9 +1431,9 @@
       "note": "8/8 registered transfer base ratios verified automatically in the official source. Threshold and promotional bonuses are excluded; this check does not certify untracked partners."
     },
     "WYN": {
-      "asOf": "2026-10-13",
+      "asOf": "2026-11-23",
       "source": "https://www.wyndhamhotels.com/WHGServices/loyalty/V4/member/partners",
-      "note": "API pública usada pela calculadora oficial, consultada em 13/10/2026: KrisFlyer 6.000/1.200, 16.000/3.200 e 30.000/6.000 confirmam razão-base 5:1. United retorna 6.000/2.400 durante promoção; a API não separa bônus da base, então a razão-base United permanece desconhecida (—)."
+      "note": "2/2 registered transfer base ratios verified automatically in the official source. Threshold and promotional bonuses are excluded; this check does not certify untracked partners."
     },
     "CHO": {
       "asOf": "2026-11-23",

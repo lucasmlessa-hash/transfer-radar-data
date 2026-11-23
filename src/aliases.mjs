@@ -69,7 +69,7 @@ export const PARTNER_ALIASES = {
   UA: ['united', 'united airlines', 'united mileageplus', 'mileageplus'],
   B6: ['jetblue', 'jetblue airways', 'jetblue trueblue', 'trueblue'],
   EY: ['etihad', 'etihad airways', 'etihad guest'],
-  IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club'],
+  IB: ['iberia', 'iberia plus', 'iberia avios', 'iberia club', 'club iberia plus'],
   CM: ['copa', 'copa airlines', 'connectmiles', 'connect miles', 'copa connectmiles', 'copa connect miles', 'copa airlines connectmiles'],
   TP: ['tap', 'tap air portugal', 'tap portugal', 'miles&go', 'tap miles&go', 'tap miles & go', 'tap miles and go', 'miles and go'],
   // Adicionadas em 2026-07-27 pelo critério "é parceira HOJE de um banco
