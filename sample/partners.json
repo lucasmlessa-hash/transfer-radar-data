@@ -81,6 +81,7 @@
     }
   },
   "airlineDomains": {
+    "ACCOR": "all.accor.com",
     "AF": "airfrance.com",
     "AV": "lifemiles.com",
     "AM": "aeromexico.com",

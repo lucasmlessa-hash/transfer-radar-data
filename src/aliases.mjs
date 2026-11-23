@@ -31,6 +31,7 @@ const BANK_ALIASES = {
 };
 
 export const PARTNER_ALIASES = {
+  ACCOR: ['accor', 'all accor', 'accor live limitless', 'all accor live limitless', 'all – accor live limitless', 'all: accor live limitless', 'le club accorhotels'],
   AF: ['air france', 'air france klm', 'air france / klm flying blue', 'air france/klm flying blue', 'flying blue', 'klm'],
   AV: ['avianca', 'avianca lifemiles', 'lifemiles'],
   // 'aeromexico clubpremier' sem espaço: é como o arquivo do Frequent Miler
@@ -97,6 +98,7 @@ export const PARTNER_ALIASES = {
 // Display name used for a route's `airline` field when no seed route already
 // supplies one (see normalize.mjs's seed lookup).
 const PARTNER_DISPLAY_NAMES = {
+  ACCOR: 'ALL Accor Live Limitless',
   AF: 'Air France / KLM Flying Blue',
   AV: 'Avianca LifeMiles',
   AM: 'Aeromexico Rewards',
