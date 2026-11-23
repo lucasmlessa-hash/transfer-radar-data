@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { load } from 'cheerio';
 
 import { source as frequentmiler, parseHistory } from '../src/sources/frequentmiler.mjs';
 import { source as awardwallet } from '../src/sources/awardwallet.mjs';
@@ -130,6 +131,35 @@ test('frequentmiler: added destination column preserves historical windows', () 
     { bankName: 'Chase Ultimate Rewards', partnerName: 'Air Canada Aeroplan', pct: 20, startDateRaw: '08/12/26', endDateRaw: '09/30/26' },
     { bankName: 'Bilt', partnerName: 'Virgin Atlantic Flying Club', pct: 100, startDateRaw: '09/01/26', endDateRaw: '09/01/26' },
   ]);
+});
+
+test('frequentmiler: a headerless copy of the current TablePress table retains its expired windows', async () => {
+  const $ = load(fixture('frequentmiler-2026-10'));
+  const archive = $('table').last();
+  archive.find('thead').remove();
+  const rows = parseHistory($.html());
+  assert.deepEqual(rows, [
+    { bankName: 'Chase Ultimate Rewards', partnerName: 'Air Canada Aeroplan', pct: 20, startDateRaw: '08/12/26', endDateRaw: '09/30/26' },
+    { bankName: 'Bilt', partnerName: 'Virgin Atlantic Flying Club', pct: 100, startDateRaw: '09/01/26', endDateRaw: '09/01/26' },
+  ]);
+  assert.equal((await frequentmiler.parse($.html())).length, 3);
+
+  archive.find('tr').first().append('<td>unknown column</td>');
+  assert.deepEqual(parseHistory($.html()), rows.slice(1));
+  archive.removeClass('tablepress-id-33').addClass('tablepress-id-99');
+  assert.deepEqual(parseHistory($.html()), []);
+});
+
+test('awardwallet: a flat signup reward alongside percentage offers leaves coverage complete', async () => {
+  const $ = load(fixture('awardwallet-2026-10'));
+  const row = $('.tt-row').last().clone().appendTo('.transfer-times');
+  row.find('.tt-bonus').text('Get 5,000 bonus Velocity points for joining RevPoints, linking your Velocity account, and making a points transfer by January 16, 2027');
+  const entries = await awardwallet.parse($.html());
+  assert.equal(entries.length, 2);
+  assert.equal(entries.coverageComplete, true);
+
+  row.find('.tt-bonus').text('Special transfer bonus through January 16, 2027');
+  assert.equal((await awardwallet.parse($.html())).coverageComplete, false);
 });
 
 test('awardwallet: recipient region is metadata, not part of the airline name', async () => {
