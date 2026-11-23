@@ -225,3 +225,20 @@ test('old expired listing cannot replace a more recent ended campaign from histo
   const recent = {pct:20,endedAt:'2026-10-10'};
   assert.deepEqual(normalize([entry],now,new Map([['amex-af',{ended:recent}]])).routes[0].ended,recent);
 });
+
+test('ALL Accor spellings produce one inbound bonus per originating program', () => {
+  const offer = { pct: 30, endDateRaw: 'July 12, 2026', sourceUrl: 'https://example.com/transfer' };
+  const { routes, unmapped } = normalize([
+    ...['ALL Accor', 'Accor Live Limitless', 'ALL – Accor Live Limitless', 'Accor'].map(partnerName =>
+      ({ ...offer, bankName: 'Livelo', partnerName })),
+    { ...offer, bankName: 'Esfera', partnerName: 'ALL - Accor Live Limitless' },
+    { ...offer, bankName: 'Accor Live Limitless', partnerName: 'Flying Blue' },
+    { ...offer, bankName: 'Livelo', partnerName: 'All partners' },
+  ], NOW);
+  assert.deepEqual(routes.map(route => route.id).sort(), ['esf-accor', 'liv-accor']);
+  for (const route of routes) {
+    assert.equal(route.airline, 'ALL Accor Live Limitless');
+    assert.equal(route.active.pct, 30);
+  }
+  assert.equal(unmapped.length, 2);
+});
