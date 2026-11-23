@@ -462,7 +462,6 @@
       "VS": "INSTANT",
       "IB": "~12–24 HOURS (SLOWER OVER WEEKEND)",
       "DL": "INSTANT",
-      "AY": "INSTANT",
       "B6": "INSTANT"
     },
     "CHASE": {
@@ -470,21 +469,17 @@
       "AC": "INSTANT",
       "AF": "INSTANT",
       "BA": "INSTANT",
-      "QR": "INSTANT",
       "SQ": "~1 DAY",
       "VS": "INSTANT",
       "IB": "INSTANT",
       "UA": "INSTANT",
-      "AY": "INSTANT",
       "B6": "INSTANT",
       "WN": "INSTANT"
     },
     "CITI": {
-      "EI": "~1 DAY",
       "AF": "INSTANT",
       "AA": "INSTANT",
       "AV": "INSTANT",
-      "BA": "~1 DAY",
       "CX": "INSTANT",
       "EK": "INSTANT",
       "BR": "INSTANT",
@@ -493,16 +488,11 @@
       "SQ": "~1 DAY",
       "TK": "12–24 HOURS",
       "VS": "INSTANT",
-      "IB": "~1 DAY",
       "EY": "~1 HOUR",
-      "AY": "~1 DAY",
-      "9W": "INSTANT",
       "B6": "INSTANT",
-      "MH": "1–2 DAYS",
       "TG": "3–7 DAYS"
     },
     "C1": {
-      "EI": "INSTANT",
       "AM": "INSTANT",
       "AC": "INSTANT",
       "AF": "INSTANT",
@@ -517,7 +507,6 @@
       "SQ": "12–24 HOURS",
       "TK": "INSTANT",
       "VS": "INSTANT",
-      "IB": "INSTANT",
       "EY": "INSTANT",
       "AY": "INSTANT",
       "B6": "1–2 HOURS"
@@ -537,7 +526,6 @@
       "VS": "INSTANT",
       "IB": "INSTANT",
       "UA": "INSTANT",
-      "AY": "INSTANT",
       "WN": "~12 HOURS"
     },
     "WF": {
@@ -546,10 +534,8 @@
       "AV": "INSTANT",
       "BA": "INSTANT",
       "CX": "INSTANT",
-      "QR": "INSTANT",
       "VS": "INSTANT",
       "IB": "INSTANT",
-      "AY": "INSTANT",
       "B6": "INSTANT"
     },
     "ROVE": {
@@ -603,10 +589,6 @@
           "1000:800"
         ],
         [
-          "Finnair Plus",
-          "1:1"
-        ],
-        [
           "Iberia Avios",
           "1:1"
         ],
@@ -642,7 +624,7 @@
         ],
         [
           "Leading Hotels Leaders Club",
-          "—"
+          "1000:250"
         ],
         [
           "Marriott Bonvoy",
@@ -673,10 +655,6 @@
           "1:1"
         ],
         [
-          "Finnair Plus",
-          "1:1"
-        ],
-        [
           "Iberia Avios",
           "1:1"
         ],
@@ -686,10 +664,6 @@
         ],
         [
           "Qantas Frequent Flyer",
-          "1:1"
-        ],
-        [
-          "Qatar Airways Avios",
           "1:1"
         ],
         [
@@ -720,7 +694,7 @@
         ],
         [
           "World of Hyatt",
-          "4:3"
+          "—"
         ],
         [
           "Wyndham Rewards",
@@ -731,102 +705,78 @@
     "CITI": {
       "air": [
         [
-          "Aer Lingus AerClub",
-          "1:1"
-        ],
-        [
           "Air France / KLM Flying Blue",
-          "1:1"
+          "—"
         ],
         [
           "American Airlines AAdvantage",
-          "1:1"
+          "—"
         ],
         [
           "Avianca LifeMiles",
-          "1:1"
-        ],
-        [
-          "British Airways Avios",
-          "1:1"
+          "—"
         ],
         [
           "Cathay Pacific Asia Miles",
-          "1:1"
+          "—"
         ],
         [
           "Copa ConnectMiles",
-          "1:1"
+          "—"
         ],
         [
           "Emirates Skywards",
-          "1000:800"
+          "—"
         ],
         [
           "Etihad Guest",
-          "1:1"
+          "—"
         ],
         [
           "EVA Infinity MileageLands",
-          "1:1"
-        ],
-        [
-          "Finnair Plus",
-          "1:1"
-        ],
-        [
-          "Iberia Avios",
-          "1:1"
+          "—"
         ],
         [
           "Japan Airlines (JAL Mileage Bank)",
-          "1:1"
-        ],
-        [
-          "Jet Airways InterMiles",
-          "1:1"
+          "—"
         ],
         [
           "JetBlue TrueBlue",
-          "1:1"
-        ],
-        [
-          "Malaysia Airlines Enrich",
-          "1:1"
+          "—"
         ],
         [
           "Qantas Frequent Flyer",
-          "1:1"
+          "—"
         ],
         [
           "Qatar Airways Avios",
-          "1:1"
+          "—"
         ],
         [
           "Singapore KrisFlyer",
-          "1:1"
+          "—"
         ],
         [
           "Thai Airways Royal Orchid Plus",
-          "1:1"
+          "—"
         ],
         [
           "Turkish Miles&Smiles",
-          "1:1"
+          "—"
         ],
         [
           "Virgin Atlantic Flying Club",
-          "1:1"
+          "—"
         ]
       ],
       "hotel": [
         [
           "ALL Accor Live Limitless",
-          "1000:500"
+          "—"
         ],
         [
           "Choice Privileges",
-          "1:1.5"
+          "—"
         ],
         [
           "Leading Hotels Leaders Club",
@@ -834,20 +784,16 @@
         ],
         [
           "Preferred Hotels I Prefer",
-          "1:2"
+          "—"
         ],
         [
           "Wyndham Rewards",
-          "1:1"
+          "—"
         ]
       ]
     },
     "C1": {
       "air": [
-        [
-          "Aer Lingus AerClub",
-          "1:1"
-        ],
         [
           "Aeromexico Rewards",
           "1:1"
@@ -874,7 +820,7 @@
         ],
         [
           "Copa ConnectMiles",
-          "1:750"
+          "1000:750"
         ],
         [
           "Emirates Skywards",
@@ -890,10 +836,6 @@
         ],
         [
           "Finnair Plus",
-          "1:1"
-        ],
-        [
-          "Iberia Avios",
           "1:1"
         ],
         [
@@ -991,10 +933,6 @@
           "1:1"
         ],
         [
-          "Finnair Plus",
-          "1:1"
-        ],
-        [
           "Iberia Avios",
           "1:1"
         ],
@@ -1085,19 +1023,11 @@
           "1:1"
         ],
         [
-          "Finnair Plus",
-          "1:1"
-        ],
-        [
           "Iberia Avios",
           "1:1"
         ],
         [
           "JetBlue TrueBlue",
-          "1:1"
-        ],
-        [
-          "Qatar Airways Avios",
           "1:1"
         ],
         [
@@ -1261,10 +1191,6 @@
     "ROVE": {
       "air": [
         [
-          "Aer Lingus AerClub",
-          "1:1"
-        ],
-        [
           "Aeromexico Rewards",
           "1:1"
         ],
@@ -1278,10 +1204,6 @@
         ],
         [
           "Air India Maharaja Club",
-          "1:1"
-        ],
-        [
-          "British Airways Avios",
           "1:1"
         ],
         [
@@ -1306,10 +1228,6 @@
         ],
         [
           "Hainan Airlines",
-          "1:1"
-        ],
-        [
-          "Iberia Avios",
           "1:1"
         ],
         [
@@ -1439,6 +1357,16 @@
       "asOf": "2026-11-23",
       "source": "https://www.choicehotels.com/en-uk/choice-privileges/rewards-exchange",
       "note": "2/2 registered transfer base ratios verified automatically in the official source. Threshold and promotional bonuses are excluded; this check does not certify untracked partners."
+    },
+    "CITI": {
+      "asOf": "2026-11-23",
+      "source": "https://www.thankyou.com/partnerProgramsListing.htm",
+      "note": "Diretório oficial dos EUA. As taxas por grupo de cartões foram conferidas nas fichas públicas de todos os parceiros."
+    },
+    "CHASE": {
+      "asOf": "2026-11-23",
+      "source": "https://media.chase.com/news/Meet-the-New-Chase-Sapphire-Preferred",
+      "note": "World of Hyatt only. Reserve personal and business receive 1,000 Hyatt points per 1,000 Chase points. The listed Preferred, Ink Plus and Corporate Flex cards receive 750."
     }
   },
   "transferTimeMeta": {
@@ -1503,11 +1431,6 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "AY": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "B6": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
@@ -1555,17 +1478,7 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "QR": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "UA": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "AY": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
         "estimate": true
@@ -1592,11 +1505,6 @@
       }
     },
     "CITI": {
-      "EI": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "AF": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
@@ -1612,22 +1520,12 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "BA": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "CX": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
         "estimate": true
       },
       "BR": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "IB": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
         "estimate": true
@@ -1647,22 +1545,7 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "AY": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "9W": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "B6": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "MH": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
         "estimate": true
@@ -1694,11 +1577,6 @@
       }
     },
     "C1": {
-      "EI": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "AC": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
@@ -1725,11 +1603,6 @@
         "estimate": true
       },
       "BR": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "IB": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
         "estimate": true
@@ -1851,11 +1724,6 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "AY": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "WN": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
@@ -1903,16 +1771,6 @@
         "asOf": "2026-11-23",
         "estimate": true
       },
-      "QR": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
-      "AY": {
-        "source": "https://frequentmiler.com/transfer-partner-master-list/",
-        "asOf": "2026-11-23",
-        "estimate": true
-      },
       "B6": {
         "source": "https://frequentmiler.com/transfer-partner-master-list/",
         "asOf": "2026-11-23",
@@ -1945,6 +1803,232 @@
         "asOf": "2026-11-23",
         "estimate": true
       }
+    }
+  },
+  "ratioTiers": {
+    "CITI": {
+      "Air France / KLM Flying Blue": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "American Airlines AAdvantage": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Citi Prestige",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash",
+          "ratio": "1000:700"
+        }
+      ],
+      "Avianca LifeMiles": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Cathay Pacific Asia Miles": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Copa ConnectMiles": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Emirates Skywards": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:800"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:560"
+        }
+      ],
+      "Etihad Guest": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "EVA Infinity MileageLands": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Japan Airlines (JAL Mileage Bank)": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "JetBlue TrueBlue": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Qantas Frequent Flyer": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Qatar Airways Avios": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Singapore KrisFlyer": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Thai Airways Royal Orchid Plus": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Turkish Miles&Smiles": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "Virgin Atlantic Flying Club": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ],
+      "ALL Accor Live Limitless": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:500"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:350"
+        }
+      ],
+      "Choice Privileges": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1500"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:1050"
+        }
+      ],
+      "Leading Hotels Leaders Club": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:200"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:140"
+        }
+      ],
+      "Preferred Hotels I Prefer": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:2000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:1400"
+        }
+      ],
+      "Wyndham Rewards": [
+        {
+          "cards": "Citi Strata Elite, Citi Strata Premier, Prestige, AT&T Access More",
+          "ratio": "1000:1000"
+        },
+        {
+          "cards": "Citi ThankYou Preferred, Citi Strata Card, Citi Double Cash Card, Citi Custom Cash Card, Citi ThankYou Mastercard, AT&T Universal Rewards World, AT&T Universal Savings and Rewards, AT&T Universal Rewards, AT&T Points Plus Card from Citi, or AT&T Access",
+          "ratio": "1000:700"
+        }
+      ]
+    },
+    "CHASE": {
+      "World of Hyatt": [
+        {
+          "cards": "Sapphire Reserve e Sapphire Reserve for Business",
+          "ratio": "1:1"
+        },
+        {
+          "cards": "Sapphire Preferred, Ink Business Preferred, Ink Plus e Corporate Flex",
+          "ratio": "4:3"
+        }
+      ]
     }
   }
 }

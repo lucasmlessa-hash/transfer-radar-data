@@ -305,7 +305,7 @@ export async function runPipeline({
       console.warn(`[publish] directory source "${src.id}" failed (${e.message}) — curated lists kept for ${src.banks.join(', ')}`);
     }
   }
-  partnersDoc.directory = mergeDirectory(partnersDoc.directory, scrapedDir);
+  partnersDoc.directory = mergeDirectory(partnersDoc.directory, scrapedDir, partnersDoc.ratioTiers);
   try { validatePartners(partnersDoc); } catch (error) {
     return { ok: false, reason: `Invalid partner directory: ${error.message}` };
   }

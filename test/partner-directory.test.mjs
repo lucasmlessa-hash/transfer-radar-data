@@ -24,7 +24,7 @@ test('FM master list: all 8 US banks, with ratios in a:b form', () => {
   // 2026-08-28, que TEM a coluna US Bank entre Wells e Rove).
   assert.ok(fm.USB.air.size >= 2 && fm.USB.air.has('Air France / KLM Flying Blue') && fm.USB.air.has('Qatar Airways Avios'),
     'US Bank com as parceiras da própria coluna: ' + [...fm.USB.air.keys()]);
-  assert.ok(fm.ROVE.air.has('British Airways Avios') && fm.ROVE.air.has('Cathay Pacific Asia Miles'),
+  assert.ok(fm.ROVE.air.has('Qatar Airways Avios') && !fm.ROVE.air.has('British Airways Avios') && fm.ROVE.air.has('Cathay Pacific Asia Miles'),
     'Rove mantém a PRÓPRIA coluna, não a do vizinho novo: ' + [...fm.ROVE.air.keys()].slice(0, 6));
   // spot checks against the page as scraped on 2026-07-25
   assert.ok(fm.CHASE.air.has('United MileagePlus'), 'Chase -> United is on the official list');

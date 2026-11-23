@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync, renameSync, rmSync, existsSync,
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseFmTransferTimes, TRANSFER_TIME_SOURCE } from '../src/sources/transfer-times.mjs';
+import { resolvePartner } from '../src/aliases.mjs';
 import { validatePartners } from './validate-feed.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -19,7 +20,12 @@ export async function refreshTransferTimes(input, { fetchImpl = fetch, now = new
   const asOf = checkedAt.slice(0, 10), before = JSON.stringify(doc);
   const known = routeEntries(doc.transferTimes), changes = [], verified = [], missingKnown = [];
   const source = { id: TRANSFER_TIME_SOURCE.id, url: TRANSFER_TIME_SOURCE.url, status: 'ok' };
-  let parsed = { times: {}, unparsed: [], conflicts: [], tableCount: 0, observedRoutes: 0 };
+  // Citi's official catalogue lists all direct destinations in ratioTiers.CITI.
+  // Older partner documents without that catalogue still use FM's direct cells.
+  const citiCodes = doc.ratioTiers?.CITI ? new Set(Object.keys(doc.ratioTiers.CITI).map(resolvePartner)) : null;
+  const isEligible = ({ bank, code }) => bank !== 'CITI' || !citiCodes || citiCodes.has(code);
+  let parsed = { times: {}, indirect: [], unparsed: [], conflicts: [], tableCount: 0, observedRoutes: 0 };
+  let timedRoutes = [];
   try {
     const response = await fetchImpl(source.url, {
       headers: { 'user-agent': 'Mozilla/5.0 (compatible; TransferRadar/1.0; public transfer-time verification)' },
@@ -27,14 +33,15 @@ export async function refreshTransferTimes(input, { fetchImpl = fetch, now = new
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     parsed = parseFmTransferTimes(await response.text());
-    if (!routeEntries(parsed.times).length) throw new Error('No explicit route times parsed; source may have changed');
+    timedRoutes = routeEntries(parsed.times).filter(isEligible);
+    if (!timedRoutes.length) throw new Error('No explicit route times parsed; source may have changed');
   } catch (error) {
     source.status = 'failed';
     source.error = error.message;
-    parsed.times = {};
+    timedRoutes = [];
   }
 
-  for (const { bank, code, time } of routeEntries(parsed.times)) {
+  for (const { bank, code, time } of timedRoutes) {
     // A newly recognized source name must first belong to the product contract.
     if (!doc.banks[bank] || !doc.airlineDomains[code]) continue;
     const previous = doc.transferTimes?.[bank]?.[code];
@@ -46,12 +53,20 @@ export async function refreshTransferTimes(input, { fetchImpl = fetch, now = new
     if (previous !== time) changes.push({ bank, code, before: previous ?? null, after: time });
   }
 
+  const indirectIds = new Set(parsed.indirect.map(({ bank, code }) => `${bank}/${code}`));
   const verifiedIds = new Set(verified.map(({ bank, code }) => `${bank}/${code}`));
   const unparsedById = new Map(parsed.unparsed.map((r) => [`${r.bank}/${r.code}`, r]));
   const conflicts = new Set(parsed.conflicts.map(({ bank, code }) => `${bank}/${code}`));
   for (const { bank, code, time } of known) {
     const id = `${bank}/${code}`;
     if (verifiedIds.has(id)) continue;
+    if (source.status !== 'failed' && (indirectIds.has(id) || !isEligible({ bank, code }))) {
+      delete doc.transferTimes[bank][code];
+      if (doc.transferTimeMeta?.[bank]) delete doc.transferTimeMeta[bank][code];
+      changes.push({ bank, code, before: time, after: null,
+        reason: indirectIds.has(id) ? 'indirect-transfer' : 'outside-citi-directory' });
+      continue;
+    }
     const reason = !TRANSFER_TIME_SOURCE.banks.includes(bank) ? 'source-not-covered'
       : source.status === 'failed' ? 'source-failed'
       : conflicts.has(id) ? 'conflicting-observations'
@@ -60,27 +75,31 @@ export async function refreshTransferTimes(input, { fetchImpl = fetch, now = new
       retainedAsOf: doc.transferTimeMeta?.[bank]?.[code]?.asOf ?? null });
   }
 
+  const removed = changes.filter(row => row.after === null);
   const byBank = {};
   for (const bank of new Set([...known, ...verified].map((r) => r.bank))) {
     const knownBefore = known.filter((r) => r.bank === bank).length;
     const retainedKnown = missingKnown.filter((r) => r.bank === bank).length;
+    const removedKnown = removed.filter(row => row.bank === bank).length;
     byBank[bank] = {
-      knownBefore, verifiedKnown: knownBefore - retainedKnown, retainedKnown,
+      knownBefore, verifiedKnown: knownBefore - retainedKnown - removedKnown, retainedKnown, removedKnown,
       verifiedTotal: verified.filter((r) => r.bank === bank).length,
       status: !TRANSFER_TIME_SOURCE.banks.includes(bank) ? 'uncovered'
         : source.status === 'failed' ? 'failed' : retainedKnown ? 'partial' : 'ok',
     };
   }
-  const needsReview = missingKnown.some(({ reason }) => reason !== 'source-not-covered') || parsed.conflicts.length > 0;
+  const eligibleConflicts = parsed.conflicts.filter(isEligible);
+  const needsReview = missingKnown.some(({ reason }) => reason !== 'source-not-covered') || eligibleConflicts.length > 0;
   if (source.status !== 'failed' && needsReview) source.status = 'partial';
   Object.assign(source, { tableCount: parsed.tableCount, observedRoutes: parsed.observedRoutes, verifiedRoutes: verified.length });
   validatePartners(doc);
   return { doc, report: {
     ok: source.status === 'ok', changed: JSON.stringify(doc) !== before, checkedAt,
     sources: [source], changes, verified, missingKnown,
-    unparsed: parsed.unparsed, conflicts: parsed.conflicts,
+    unparsed: parsed.unparsed.filter(isEligible), conflicts: eligibleConflicts,
     coverage: {
-      knownBefore: known.length, verifiedKnown: known.length - missingKnown.length,
+      knownBefore: known.length, verifiedKnown: known.length - missingKnown.length - removed.length,
+      removedKnown: removed.length,
       retainedKnown: missingKnown.length, verifiedTotal: verified.length,
       storedTotal: routeEntries(doc.transferTimes).length, byBank,
     },

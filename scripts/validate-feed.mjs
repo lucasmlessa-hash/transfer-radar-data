@@ -270,6 +270,44 @@ function validatePartnerTuple(t, ctx) {
   }
 }
 
+const positiveDecimal = '(?:[1-9][0-9]*(?:\\.[0-9]+)?|0\\.0*[1-9][0-9]*)';
+const tierRatio = new RegExp(`^${positiveDecimal}:${positiveDecimal}$`);
+
+function validateTierOptions(options, ctx) {
+  if (!Array.isArray(options) || options.length < 2) fail(`${ctx}: expected at least two card groups`);
+  const groups = new Set();
+  options.forEach((option, index) => {
+    const item = `${ctx}[${index}]`;
+    if (!isPlainObject(option)) fail(`${item}: must be an object`);
+    checkKeys(option, ['ratio', 'cards'], ['ratio', 'cards'], item);
+    if (typeof option.ratio !== 'string' || !tierRatio.test(option.ratio)) {
+      fail(`${item}.ratio: expected a positive decimal ratio a:b`);
+    }
+    if (typeof option.cards !== 'string' || !option.cards.trim()) fail(`${item}.cards: expected a nonblank card group`);
+    const label = option.cards.normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('pt-BR');
+    if (groups.has(label)) fail(`${item}.cards: duplicate card group`);
+    groups.add(label);
+  });
+}
+
+function validateRatioTiers(doc) {
+  if (!isPlainObject(doc.ratioTiers)) fail('partners.ratioTiers: must be an object');
+  for (const [bank, destinations] of Object.entries(doc.ratioTiers)) {
+    const ctx = `partners.ratioTiers.${bank}`;
+    if (!Object.hasOwn(doc.banks, bank) || !Object.hasOwn(doc.directory, bank)) fail(`${ctx}: unknown directory bank`);
+    if (!isPlainObject(destinations) || !Object.keys(destinations).length) fail(`${ctx}: expected a map of destinations`);
+    const { air, hotel } = doc.directory[bank];
+    const rows = [...air, ...hotel];
+    for (const [name, options] of Object.entries(destinations)) {
+      const route = `${ctx}.${name}`;
+      const matches = rows.filter(([destination]) => destination === name);
+      if (matches.length !== 1) fail(`${route}: expected one matching directory destination`);
+      if (matches[0][1] !== '—') fail(`${route}: the directory ratio must be an em dash`);
+      validateTierOptions(options, route);
+    }
+  }
+}
+
 export function validatePartners(doc) {
   if (!isPlainObject(doc)) fail('partners: must be an object');
   const required = ['version', 'banks', 'airlineDomains', 'bankDomains', 'airlineValues', 'directory'];
@@ -279,7 +317,7 @@ export function validatePartners(doc) {
   // conferida à mão. Razões mudam (desvalorização é rotina), e uma errada
   // corrompe o ¢/pt e a ordenação BEST VALUE sem barulho — por isso a data é
   // obrigatória por banco e um teste falha quando ela envelhece.
-  const optional = ['airlineIconUrls', 'transferTimes', 'transferTimeMeta', 'airlineValueMeta', 'ratioProvenance'];
+  const optional = ['airlineIconUrls', 'transferTimes', 'transferTimeMeta', 'airlineValueMeta', 'ratioProvenance', 'ratioTiers'];
   checkKeys(doc, required, [...required, ...optional], 'partners');
   if (doc.version !== 1) fail(`partners.version: must be 1, got ${JSON.stringify(doc.version)}`);
 
@@ -401,6 +439,7 @@ export function validatePartners(doc) {
       entry[g].forEach((t, j) => validatePartnerTuple(t, `${ctx}.${g}[${j}]`));
     }
   }
+  if (Object.hasOwn(doc, 'ratioTiers')) validateRatioTiers(doc);
 }
 
 function main(argv) {

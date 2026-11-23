@@ -119,3 +119,79 @@ test('CLI runner writes a report while dry-run preserves the input, then writes 
   assert.equal(JSON.parse(readFileSync(partnersPath, 'utf8')).transferTimeMeta.AMEX.AF.asOf, '2026-10-13');
   await assert.rejects(runTransferTimes({ partnersPath, reportPath: partnersPath, fetchImpl: liveSnapshot, now }), /must differ/);
 });
+
+function directTable(rows) {
+  const cells = row => `<tr>${row.map(text => `<td>${text}</td>`).join('')}</tr>`;
+  return `<table class="tablepress"><thead><tr><th>Rewards Program</th>
+    <th>Amex Transfer Ratio (and transfer time)</th><th>Citi Transfer Ratio (and transfer time)</th>
+    </tr></thead><tbody>${rows.map(cells).join('')}</tbody></table>`;
+}
+
+const mixedRows = [
+  ['Finnair Plus', '1 to 1 via BA (Instant)', ''],
+  ['Jet Airways InterMiles', '', '1 to 1 (1 day)'],
+  ['British Airways Avios', '', '1 to 1 (Instant)'],
+  ['Flying Blue', '1 to 1 (2 days)', '1 to 1 (Instant)'],
+  ['Iberia Avios', '1 to 1 via BA (Instant)', ''],
+  ['Iberia Avios', '1 to 1 (Unknown)', ''],
+  ['Flying Blue', '1 to 1 via BA (1 day)', ''],
+];
+
+function directTimeInput() {
+  const doc = input();
+  const destination = 'Air France / KLM Flying Blue';
+  doc.directory.CITI = { air: [[destination, '—']], hotel: [] };
+  doc.ratioTiers = { CITI: { [destination]: [
+    { cards: 'Strata Premier', ratio: '1000:1000' }, { cards: 'Outros cartões', ratio: '1000:700' },
+  ] } };
+  doc.transferTimes = { AMEX: { AY: '1 DAY', IB: '3 DAYS' }, CITI: { '9W': '2 DAYS', VN: '1 DAY' } };
+  doc.transferTimeMeta = Object.fromEntries(Object.entries(doc.transferTimes).map(([bank, byCode]) => [
+    bank, Object.fromEntries(Object.keys(byCode).map(code => [code, { source: sourceUrl, asOf: '2026-08-01', estimate: true }])),
+  ]));
+  return doc;
+}
+
+test('inline indirect cells are reported for removal only when the source never lists a direct cell', () => {
+  for (const rows of [mixedRows, [...mixedRows].reverse()]) {
+    const { times, indirect, unparsed, conflicts } = parseFmTransferTimes(directTable(rows));
+    assert.equal(times.AMEX?.AY, undefined);
+    assert.equal(times.AMEX?.AF, '2 DAYS');
+    assert.equal(times.AMEX?.IB, undefined);
+    assert.deepEqual(indirect, [{ bank: 'AMEX', code: 'AY' }]);
+    assert.deepEqual(conflicts, []);
+    assert.ok(unparsed.some(row => row.code === 'IB' && row.reason === 'unknown'));
+  }
+});
+
+test('healthy refresh removes saved indirect and non-Citi partners with their metadata, even when unobserved', async () => {
+  const { doc, report } = await refreshTransferTimes(directTimeInput(), {
+    fetchImpl: async () => new Response(directTable(mixedRows)), now,
+  });
+  assert.deepEqual(doc.transferTimes, { AMEX: { AF: '2 DAYS', IB: '3 DAYS' }, CITI: { AF: 'INSTANT' } });
+  assert.deepEqual(Object.keys(doc.transferTimeMeta.AMEX).sort(), ['AF', 'IB']);
+  assert.deepEqual(Object.keys(doc.transferTimeMeta.CITI), ['AF']);
+  assert.equal(doc.transferTimeMeta.AMEX.IB.asOf, '2026-08-01');
+  assert.deepEqual(report.missingKnown.map(row => row.code), ['IB']);
+  assert.deepEqual(report.verified.map(row => row.code), ['AF', 'AF']);
+  assert.deepEqual(report.changes.filter(row => row.after === null).map(row => row.code).sort(), ['9W', 'AY', 'VN']);
+  assert.equal(report.coverage.knownBefore, 4);
+  assert.equal(report.coverage.verifiedKnown, 0);
+  assert.equal(report.coverage.removedKnown, 3);
+  assert.equal(report.coverage.byBank.CITI.verifiedKnown, 0);
+  assert.equal(report.coverage.byBank.CITI.removedKnown, 2);
+  const repeated = await refreshTransferTimes(doc, { fetchImpl: async () => new Response(directTable(mixedRows)), now });
+  assert.deepEqual(repeated.doc, doc);
+  assert.equal(repeated.report.changed, false);
+});
+
+test('an unusable source cannot delete saved estimates, including stale Citi and inline indirect rows', async () => {
+  for (const response of [new Response('offline', { status: 503 }), new Response(directTable([mixedRows[0]]))]) {
+    const original = directTimeInput();
+    const { doc, report } = await refreshTransferTimes(original, { fetchImpl: async () => response, now });
+    assert.deepEqual(doc, original);
+    assert.deepEqual(report.changes, []);
+    assert.equal(report.coverage.removedKnown, 0);
+    assert.equal(report.coverage.retainedKnown, 4);
+    assert.equal(report.sources[0].status, 'failed');
+  }
+});

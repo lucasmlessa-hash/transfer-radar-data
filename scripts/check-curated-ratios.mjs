@@ -10,7 +10,7 @@ export const RATIO_REVIEW_DAYS = 35;
 
 export function checkCuratedRatios(doc, now = new Date()) {
   const today = Date.parse(new Date(now).toISOString().slice(0, 10));
-  return Object.entries(doc.directory).filter(([bank, row]) => !AUTOMATED_BANKS.has(bank)
+  return Object.entries(doc.directory).filter(([bank, row]) => (!AUTOMATED_BANKS.has(bank) || Object.keys(doc.ratioTiers?.[bank] ?? {}).length > 0)
     && [...row.air ?? [], ...row.hotel ?? []].length).map(([bank]) => {
     const evidence = doc.ratioProvenance?.[bank];
     const date = Date.parse(evidence?.asOf);

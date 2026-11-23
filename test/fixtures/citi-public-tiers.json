@@ -1,0 +1,157 @@
+{
+  "routes": [
+    [
+      "PTXF_AAL",
+      "AAdvantage<sup>®</sup> Program",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_ALL",
+      "ALL Accor",
+      "hotels",
+      "500",
+      "350"
+    ],
+    [
+      "PTXF_MAVI",
+      "Avianca LifeMiles",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_Cathay",
+      "Cathay Pacific",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_CH",
+      "Choice Privileges<sup>®</sup>",
+      "hotels",
+      "1,500",
+      "1,050"
+    ],
+    [
+      "PTXF_COPA",
+      "Copa Airlines ConnectMiles",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_MEMI",
+      "Emirates Skywards",
+      "airlines",
+      "800",
+      "560"
+    ],
+    [
+      "PTXF_ETGUES",
+      "Etihad Guest",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_EINFI",
+      "EVA Air",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_FBLUE",
+      "Flying Blue",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_JAL",
+      "JAL Mileage Bank",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_JBLUE",
+      "JETBLUE TRUEBLUE",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_LHW",
+      "Leaders Club",
+      "hotels",
+      "200",
+      "140"
+    ],
+    [
+      "PTXF_PH",
+      "Preferred Hotels & Resorts",
+      "hotels",
+      "2,000",
+      "1,400"
+    ],
+    [
+      "PTXF_QFFLYS",
+      "Qantas Frequent Flyer",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_QPRIV",
+      "Qatar Airways Privilege Club",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_SKRIS",
+      "Singapore Airlines",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_TORCH",
+      "Thai Royal Orchid Plus",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_MTUR",
+      "Turkish Airlines Miles&Smiles",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_VFCLU",
+      "Virgin Atlantic Flying Club and Virgin Red",
+      "airlines",
+      "1,000",
+      "700"
+    ],
+    [
+      "PTXF_WR",
+      "Wyndham Rewards<sup>®</sup>",
+      "hotels",
+      "1,000",
+      "700"
+    ]
+  ],
+  "cardLabels": {
+    "pt.landing.page.conversionRate.group-2.header.PTXF_AAL": "Citi ThankYou<sup class='sm'>&reg;</sup> Preferred, Citi Strata<sup>&reg;</sup> Card, Citi Double Cash<sup>&reg;</sup> Card, Citi Custom Cash<sup>&reg;</sup> Cardmembers",
+    "pt.landing.page.conversionRate.group-2.header": "Citi ThankYou<sup class='sm'>&reg;</sup> Preferred, Citi Strata<sup class='sm'>&reg;</sup> Card, Citi Double Cash<sup class='sm'>&reg;</sup> Card, Citi Custom Cash<sup class='sm'>&reg;</sup> Card, Citi ThankYou<sup class='sm'>&reg;</sup> Mastercard<sup class='sm'>&reg;</sup>, AT&amp;T Universal Rewards World, AT&amp;T Universal Savings and Rewards, AT&amp;T Universal Rewards, AT&amp;T Points Plus<sup class='sm'>&reg;</sup>&nbsp;Card from Citi, or AT&amp;T Access Cardmembers",
+    "pt.landing.page.conversionRate.group-1.header": "Citi Strata Elite<sup class='sm'>&reg;</sup>, Citi Strata Premier<sup class='sm'>&reg;</sup>, Prestige<sup class='sm'>&reg;</sup>, AT&amp;T Access More Cardmembers",
+    "pt.landing.page.conversionRate.group-1.header.PTXF_AAL": "Citi Strata Elite<sup class='sm'>&reg;</sup>, Citi Strata Premier<sup class='sm'>&reg;</sup>, Citi Prestige<sup class='sm'>&reg;</sup> Cardmembers"
+  }
+}

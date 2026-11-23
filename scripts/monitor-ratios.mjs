@@ -73,17 +73,34 @@ export async function monitorRatios({ partnersPath = PARTNERS, dry = false, fetc
   for (const [bank, buckets] of Object.entries(scraped)) {
     const atual = doc.directory[bank];
     if (!atual) continue;
+    const tiers = doc.ratioTiers?.[bank] ?? {};
+    if (bank === 'CITI' && Object.keys(tiers).length) {
+      // The issuer publishes the complete roster and all card-specific rates.
+      for (const bucket of ['air', 'hotel']) {
+        const retained = atual[bucket].filter(([name]) => Object.hasOwn(tiers, name)).map(([name]) => [name, '—']);
+        if (JSON.stringify(atual[bucket]) !== JSON.stringify(retained)) updated = true;
+        atual[bucket] = retained;
+      }
+      continue;
+    }
     if (![...buckets.air.values(), ...buckets.hotel.values()].some((r) => r !== '—')) {
       failures.push(`${bank}: nenhuma razão verificável encontrada`);
       continue;
     }
     for (const bucket of ['air', 'hotel']) {
       const novo = buckets[bucket];
-      if (!novo || !novo.size) continue;           // scrape vazio nunca apaga nada
       const antigo = new Map(atual[bucket] ?? []);
+      for (const name of buckets.indirect) {
+        if (!Object.hasOwn(tiers, name) && antigo.delete(name)) updated = true;
+      }
       for (const [nome, scrapedRatio] of novo) {
         let razao = scrapedRatio;
         const antes = antigo.get(nome);
+        if (Object.hasOwn(tiers, nome)) {
+          if (antes !== '—') updated = true;
+          antigo.set(nome, '—');
+          continue;
+        }
         if (bank === 'BILT' && bucket === 'hotel' && nome === 'Marriott Bonvoy' && razao === '—') {
           try {
             razao = await biltMarriottBaseRatio(fetchImpl);
