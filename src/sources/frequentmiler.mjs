@@ -102,13 +102,25 @@ function columnsFor($, table) {
 // contract other tests assert on).
 function parseHistoryFrom($) {
   const out = [];
-  const table = findHistoryTable($, findBonusTable($));
+  const current = findBonusTable($);
+  const table = findHistoryTable($, current);
   if (!table) return out;
-  const columns = columnsFor($, table);
+  let columns = columnsFor($, table);
+  let inheritedWidth;
+  // FM also renders the same TablePress dataset twice with headers enabled
+  // only on the current listing. An unrelated table cannot supply a schema.
+  if (!columns && current && !table.find('thead, th').length) {
+    const dataset = current.attr('class')?.split(/\s+/).find(name => /^tablepress-id-\d+$/.test(name));
+    if (dataset && table.hasClass(dataset)) {
+      columns = columnsFor($, current);
+      inheritedWidth = current.find('tr').first().children('th,td').length;
+    }
+  }
   if (!columns) return out;
 
   table.find('tr').each((_, el) => {
     const cells = $(el).find('td');
+    if (inheritedWidth !== undefined && cells.length !== inheritedWidth) return;
     if (cells.length <= Math.max(...Object.values(columns))) return; // header / layout rows
     const details = cellText($, cells[columns.details]);
     // "[Targeted]" rows are offers mailed to selected cardholders, not public

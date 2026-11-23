@@ -42,6 +42,9 @@ export const source = {
       // ("Transfer partner added July 1 … and 25% bonus through July 31" -> July 31;
       //  "100% … through July 30. Then 70% … through Aug 31" -> the current one).
       const pctMatch = bonus.match(/(\d+(?:\.\d+)?)\s*%/);
+      // The listing includes fixed signup awards that happen to require a
+      // transfer. They do not change the transfer ratio.
+      if (!pctMatch && /^get\s+[\d,]+\s+bonus\s+(?:[\w-]+\s+){0,3}(?:points|miles)\s+for joining\b/i.test(bonus)) return;
       const endDateRaw = pctMatch
         ? (bonus.slice(pctMatch.index + pctMatch[0].length).match(DATE) || [''])[0].replace(/\s+/g, ' ')
         : '';
