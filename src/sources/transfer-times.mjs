@@ -2,7 +2,7 @@
 // official bank SLAs, and an Unknown/absent cell never verifies a saved value.
 import * as cheerio from 'cheerio';
 import { resolveBank, resolvePartner } from '../aliases.mjs';
-import { DIRECTORY_SOURCES } from './partner-directory.mjs';
+import { DIRECTORY_SOURCES, isIndirectTransfer } from './partner-directory.mjs';
 
 export const TRANSFER_TIME_SOURCE = DIRECTORY_SOURCES.find(({ id }) => id === 'fm-directory');
 
@@ -41,12 +41,12 @@ function parseCell(cell) {
 /**
  * Header-mapped FM table observations. Only a time explicitly present in a
  * bank/program cell can populate times[bank][code]; no airline-wide fallback.
- * "via Qatar/BA" rows retain the source's end-to-end estimate, never a time
- * inferred from the intermediate program. Tables marked Indirect are ignored.
+ * An inline bridge only identifies an indirect route when the same bank and
+ * program have no direct cell anywhere in the table set.
  */
 export function parseFmTransferTimes(html) {
   const $ = cheerio.load(html);
-  const routes = new Map();
+  const routes = new Map(), indirect = [];
   let tableCount = 0;
   $('table.tablepress').each((_, table) => {
     const headers = $(table).find('thead th').map((__, el) => $(el).text().trim()).get();
@@ -64,12 +64,16 @@ export function parseFmTransferTimes(html) {
         if (!TRANSFER_TIME_SOURCE.banks.includes(bank) || !cell) return;
         const key = `${bank}/${code}`;
         if (!routes.has(key)) routes.set(key, { bank, code, observations: new Map() });
-        routes.get(key).observations.set(cell, { cell, ...parseCell(cell) });
+        if (!isIndirectTransfer(cell)) routes.get(key).observations.set(cell, { cell, ...parseCell(cell) });
       });
     });
   });
   const times = {}, unparsed = [], conflicts = [];
   for (const { bank, code, observations } of routes.values()) {
+    if (observations.size === 0) {
+      indirect.push({ bank, code });
+      continue;
+    }
     const values = new Set([...observations.values()].map(({ time }) => time));
     if (values.size > 1) {
       conflicts.push({ bank, code, values: [...values], cells: [...observations.keys()] });
@@ -79,5 +83,5 @@ export function parseFmTransferTimes(html) {
     if (time) (times[bank] ??= {})[code] = time;
     else for (const observation of observations.values()) unparsed.push({ bank, code, ...observation });
   }
-  return { times, unparsed, conflicts, tableCount, observedRoutes: routes.size };
+  return { times, indirect, unparsed, conflicts, tableCount, observedRoutes: routes.size };
 }

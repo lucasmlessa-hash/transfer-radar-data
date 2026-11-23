@@ -39,6 +39,11 @@ jobs:
         continue-on-error: true
         run: node scripts/refresh-br-ratios.mjs
 
+      - name: Refresh official Citi partners and card rates
+        id: citi
+        continue-on-error: true
+        run: node scripts/refresh-citi-partners.mjs
+
       # Razão de transferência não é fixa, e uma errada não quebra nada — só
       # mente. Este passo compara as razões dos bancos US contra as commitadas
       # e GRITA quando alguma mudou; a issue abaixo é o ponto todo, porque uma
@@ -136,7 +141,7 @@ jobs:
             --body-file "$RUNNER_TEMP/ratio-issue.md"
 
       - name: Report incomplete ratio verification
-        if: steps.br.outcome == 'failure' || steps.ratios.outcome == 'failure' || steps.curated.outcome == 'failure' || steps.hotels.outcome == 'failure' || steps.valuations.outcome == 'failure' || steps.times.outcome == 'failure'
+        if: steps.br.outcome == 'failure' || steps.citi.outcome == 'failure' || steps.ratios.outcome == 'failure' || steps.curated.outcome == 'failure' || steps.hotels.outcome == 'failure' || steps.valuations.outcome == 'failure' || steps.times.outcome == 'failure'
         run: |
           echo '::error::Daily reference verification is incomplete. Verified changes passed validation; failed sources retained their previous values and verification dates. Review the failed source above.'
           exit 1

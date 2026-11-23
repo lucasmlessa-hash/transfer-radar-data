@@ -185,6 +185,37 @@
         }
       }
     },
+    "ratioTiers": {
+      "description": "Optional card-specific transfer ratios keyed by bank and exact air or hotel directory name. Each route must use an em dash in the directory. Each distinct card group is described for the reader in Portuguese.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 1,
+        "additionalProperties": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "required": [
+              "ratio",
+              "cards"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ratio": {
+                "type": "string",
+                "pattern": "^(?:[1-9][0-9]*(?:\\.[0-9]+)?|0\\.0*[1-9][0-9]*):(?:[1-9][0-9]*(?:\\.[0-9]+)?|0\\.0*[1-9][0-9]*)(?![\\s\\S])"
+              },
+              "cards": {
+                "type": "string",
+                "pattern": "\\S"
+              }
+            }
+          }
+        }
+      }
+    },
     "ratioProvenance": {
       "type": "object",
       "additionalProperties": {

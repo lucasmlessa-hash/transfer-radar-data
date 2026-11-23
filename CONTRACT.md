@@ -137,6 +137,11 @@ Field notes:
   `[partnerName, ratio]`. `ratio` is always a string of the form
   `"<points>:<miles>"` (e.g. `"1:1"`, `"1:1.6"`, `"2:1"`) — points sent on the
   left, miles/points received on the right.
+- Use the string `—` when there is no single confirmed base rate. If the rate
+  depends on the card, optional `ratioTiers[bank][partnerName]` lists each
+  group as `{ cards, ratio }`. The corresponding direct row has `—`.
+  Older clients can show an unknown rate. Calculations that need a single
+  multiplier must wait for a known rate.
 - All five top-level keys (`banks`, `airlineDomains`, `bankDomains`,
   `airlineValues`, `directory`) are required, alongside `version`.
 

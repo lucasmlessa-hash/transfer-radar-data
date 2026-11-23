@@ -25,11 +25,19 @@ const NOT_TRAVEL = /shop your way|dotz|seedz/i;
 const HOTELISH = /hyatt|accor|hilton|ihg|marriott|wyndham|choice|preferred hotels|leading hotels|radisson/i;
 
 // "1 to 1 (Instant)" / "1000 to 500 (Instant)" / "3 to 2 (Unknown)" -> "1:1" etc.
-function parseRatio(cell) {
-  const m = /([\d.,]+)\s*to\s*([\d.,]+)/i.exec(cell);
+export const isIndirectTransfer = (cell) => /\bvia\b/i.test(cell);
+
+function parseRatio(cell, bank, name) {
+  const m = /^(\d[\d.,]*)(k?)\s*to\s*(\d[\d.,]*)(k?)\b/i.exec(cell);
   if (!m) return '—';
-  const clean = (s) => s.replace(/,/g, '');
-  return `${clean(m[1])}:${clean(m[2])}`;
+  const amount = (n, k) => Number(n.replace(/,/g, '')) * (k ? 1000 : 1);
+  const from = amount(m[1], m[2]), to = amount(m[3], m[4]);
+  if (!(from > 0 && to > 0)) return '—';
+  // FM quotes the Bilt transfer block including a bonus, not the base rate.
+  if (bank === 'BILT' && name === 'Marriott Bonvoy' && from === 20000 && to === 25000) return '—';
+  // The issuers explicitly quote 750 ConnectMiles per 1,000 Capital One miles.
+  if (bank === 'C1' && name === 'Copa ConnectMiles' && from === 1 && to === 750) return '1000:750';
+  return `${from}:${to}`;
 }
 
 // Hotels carry no partner codes, so alias resolution can't canonicalize them
@@ -68,7 +76,7 @@ export const canonical = (name) => {
 export function parseFmDirectory(html) {
   const $ = cheerio.load(html);
   const BANKS = ['AMEX', 'CHASE', 'CITI', 'C1', 'BILT', 'WF', 'USB', 'ROVE'];
-  const byBank = Object.fromEntries(BANKS.map((b) => [b, { air: new Map(), hotel: new Map() }]));
+  const byBank = Object.fromEntries(BANKS.map((b) => [b, { air: new Map(), hotel: new Map(), indirect: new Set() }]));
   $('table.tablepress').each((_, el) => {
     const head = $(el).find('thead th').map((__, e) => $(e).text().trim()).get();
     if (!/Rewards Program/i.test(head[0] ?? '') || head.some((h) => /Indirect/i.test(h))) return;
@@ -90,10 +98,14 @@ export function parseFmDirectory(html) {
         if (!bank || !byBank[bank]) return;
         const cell = tds[i] ?? '';
         if (!cell) return;
-        if (!byBank[bank][bucket].has(name)) byBank[bank][bucket].set(name, parseRatio(cell));
+        if (isIndirectTransfer(cell)) byBank[bank].indirect.add(name);
+        else if (!byBank[bank][bucket].has(name)) byBank[bank][bucket].set(name, parseRatio(cell, bank, name));
       });
     });
   });
+  for (const { air, hotel, indirect } of Object.values(byBank)) {
+    for (const name of [...air.keys(), ...hotel.keys()]) indirect.delete(name);
+  }
   return byBank;
 }
 
@@ -159,19 +171,28 @@ const sortPairs = (m) => [...m.entries()].sort((a, b) => a[0].localeCompare(b[0]
  * the curated entry for the same canonical name; an empty or failed scrape
  * keeps the curated lists untouched (degraded beats wrong).
  */
-export function mergeDirectory(curated, scrapedByBank) {
+export function mergeDirectory(curated, scrapedByBank, ratioTiers = {}) {
   const out = {};
-  for (const bank of Object.keys(curated)) {
+  for (const [bank, saved] of Object.entries(curated)) {
     const scraped = scrapedByBank[bank];
-    if (!scraped || (scraped.air.size === 0 && scraped.hotel.size === 0)) {
-      out[bank] = curated[bank];
-      continue;
+    const tiers = ratioTiers[bank] ?? {};
+    const officialCiti = bank === 'CITI' && Object.keys(tiers).length > 0;
+    const useScrape = !officialCiti && scraped && (scraped.air.size || scraped.hotel.size);
+    out[bank] = {};
+    for (const bucket of ['air', 'hotel']) {
+      const savedRows = saved[bucket] ?? [];
+      const savedRates = new Map(savedRows.map(([name, ratio]) => [canonical(name), ratio]));
+      const rows = useScrape ? sortPairs(scraped[bucket]) : savedRows;
+      const merged = new Map();
+      for (const [name, ratio] of rows) {
+        if (officialCiti && !Object.hasOwn(tiers, name)) continue;
+        if (!officialCiti && scraped?.indirect?.has(name)) continue;
+        merged.set(name, Object.hasOwn(tiers, name) ? '—' : ratio === '—' ? (savedRates.get(name) ?? '—') : ratio);
+      }
+      // A card-specific route is verified independently of the editorial table.
+      for (const [name] of savedRows) if (Object.hasOwn(tiers, name)) merged.set(name, '—');
+      out[bank][bucket] = useScrape ? sortPairs(merged) : [...merged];
     }
-    const inherit = (bucket) => {
-      const curatedRatio = new Map((curated[bank]?.[bucket] ?? []).map(([n, r]) => [canonical(n), r]));
-      return sortPairs(scraped[bucket]).map(([name, ratio]) => [name, ratio !== '—' ? ratio : (curatedRatio.get(name) ?? '—')]);
-    };
-    out[bank] = { air: inherit('air'), hotel: inherit('hotel') };
   }
   return out;
 }
