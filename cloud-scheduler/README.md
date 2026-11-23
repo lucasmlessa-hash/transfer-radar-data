@@ -178,9 +178,10 @@ Não disparam workflows reais nem usam tokens reais.
 ## Cobertura e limites
 
 - Diretórios e razões dos bancos US/BR: conectores existentes, conferidos diariamente.
-- Hotéis: Marriott 8/8, Choice 2/2 e Wyndham 1/2 das rotas cadastradas, pelas fontes oficiais.
-  Wyndham → United permanece sem taxa base confirmada, exibida como `—`. A API
-  não separa claramente o bônus da taxa base; o relatório registra essa lacuna.
+- O coletor confere 8 rotas da Marriott, 2 da Choice e 2 da Wyndham nas fontes oficiais.
+  Em 23/11/2026, a [calculadora da Wyndham](https://www.wyndhamhotels.com/wyndham-rewards/redeem/travel-points)
+  oferecia 1.200, 3.200 e 6.000 milhas United por 6.000, 16.000 e 30.000 pontos, respectivamente.
+  Uma mudança nesses lotes exige nova conferência antes de atualizar a taxa.
   Novas parcerias de hotéis fora das rotas cadastradas ainda exigem ampliar o diretório.
 - Estimativas de resgate: 24 programas conferidos no Frequent Miler/TPG; 13 valores
   legados sem revalidação automática ficam fora dos cálculos quando não têm

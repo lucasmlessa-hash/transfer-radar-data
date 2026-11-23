@@ -98,27 +98,33 @@ export function parseChoiceRatios(html) {
   return out;
 }
 
+// The calculator can temporarily substitute promotional bundles. Verify the
+// reviewed redemption options by item code, cost, face value and displayed miles.
+function hasStandardWyndhamBundles(rows, prefix, label) {
+  const tiers = [[6000, 1200], [16000, 3200], [30000, 6000]];
+  return rows.length === tiers.length && tiers.every(([cost, miles]) => {
+    const row = rows.find(item => item.redemptionItemCode === prefix + miles);
+    const description = label.exec(row?.description ?? '');
+    return row?.currencyRequired === cost && row.faceValue === miles
+      && description && Number(description[1].replaceAll(',', '')) === miles;
+  });
+}
+
 export function parseWyndhamRatios(body) {
   const doc = typeof body === 'string' ? JSON.parse(body) : body;
   if (!Array.isArray(doc?.data) || !doc.data.length) throw new Error('Wyndham partner data missing or empty');
   const out = result();
   const bundles = doc.data.filter((row) => /^SQ-MILES-/.test(row?.redemptionItemCode ?? ''));
-  const expected = new Map([['SQ-MILES-1200', [6000, 1200]], ['SQ-MILES-3200', [16000, 3200]], ['SQ-MILES-6000', [30000, 6000]]]);
-  // Snapshot provenance: official public calculator API, fetched 2026-10-13.
-  // It does NOT label base versus promotional amounts. Accept only the three
-  // independently reviewed Singapore bundles, all in agreement. A future
-  // enhancement/devaluation requires new evidence rather than auto-rebasing.
-  const codes = new Set(bundles.map((row) => row.redemptionItemCode));
-  const valid = bundles.length === 3 && codes.size === 3 && bundles.every((row) => {
-    const values = expected.get(row.redemptionItemCode);
-    return values && row.currencyRequired === values[0] && row.faceValue === values[1]
-      && /^\d[\d,]*[- ]Singapore Airlines Miles$/.test(row.description ?? '');
-  });
+  const valid = hasStandardWyndhamBundles(bundles, 'SQ-MILES-', /^([\d,]+)[- ]Singapore Airlines Miles$/);
   record(out, 'Singapore KrisFlyer', valid ? '5:1' : null,
     'Singapore baseline bundles changed, missing or inconsistent; review official base before updating');
-  // 6,000 -> 2,400 on this API is a promotional United amount. Even three
-  // consistent future tiers would not prove a baseline without separate terms.
+  // On 2026-11-23 Wyndham listed United on its regular redeem/travel-points
+  // form and quoted these three tiers. The October promotion used different items.
   const united = doc.data.filter((row) => /^UA-MILES-/.test(row?.redemptionItemCode ?? ''));
+  if (hasStandardWyndhamBundles(united, 'UA-MILES-', /^([\d,]+) United MileagePlus Miles$/)) {
+    record(out, 'United MileagePlus', '5:1');
+    return out;
+  }
   const knownAmounts = new Map([['UA-MILES-0', [0, 0]], ['UA-MILES-2400', [6000, 2400]]]);
   const unchangedUnknown = united.length === 2 && new Set(united.map((row) => row.redemptionItemCode)).size === 2
     && united.every((row) => {

@@ -79,6 +79,32 @@ test('Wyndham refuses missing, inconsistent, renamed or newly enhanced Singapore
   }
 });
 
+test('Wyndham verifies United only when all three reviewed MileagePlus redemption options agree', async () => {
+  // Public redemption calculator on 2026-11-23, after the doubled October offer.
+  const united = [
+    { redemptionItemCode: 'UA-MILES-1200', description: '1,200 United MileagePlus Miles', currencyRequired: 6000, faceValue: 1200 },
+    { redemptionItemCode: 'UA-MILES-3200', description: '3,200 United MileagePlus Miles', currencyRequired: 16000, faceValue: 3200 },
+    { redemptionItemCode: 'UA-MILES-6000', description: '6,000 United MileagePlus Miles', currencyRequired: 30000, faceValue: 6000 },
+  ];
+  const other = JSON.parse(bodies.WYN).data.filter(row => !row.redemptionItemCode.startsWith('UA-MILES-'));
+  const body = JSON.stringify({ data: [...other, ...united] });
+  const doc = tracked();
+  const report = await refreshHotelRatios(doc, { now, log: quiet, getPage: url => url.includes('wyndhamhotels') ? body : getPage(url) });
+  assert.equal(report.ok, true);
+  assert.equal(doc.directory.WYN.air[1][1], '5:1');
+  assert.equal(report.coverage.WYN.verified, 2);
+  assert.equal(doc.ratioProvenance.WYN.asOf, now.toISOString().slice(0, 10));
+
+  for (const rows of [
+    united.slice(0, 2), [...united, united[0]],
+    [...united.slice(0, 2), { ...united[2], currencyRequired: 15000 }],
+    [...united.slice(0, 2), { ...united[2], description: '12,000 United MileagePlus Miles' }],
+    [...united.slice(0, 2), { ...united[2], description: '6,000 United MileagePlus Miles plus bonus' }],
+  ]) {
+    assert.equal(parseWyndhamRatios({ data: [...other, ...rows] }).rates.has('United MileagePlus'), false);
+  }
+});
+
 test('redesigned, unavailable or malformed sources fail instead of looking like a verified empty programme', () => {
   assert.throws(() => parseMarriottRatios(fixture('unavailable.html')));
   assert.throws(() => parseChoiceRatios(fixture('unavailable.html')));
