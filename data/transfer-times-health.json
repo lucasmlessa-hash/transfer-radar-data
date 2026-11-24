@@ -1,18 +1,31 @@
 {
   "ok": true,
-  "changed": false,
-  "checkedAt": "2026-11-23T17:34:17.440Z",
+  "changed": true,
+  "checkedAt": "2026-11-24T09:01:32.503Z",
   "sources": [
     {
       "id": "fm-directory",
       "url": "https://frequentmiler.com/transfer-partner-master-list/",
       "status": "ok",
       "tableCount": 4,
-      "observedRoutes": 129,
-      "verifiedRoutes": 84
+      "observedRoutes": 134,
+      "verifiedRoutes": 86
     }
   ],
-  "changes": [],
+  "changes": [
+    {
+      "bank": "C1",
+      "code": "ACCOR",
+      "before": null,
+      "after": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "ACCOR",
+      "before": null,
+      "after": "INSTANT"
+    }
+  ],
   "verified": [
     {
       "bank": "AMEX",
@@ -345,6 +358,11 @@
       "time": "INSTANT"
     },
     {
+      "bank": "C1",
+      "code": "ACCOR",
+      "time": "INSTANT"
+    },
+    {
       "bank": "CITI",
       "code": "AF",
       "time": "INSTANT"
@@ -412,6 +430,11 @@
     {
       "bank": "CITI",
       "code": "VS",
+      "time": "INSTANT"
+    },
+    {
+      "bank": "CITI",
+      "code": "ACCOR",
       "time": "INSTANT"
     },
     {
@@ -632,6 +655,27 @@
       "cell": "1 to 1 (Unknown)",
       "time": null,
       "reason": "unknown"
+    },
+    {
+      "bank": "BILT",
+      "code": "ACCOR",
+      "cell": "3 to 2 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "USB",
+      "code": "ACCOR",
+      "cell": "2 to 1 (Unknown)",
+      "time": null,
+      "reason": "unknown"
+    },
+    {
+      "bank": "ROVE",
+      "code": "ACCOR",
+      "cell": "3 to 2 (Unknown)",
+      "time": null,
+      "reason": "unknown"
     }
   ],
   "conflicts": [],
@@ -640,8 +684,8 @@
     "verifiedKnown": 84,
     "removedKnown": 0,
     "retainedKnown": 0,
-    "verifiedTotal": 84,
-    "storedTotal": 84,
+    "verifiedTotal": 86,
+    "storedTotal": 86,
     "byBank": {
       "AMEX": {
         "knownBefore": 16,
@@ -664,7 +708,7 @@
         "verifiedKnown": 14,
         "retainedKnown": 0,
         "removedKnown": 0,
-        "verifiedTotal": 14,
+        "verifiedTotal": 15,
         "status": "ok"
       },
       "C1": {
@@ -672,7 +716,7 @@
         "verifiedKnown": 17,
         "retainedKnown": 0,
         "removedKnown": 0,
-        "verifiedTotal": 17,
+        "verifiedTotal": 18,
         "status": "ok"
       },
       "BILT": {
@@ -702,5 +746,5 @@
     }
   },
   "dryRun": false,
-  "written": false
+  "written": true
 }
