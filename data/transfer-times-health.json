@@ -1,7 +1,7 @@
 {
   "ok": true,
   "changed": true,
-  "checkedAt": "2026-11-24T09:01:32.503Z",
+  "checkedAt": "2026-11-25T09:01:24.387Z",
   "sources": [
     {
       "id": "fm-directory",
@@ -12,20 +12,7 @@
       "verifiedRoutes": 86
     }
   ],
-  "changes": [
-    {
-      "bank": "C1",
-      "code": "ACCOR",
-      "before": null,
-      "after": "INSTANT"
-    },
-    {
-      "bank": "CITI",
-      "code": "ACCOR",
-      "before": null,
-      "after": "INSTANT"
-    }
-  ],
+  "changes": [],
   "verified": [
     {
       "bank": "AMEX",
@@ -680,8 +667,8 @@
   ],
   "conflicts": [],
   "coverage": {
-    "knownBefore": 84,
-    "verifiedKnown": 84,
+    "knownBefore": 86,
+    "verifiedKnown": 86,
     "removedKnown": 0,
     "retainedKnown": 0,
     "verifiedTotal": 86,
@@ -704,16 +691,16 @@
         "status": "ok"
       },
       "CITI": {
-        "knownBefore": 14,
-        "verifiedKnown": 14,
+        "knownBefore": 15,
+        "verifiedKnown": 15,
         "retainedKnown": 0,
         "removedKnown": 0,
         "verifiedTotal": 15,
         "status": "ok"
       },
       "C1": {
-        "knownBefore": 17,
-        "verifiedKnown": 17,
+        "knownBefore": 18,
+        "verifiedKnown": 18,
         "retainedKnown": 0,
         "removedKnown": 0,
         "verifiedTotal": 18,
