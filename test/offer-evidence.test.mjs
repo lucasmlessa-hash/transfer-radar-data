@@ -37,6 +37,45 @@ test('maximum bonus and public conditions survive normalization', () => {
 const page = variations => `<script id="__NEXT_DATA__">${JSON.stringify({ props: { cards: variations.map(v => ({ status: { forceClose: false, variations: [{ status: 'Vigente', statusCard: 'active', ...v }] } })) } })}</script>`;
 const shopping = { title: 'Compre e ganhe pontos', description: 'Pontos nas compras', button: { redirectLink: '/juntar-pontos/parceiros/loja' } };
 
+// Both cards appeared on the Livelo listing on November 26, 2026.
+const clubePremium = {
+  title: 'Assine o Clube Premium e garanta até 390.000 pontos em 12 meses',
+  description: '<p>Aproveite transferências entre contas Livelo por apenas R$ 1,00 e outras vantagens exclusivas!</p>',
+  button: { redirectLink: 'https://www.livelo.com.br/adesao-promo-CDC16584' },
+};
+const smiles = {
+  title: 'Ganhe até 80% de bônus com a Smiles',
+  description: '<p>Transfira seus pontos e conheça o mundo!</p>',
+  button: { redirectLink: 'https://www.livelo.com.br/livelo-para-parceiros/smiles/SMLTransfer' },
+};
+
+test('an internal account transfer perk preserves coverage of the Smiles campaign', async () => {
+  const campaign = { bonus: 'Até 80% de bônus', partnercampaignalert: '25/11 até 26/11/2026' };
+  const entries = await livelo.parse(page([clubePremium, smiles]), {
+    loadPage: async () => `<script id="__NEXT_DATA__">${JSON.stringify({ campaign })}</script>`,
+  });
+  assert.deepEqual(entries.map(e => [e.partnerName, e.pct, e.bonusKind, e.endDateRaw]),
+    [['Smiles', 80, 'up_to', '11/26/2026']]);
+  assert.equal(entries.coverageComplete, true);
+});
+
+test('a shopping listing with internal account transfers can confirm zero partner bonuses', async () => {
+  const html = page([shopping, clubePremium]);
+  assert.equal(livelo.isValidEmpty(html), true);
+  assert.deepEqual(await livelo.parse(html), []);
+});
+
+test('a club perk cannot suppress a separate partner transfer mentioned on the same card', async () => {
+  for (const card of [
+    { ...clubePremium, description: clubePremium.description + ' Transfira também seus pontos para parceiros.' },
+    { ...clubePremium, button: smiles.button },
+  ]) {
+    const html = page([shopping, card]);
+    assert.equal(livelo.isValidEmpty(html), false);
+    assert.equal((await livelo.parse(html)).coverageComplete, false);
+  }
+});
+
 test('money-transfer advertising does not turn an empty Livelo points-bonus listing into a failure', () => {
   const html = page([shopping, { title: 'Lançamento ARQ', description: 'Transfira 100 US$/EURO e ganhe 5.500 pontos Livelo', button: { redirectLink: 'https://www.livelo.com.br/instituicoes-financeiras/arq' } }]);
   assert.equal(livelo.isValidEmpty(html), true);
