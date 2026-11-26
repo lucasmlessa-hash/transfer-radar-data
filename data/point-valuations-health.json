@@ -1,13 +1,13 @@
 {
   "ok": true,
-  "checkedAt": "2026-11-26T14:14:59.579Z",
+  "checkedAt": "2026-11-26T14:18:24.764Z",
   "verified": 39,
-  "changed": true,
-  "written": true,
+  "changed": false,
+  "written": false,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "selectedAttempt": 1,
       "attempts": [
@@ -63,7 +63,7 @@
     },
     "tpg": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "selectedAttempt": 1,
       "attempts": [
@@ -129,7 +129,7 @@
     },
     "upgraded-points": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
       "selectedAttempt": 1,
       "attempts": [
@@ -195,7 +195,7 @@
     },
     "omaat": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://onemileatatime.com/guides/value-miles-points/",
       "selectedAttempt": 1,
       "attempts": [
@@ -259,7 +259,7 @@
     },
     "points-frog-copa": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://www.pointsfrog.com/points-value/connectmiles",
       "selectedAttempt": 1,
       "attempts": [
@@ -279,7 +279,7 @@
     },
     "milhasbot-smiles": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
       "selectedAttempt": 1,
       "attempts": [
@@ -297,7 +297,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:14:59.579Z",
+        "checkedAt": "2026-11-26T14:18:24.764Z",
         "editorial": {
           "url": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
           "month": "2026-11",
@@ -316,7 +316,7 @@
     },
     "milhasbot-br": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
       "selectedAttempt": 1,
       "attempts": [
@@ -338,7 +338,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:14:59.579Z",
+        "checkedAt": "2026-11-26T14:18:24.764Z",
         "editorial": {
           "url": "https://www.milhasbot.com.br/valores-do-milheiro/",
           "month": "2026-11",
@@ -367,7 +367,7 @@
     },
     "accor-ecb": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
       "selectedAttempt": 1,
       "attempts": [
@@ -385,7 +385,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:14:59.579Z",
+        "checkedAt": "2026-11-26T14:18:24.764Z",
         "redemption": {
           "url": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
           "points": 1000,
@@ -400,7 +400,7 @@
     },
     "points-frog-airlines": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:14:59.579Z",
+      "checkedAt": "2026-11-26T14:18:24.764Z",
       "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "selectedAttempt": 1,
       "attempts": [
@@ -477,182 +477,6 @@
       "missingCodes": []
     }
   },
-  "changes": [
-    {
-      "code": "AC",
-      "before": 1.4,
-      "after": 1.44
-    },
-    {
-      "code": "AF",
-      "before": 1.3,
-      "after": 1.33
-    },
-    {
-      "code": "AA",
-      "before": 1.4,
-      "after": 1.44
-    },
-    {
-      "code": "AS",
-      "before": 1.5,
-      "after": 1.55
-    },
-    {
-      "code": "AV",
-      "before": 1.3,
-      "after": 1.41
-    },
-    {
-      "code": "BA",
-      "before": 1.1,
-      "after": 1.24
-    },
-    {
-      "code": "IB",
-      "before": 1.35,
-      "after": 1.24
-    },
-    {
-      "code": "EI",
-      "before": 1.35,
-      "after": 1.24
-    },
-    {
-      "code": "QR",
-      "before": 1.35,
-      "after": 1.24
-    },
-    {
-      "code": "AY",
-      "before": 1.2,
-      "after": 1.24
-    },
-    {
-      "code": "CX",
-      "before": 1.1,
-      "after": 1.22
-    },
-    {
-      "code": "DL",
-      "before": 1.1,
-      "after": 1.16
-    },
-    {
-      "code": "F9",
-      "before": 1,
-      "after": 1.125
-    },
-    {
-      "code": "B6",
-      "before": 1.3,
-      "after": 1.31
-    },
-    {
-      "code": "LH",
-      "before": 1.3,
-      "after": 1.275
-    },
-    {
-      "code": "QF",
-      "before": 1.3,
-      "after": 1.266667
-    },
-    {
-      "code": "WN",
-      "before": 1.3,
-      "after": 1.26
-    },
-    {
-      "code": "UA",
-      "before": 1.3,
-      "after": 1.25
-    },
-    {
-      "code": "VS",
-      "before": 1.5,
-      "after": 1.38
-    },
-    {
-      "code": "NH",
-      "before": 1.3,
-      "after": 1.375
-    },
-    {
-      "code": "EK",
-      "before": 1,
-      "after": 1.125
-    },
-    {
-      "code": "EY",
-      "before": 1.1,
-      "after": 1.2
-    },
-    {
-      "code": "SQ",
-      "before": 1.25,
-      "after": 1.3
-    },
-    {
-      "code": "TK",
-      "before": 1.1,
-      "after": 1.2
-    },
-    {
-      "code": "LA",
-      "before": 0.57,
-      "after": 0.458989
-    },
-    {
-      "code": "AD",
-      "before": 0.34,
-      "after": 0.288993
-    },
-    {
-      "code": "TP",
-      "before": 1.1,
-      "after": 0.569996
-    },
-    {
-      "code": "ACCOR",
-      "before": 2.2,
-      "after": 2.187
-    },
-    {
-      "code": "BR",
-      "before": 1.3,
-      "after": 1.4
-    },
-    {
-      "code": "SK",
-      "before": 1.2,
-      "after": 1.1
-    },
-    {
-      "code": "TG",
-      "before": 1.1,
-      "after": 1
-    },
-    {
-      "code": "MH",
-      "before": 1,
-      "after": 0.7
-    },
-    {
-      "code": "AI",
-      "before": 0.8,
-      "after": 0.6
-    },
-    {
-      "code": "HU",
-      "before": null,
-      "after": 0.5
-    },
-    {
-      "code": "VN",
-      "before": 1,
-      "after": 0.5
-    }
-  ],
+  "changes": [],
   "failures": []
 }
