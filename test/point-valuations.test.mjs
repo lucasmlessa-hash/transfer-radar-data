@@ -9,13 +9,15 @@ import { refreshPointValuations } from '../scripts/refresh-point-valuations.mjs'
 
 const fixture = id => readFileSync(new URL(`../fixtures/valuations-${id}-2026-10.html`, import.meta.url), 'utf8');
 
-test('original publisher tables return only the 24 designated cents-USD estimates', () => {
+test('October publisher tables return every supported redemption estimate and a common base across Avios programs', () => {
   assert.deepEqual(parsePointValuations(fixture('fm'), 'fm').values, {
-    AC:1.4, AF:1.3, AA:1.4, AS:1.5, AV:1.3, BA:1.1, CX:1.1, DL:1.1,
+    AC:1.4, AF:1.3, AA:1.4, AS:1.5, AV:1.3, BA:1.1, IB:1.1, EI:1.1, QR:1.1, AY:1.1, CX:1.1, DL:1.1,
     F9:1, B6:1.3, LH:1.3, QF:1.3, WN:1.3, UA:1.3, VS:1.5,
   });
   assert.deepEqual(parsePointValuations(fixture('tpg'), 'tpg').values, {
-    AM:0.8, NH:1.4, QR:1.4, EI:1.4, IB:1.4, EK:1.2, EY:1.2, SQ:1.3, TK:1.1,
+    AM:0.8, AC:1.5, AS:1.55, AA:1.45, NH:1.4, AV:1.6, BA:1.4, QR:1.4, EI:1.4, IB:1.4, AY:1.4,
+    CX:1.3, DL:1.2, EK:1.2, EY:1.2, AF:1.4, F9:1.3, B6:1.35, QF:1.25, SQ:1.3, WN:1.25,
+    TK:1.1, UA:1.2, VS:1.5,
   });
 });
 
@@ -31,7 +33,8 @@ test('a numeric change is collected while a lost table or unknown unit is not tr
   assert.equal(partial.values.AC,1.4);
 });
 
-const COVERED=['AC','AF','AA','AS','AV','BA','CX','DL','F9','B6','LH','QF','WN','UA','VS','AM','NH','QR','EI','IB','EK','EY','SQ','TK'];
+const COVERED=['AC','AF','AA','AS','AV','BA','CX','DL','F9','B6','LH','QF','WN','UA','VS','AM','NH','QR','EI','IB','AY','EK','EY','SQ','TK'];
+const MISSING_FROM_PARTIAL=['EK','EY','AF','F9','B6','QF','SQ','WN','TK','UA','VS'];
 function files(t) {
   const dir=mkdtempSync(path.join(tmpdir(),'radar-valuations-'));t.after(()=>rmSync(dir,{recursive:true,force:true}));
   const partnersPath=path.join(dir,'partners.json'),reportPath=path.join(dir,'report.json');
@@ -42,18 +45,26 @@ function files(t) {
 const now=new Date('2026-10-13T16:00:00Z');
 const fetchFixture=async url=>({ok:true,text:async()=>fixture(url.includes('frequentmiler')?'fm':'tpg')});
 
-test('the scheduled refresh includes valuations for all five previously uncovered active destinations', async t => {
+test('the default refresh deduplicates dated estimates across publications and uses the official Accor redemption', async t => {
   const f = files(t);
   const publisherFixtures = {
-    'frequentmiler.com': 'valuations-fm-2026-10',
-    'thepointsguy.com': 'valuations-tpg-2026-10',
+    'frequentmiler.com': 'valuations-fm-2026-11',
+    'thepointsguy.com': 'valuations-tpg-2026-11',
     'upgradedpoints.com': 'valuations-upgraded-points-2026-11',
     'onemileatatime.com': 'valuations-omaat-2026-11',
     'www.pointsfrog.com': 'valuations-points-frog-copa-2026-11',
     'www.milhasbot.com.br': 'smiles-point-valuation-milhasbot',
+    'all.accor.com': 'accor-point-valuation',
   };
   const fetchImpl = async url => {
-    const { hostname } = new URL(url);
+    const { hostname, pathname } = new URL(url);
+    if (hostname === 'www.pointsfrog.com' && pathname === '/best-points-programs/airline-miles') {
+      return new Response(readFileSync(new URL('../fixtures/valuations-points-frog-airlines.html', import.meta.url)));
+    }
+    if (hostname === 'www.milhasbot.com.br' && pathname === '/valores-do-milheiro/') {
+      return new Response(readFileSync(new URL('../fixtures/valuations-milhasbot-br-2026-11.html', import.meta.url)));
+    }
+    if (hostname === 'data-api.ecb.europa.eu') return new Response(readFileSync(new URL('../fixtures/accor-ecb-fixing.json', import.meta.url)));
     if (hostname === 'olinda.bcb.gov.br') return Response.json({
       '@odata.context': 'https://olinda.bcb.gov.br/odata$metadata#_CotacaoDolarPeriodo(cotacaoVenda,dataHoraCotacao)',
       value: [{ dataHoraCotacao: '2026-11-25 13:02:42', cotacaoVenda: 5.8825 }],
@@ -65,11 +76,24 @@ test('the scheduled refresh includes valuations for all five previously uncovere
     partnersPath: f.partnersPath, now: new Date('2026-11-26T13:30:00Z'), fetchImpl, sleepImpl: async () => {}, log() {},
   });
   assert.equal(result.ok, true);
-  assert.equal(result.verified, 29);
+  const verified = new Set(Object.values(result.sources).flatMap(source => source.verifiedCodes));
+  assert.equal(result.verified, verified.size);
+  assert.ok(verified.size >= 29);
   const saved = JSON.parse(readFileSync(f.partnersPath));
-  for (const [code, value] of Object.entries({ CM: 1.3, JL: 1.3, AY: 1.2, ACCOR: 2.2, G3: 0.36 })) {
+  for (const [code, value] of Object.entries({ CM: 1.3, JL: 1.3, AY: 1.24, ACCOR: 2.187, G3: 0.36 })) {
     assert.equal(saved.airlineValues[code], value);
     assert.match(saved.airlineValueMeta[code].source, /^https:\/\//);
+  }
+  assert.equal(saved.airlineValueMeta.ACCOR.method, 'official-fx');
+  assert.equal(saved.airlineValueMeta.CM.sources.length, 1);
+  for (const code of ['G3', 'LA', 'AD']) {
+    assert.deepEqual(saved.airlineValueMeta[code].sources.map(item => new URL(item.source).hostname), ['www.milhasbot.com.br']);
+  }
+  assert.equal(saved.airlineValueMeta.TP.sources.length, 2);
+  assert.equal(saved.airlineValueMeta.AY.sources.length, 5);
+  for (const code of ['BA','IB','EI','QR']) {
+    assert.deepEqual(saved.airlineValueMeta[code], saved.airlineValueMeta.AY);
+    assert.equal(saved.airlineValues[code], saved.airlineValues.AY);
   }
 });
 
@@ -100,15 +124,17 @@ test('a multi-source BRL estimate retains its exchange-rate date and the evidenc
   assert.deepEqual(JSON.parse(readFileSync(f.partnersPath)), saved);
 });
 
-test('refresh verifies only the 24 covered estimates, including unchanged values, and persists a source report',async t=>{
+test('refresh verifies 25 distinct destinations, including overlapping observations, and persists a source report',async t=>{
   const f=files(t);const result=await refreshPointValuations({...f,fetchImpl:fetchFixture,now,log:()=>{}});
-  assert.equal(result.ok,true);assert.equal(result.verified,24);
+  assert.equal(result.ok,true);assert.equal(result.verified,25);
   const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
   for(const code of COVERED) {
     assert.equal(doc.airlineValueMeta[code].asOf,'2026-10-13',code);
     assert.equal(doc.airlineValueMeta[code].currency,'USD',code);
     assert.equal(doc.airlineValueMeta[code].estimate,true,code);
-    assert.equal(doc.airlineValueMeta[code].source,f.before.airlineValueMeta[code].source,code);
+    const urls = VALUATION_SOURCES.filter(source => source.codes.includes(code)).map(source => source.url);
+    assert.deepEqual(doc.airlineValueMeta[code].sources.map(observation => observation.source), urls, code);
+    assert.equal(doc.airlineValueMeta[code].source, urls[0], code);
   }
   for(const code of Object.keys(f.before.airlineValues).filter(code=>!COVERED.includes(code))) {
     assert.deepEqual(doc.airlineValueMeta[code],f.before.airlineValueMeta[code]);
@@ -116,24 +142,24 @@ test('refresh verifies only the 24 covered estimates, including unchanged values
   }
   assert.deepEqual(doc.directory,f.before.directory);
   const report=JSON.parse(readFileSync(f.reportPath,'utf8'));
-  assert.equal(report.sources.fm.verifiedCodes.length,15);
-  assert.equal(report.sources.tpg.verifiedCodes.length,9);
+  assert.equal(report.sources.fm.verifiedCodes.length,19);
+  assert.equal(report.sources.tpg.verifiedCodes.length,24);
 });
 
-test('a failed publisher preserves its previous values and age while the independent source still refreshes',async t=>{
+test('a failed publisher preserves an unduplicated legacy estimate while the independent source still refreshes',async t=>{
   const f=files(t);
   // Deliberately differs from the captured publisher table and from today's
   // mutable sample, so the test proves preservation rather than a lucky match.
-  f.before.airlineValues.AF=2.25;
-  f.before.airlineValueMeta.AF.asOf='2026-07-24';
+  f.before.airlineValues.LH=2.25;
+  f.before.airlineValueMeta.LH.asOf='2026-07-24';
   writeFileSync(f.partnersPath,JSON.stringify(f.before,null,2)+'\n');
   const result=await refreshPointValuations({...f,now,log:()=>{},fetchImpl:async url=>{
     if(url.includes('frequentmiler'))throw Error('offline');return fetchFixture(url);
   }});
-  assert.equal(result.ok,false);assert.equal(result.verified,9);
+  assert.equal(result.ok,false);assert.equal(result.verified,24);
   const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
-  assert.deepEqual(doc.airlineValueMeta.AF,f.before.airlineValueMeta.AF);
-  assert.equal(doc.airlineValues.AF,f.before.airlineValues.AF);
+  assert.deepEqual(doc.airlineValueMeta.LH,f.before.airlineValueMeta.LH);
+  assert.equal(doc.airlineValues.LH,f.before.airlineValues.LH);
   assert.equal(doc.airlineValueMeta.NH.asOf,'2026-10-13');
   assert.equal(result.sources.fm.status,'failed');
   assert.equal(result.sources.tpg.status,'ok');
@@ -141,19 +167,19 @@ test('a failed publisher preserves its previous values and age while the indepen
 
 test('an unreadable individual value keeps its old review date without discarding successful rows',async t=>{
   const f=files(t);const result=await refreshPointValuations({...f,now,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')
-    ? fixture('fm').replace(/(Air France KLM Flying Blue<\/td>\s*<td[^>]*>)1\.3/,'$1unknown') : fixture('tpg')})});
-  assert.equal(result.ok,false);assert.equal(result.verified,23);
+    ? fixture('fm').replace(/(Miles &amp; More \(Lufthansa\)<\/td>\s*<td[^>]*>)1\.3/,'$1unknown') : fixture('tpg')})});
+  assert.equal(result.ok,false);assert.equal(result.verified,24);
   const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
-  assert.deepEqual(doc.airlineValueMeta.AF,f.before.airlineValueMeta.AF);
+  assert.deepEqual(doc.airlineValueMeta.LH,f.before.airlineValueMeta.LH);
   assert.equal(doc.airlineValueMeta.AC.asOf,'2026-10-13');
   assert.equal(result.sources.fm.status,'degraded');
-  assert.deepEqual(result.sources.fm.missingCodes,['AF']);
+  assert.deepEqual(result.sources.fm.missingCodes,['LH']);
 });
 
 test('dry run, total failure, and invalid candidate cannot rewrite partner data',async t=>{
   const f=files(t);const before=readFileSync(f.partnersPath,'utf8');
   const dry=await refreshPointValuations({...f,now,dryRun:true,fetchImpl:fetchFixture,log:()=>{}});
-  assert.equal(dry.verified,24);assert.equal(dry.written,false);
+  assert.equal(dry.verified,25);assert.equal(dry.written,false);
   assert.equal(readFileSync(f.partnersPath,'utf8'),before);
   const failed=await refreshPointValuations({...f,now,fetchImpl:async()=>({ok:false,status:503}),log:()=>{}});
   assert.equal(failed.verified,0);assert.equal(failed.changed,false);
@@ -166,8 +192,8 @@ test('dry run, total failure, and invalid candidate cannot rewrite partner data'
 test('an incomplete public table reports its actual cells without accepting the missing estimates',()=>{
   const html=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
   const parsed=parsePointValuations(html,'tpg');
-  assert.deepEqual(Object.keys(parsed.values),['AM','NH','QR','EI','IB']);
-  assert.deepEqual(parsed.missingCodes,['EK','EY','SQ','TK']);
+  assert.deepEqual(Object.keys(parsed.values),['AM','AC','AS','AA','NH','AV','BA','IB','EI','QR','AY','CX','DL']);
+  assert.deepEqual(parsed.missingCodes,MISSING_FROM_PARTIAL);
   assert.equal(parsed.diagnostics.matchingTableCount,1);
   assert.deepEqual(parsed.diagnostics.tables[0].header,['Program','October 2026 valuation (cents)']);
   assert.equal(parsed.diagnostics.tables[0].rowCount,9);
@@ -196,7 +222,7 @@ test('a partial remote valuation result persists the observed cells and preserve
   const incomplete=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
   const logs=[];
   const result=await refreshPointValuations({...f,now,log:line=>logs.push(line),fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):incomplete})});
-  assert.equal(result.ok,false);assert.equal(result.verified,20);
+  assert.equal(result.ok,false);assert.equal(result.verified,21);
   const report=JSON.parse(readFileSync(f.reportPath,'utf8'));
   assert.equal(report.sources.tpg.status,'degraded');
   assert.equal(report.sources.tpg.diagnostics.tables[0].rowCount,9);
@@ -229,7 +255,7 @@ test('partial capture is exact and the CLI accepts --diagnostics-dir without cha
   const f=files(t),diagnosticsDir=path.join(path.dirname(f.partnersPath),'captures');
   const html=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
   const result=await refreshPointValuations({...f,diagnosticsDir,now,dryRun:true,log:()=>{},fetchImpl:async url=>({ok:true,text:async()=>url.includes('frequentmiler')?fixture('fm'):html})});
-  assert.equal(result.verified,20);assert.equal(result.ok,false);
+  assert.equal(result.verified,21);assert.equal(result.ok,false);
   assert.equal(readFileSync(path.join(diagnosticsDir,'tpg-attempt1.html'),'utf8'),html);
   assert.equal(result.sources.tpg.attempts[0].htmlCapture.truncated,false);
   writeFileSync(f.partnersPath,JSON.stringify({...f.before,version:99}));
@@ -239,7 +265,7 @@ test('partial capture is exact and the CLI accepts --diagnostics-dir without cha
   assert.doesNotMatch(cli.stderr,/Unknown argument/);
 });
 
-test('a 5/9 response is captured before retry and replaced by one fully verified 9/9 response',async t=>{
+test('a partial airline table is captured before retry and replaced by one fully verified response',async t=>{
   const f=files(t),diagnosticsDir=path.join(path.dirname(f.partnersPath),'captures');
   const partial=readFileSync(new URL('../fixtures/valuations-tpg-incomplete.html',import.meta.url),'utf8');
   let tpgCalls=0,fmCalls=0;const sleeps=[];
@@ -249,7 +275,7 @@ test('a 5/9 response is captured before retry and replaced by one fully verified
     if(url.includes('frequentmiler')){fmCalls++;return {ok:true,text:async()=>fixture('fm')};}
     tpgCalls++;return {ok:true,text:async()=>tpgCalls===1?partial:fixture('tpg')};
   }});
-  assert.equal(result.ok,true);assert.equal(result.verified,24);
+  assert.equal(result.ok,true);assert.equal(result.verified,25);
   assert.equal(tpgCalls,2);assert.equal(fmCalls,1);assert.deepEqual(sleeps,[1000]);
   assert.deepEqual(result.sources.tpg.attempts.map(a=>a.status),['degraded','ok']);
   assert.equal(result.sources.tpg.selectedAttempt,2);assert.deepEqual(result.failures,[]);
@@ -264,7 +290,7 @@ test('three partial responses select the last response without combining values 
     if(url.includes('frequentmiler'))return fetchFixture(url);
     calls++;return {ok:true,text:async()=>calls===1?earlier:partial};
   }});
-  assert.equal(calls,3);assert.equal(result.ok,false);assert.equal(result.verified,20);
+  assert.equal(calls,3);assert.equal(result.ok,false);assert.equal(result.verified,21);
   assert.equal(result.sources.tpg.attempts.length,3);assert.equal(result.sources.tpg.selectedAttempt,3);
   const doc=JSON.parse(readFileSync(f.partnersPath,'utf8'));
   for(const code of ['EK','EY','SQ','TK']) {
@@ -281,7 +307,7 @@ test('repeated network failures do not block the independent source or erase a p
     if(source==='tpg' && calls[source]===1)return {ok:true,text:async()=>partial};
     throw Error('network unavailable');
   }});
-  assert.deepEqual(calls,{fm:3,tpg:3});assert.equal(result.verified,5);
+  assert.deepEqual(calls,{fm:3,tpg:3});assert.equal(result.verified,13);
   assert.equal(result.sources.fm.status,'failed');assert.equal(result.sources.tpg.status,'degraded');
   assert.equal(result.sources.tpg.selectedAttempt,1);
   assert.deepEqual(result.sources.tpg.attempts.map(a=>a.status),['degraded','failed','failed']);
@@ -297,5 +323,5 @@ test('diagnostics retain up to thirty headerless table fragments without accepti
   assert.deepEqual(parsed.diagnostics.tables[1].header,['fragment 0','1.2']);
   assert.equal(parsed.diagnostics.tables[1].rows[0].program,'fragment 0');
   assert.doesNotMatch(JSON.stringify(parsed.diagnostics),/excluded third cell/);
-  assert.deepEqual(parsed.missingCodes,['EK','EY','SQ','TK']);
+  assert.deepEqual(parsed.missingCodes,MISSING_FROM_PARTIAL);
 });

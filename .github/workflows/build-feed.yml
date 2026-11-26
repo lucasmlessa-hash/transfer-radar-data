@@ -17,7 +17,7 @@ on:
   repository_dispatch:
     types: [refresh-feed]
 
-# contents: write exists solely for the observed-windows ledger commit below.
+# The job persists campaign observations, forecast records and the last official Accor fixing.
 permissions:
   contents: write
   pages: write
@@ -35,6 +35,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -92,6 +94,9 @@ jobs:
         id: build
         run: npm run build
 
+      - name: Refresh ALL Accor using the latest published ECB fixing
+        run: node scripts/refresh-accor-fixing.mjs
+
       - name: Validate output
         run: node scripts/validate-feed.mjs out/feed.json
 
@@ -124,12 +129,14 @@ jobs:
         run: |
           # status --porcelain, not diff --quiet: the latter is blind to an
           # untracked file, and the ledger's very first appearance is one.
-          if [ -z "$(git status --porcelain -- data/observed-windows.json data/forecast-records.json)" ]; then
+          files=(data/observed-windows.json data/forecast-records.json)
+          if [ -f data/accor-fixing.json ]; then files+=(data/accor-fixing.json); fi
+          if [ -z "$(git status --porcelain -- "${files[@]}")" ]; then
             echo "ledger unchanged"
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add data/observed-windows.json data/forecast-records.json
+            git add -- "${files[@]}"
             git commit -m "chore(data): campaign and forecast ledgers $(date -u +%F)"
             if ! (git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"); then
               echo "::error::ledger push failed — refusing to publish unrecorded forecasts"

@@ -75,7 +75,7 @@ test('every cents-per-mile value carries provenance', () => {
     const m = P.airlineValueMeta[code];
     assert.ok(m, `${code}: no airlineValueMeta entry`);
     assert.match(m.asOf, /^\d{4}-\d{2}-\d{2}$/, `${code}: bad asOf`);
-    assert.ok(['USD', 'BRL'].includes(m.currency), `${code}: bad currency "${m.currency}"`);
+    assert.ok(['USD', 'BRL', 'EUR'].includes(m.currency), `${code}: bad currency "${m.currency}"`);
     assert.ok(
       m.source.startsWith('https://') || m.source === 'unsourced' || m.source.startsWith('derived:'),
       `${code}: source must be a URL, "unsourced", or "derived:*", got "${m.source}"`,

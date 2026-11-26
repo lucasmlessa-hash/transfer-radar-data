@@ -3,7 +3,7 @@ import { fetchPage, PUBLIC_CLIENT_USER_AGENT } from '../fetch-page.mjs';
 
 const EDITORIAL_URL = 'https://www.milhasbot.com.br/valores-do-milheiro/smiles/';
 const PTAX_PERIOD = 'https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)';
-const PTAX_SOURCE = 'https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios';
+export const PTAX_SOURCE = 'https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios';
 const TIME_ZONE = 'America/Sao_Paulo';
 const MAX_FX_AGE_DAYS = 5; // Calendar days, to accommodate long weekends and Carnival.
 const MAX_EDITION_AGE_DAYS = 35;
@@ -14,6 +14,17 @@ const rangeCell = new RegExp(String.raw`^R\$\s*${brlNumber}\s*[-–—]\s*(?:R\$
 const redemptionSentence = new RegExp(String.raw`^Pela nossa referência de ([\p{L}]+ de \d{4}), cada 1\.?000 milhas Smiles valem de R\$\s*${brlNumber} a R\$\s*${brlNumber} em resgate\b`, 'u');
 const clean = value => value.replace(/\s+/g, ' ').trim();
 const parseBrl = value => Number(value.replace(',', '.'));
+
+export function redemptionMonth(label, today) {
+  const [monthName, year] = label.split(' de ');
+  const monthNumber = MONTHS.indexOf(monthName) + 1;
+  const month = `${year}-${String(monthNumber).padStart(2, '0')}`;
+  const ageDays = (Date.parse(today) - Date.parse(`${month}-01`)) / DAY_MS;
+  if (!monthNumber || !Number.isFinite(ageDays) || ageDays < 0 || ageDays > MAX_EDITION_AGE_DAYS) {
+    throw new Error(`future, stale or unreadable redemption reference: ${label}`);
+  }
+  return month;
+}
 
 function editorialRange(html, today, previousMeta) {
   const $ = load(html);
@@ -32,13 +43,7 @@ function editorialRange(html, today, previousMeta) {
   const { cell, caption } = candidates[0];
   const quoted = redemptionSentence.exec(caption), row = rangeCell.exec(cell);
   if (!quoted || !row) throw new Error('missing dated BRL redemption range for 1,000 Smiles miles');
-  const [monthName, year] = quoted[1].split(' de ');
-  const monthNumber = MONTHS.indexOf(monthName) + 1;
-  const month = `${year}-${String(monthNumber).padStart(2, '0')}`;
-  const ageDays = (Date.parse(today) - Date.parse(`${month}-01`)) / DAY_MS;
-  if (!monthNumber || !Number.isFinite(ageDays) || ageDays < 0 || ageDays > MAX_EDITION_AGE_DAYS) {
-    throw new Error(`future, stale or unreadable redemption reference: ${quoted[1]}`);
-  }
+  const month = redemptionMonth(quoted[1], today);
   // Older partner contracts store the source dates in note. Reading the two
   // dates independently prevents an old cached page from undoing a newer one.
   const previousMonth = /MilhasBot's (\d{4}-\d{2}) airfare redemption range/.exec(previousMeta?.note)?.[1];
@@ -82,7 +87,7 @@ function latestPtax(body, url, localNow, startDay, previousMeta) {
   return { url, ...latest };
 }
 
-async function sourceResult(label, url, fetchImpl, parse) {
+export async function sourceResult(label, url, fetchImpl, parse) {
   try {
     const body = await fetchPage(url, { fetcher: fetchImpl, tries: 1, headers: { 'User-Agent': PUBLIC_CLIENT_USER_AGENT } });
     return parse(body);
@@ -91,23 +96,34 @@ async function sourceResult(label, url, fetchImpl, parse) {
   }
 }
 
-async function collectSmilesValuation({ fetchImpl = fetch, now = new Date(), previousMeta } = {}) {
+export function brasiliaTimestamp(now) {
   // Olinda stamps are Brasília wall time. Compare in the same zone, including
   // microseconds, so a quote from later today cannot enter an earlier run.
-  const localNow = now.toLocaleString('sv-SE', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+  return now.toLocaleString('sv-SE', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3, hourCycle: 'h23' }).replace(',', '.') + '000';
+}
+
+export function collectPtax(localNow, fetchImpl, previousMeta) {
   const today = localNow.slice(0, 10);
   const startDay = new Date(Date.parse(today) - MAX_FX_AGE_DAYS * DAY_MS).toISOString().slice(0, 10);
   const url = ptaxUrl(startDay, today);
+  return sourceResult('BCB PTAX', url, fetchImpl, body => latestPtax(body, url, localNow, startDay, previousMeta));
+}
+
+export function conversionDate(month, fxDate, today) {
+  // A new fixing must not extend the publisher's prior monthly edition.
+  const priorMonthEnd = new Date(Date.parse(`${today.slice(0, 7)}-01`) - DAY_MS).toISOString().slice(0, 10);
+  return month < today.slice(0, 7) && fxDate > priorMonthEnd ? priorMonthEnd : fxDate;
+}
+
+async function collectSmilesValuation({ fetchImpl = fetch, now = new Date(), previousMeta } = {}) {
+  const localNow = brasiliaTimestamp(now), today = localNow.slice(0, 10);
   const [editorial, fx] = await Promise.all([
     sourceResult('MilhasBot', EDITORIAL_URL, fetchImpl, body => editorialRange(body, today, previousMeta)),
-    sourceResult('BCB PTAX', url, fetchImpl, body => latestPtax(body, url, localNow, startDay, previousMeta)),
+    collectPtax(localNow, fetchImpl, previousMeta),
   ]);
   const [low, high] = editorial.rangeBrlPer1000;
-  // A new PTAX during the publisher's month rollover can update the conversion
-  // without attributing the prior month's redemption research to the new month.
-  const priorMonthEnd = new Date(Date.parse(`${today.slice(0, 7)}-01`) - DAY_MS).toISOString().slice(0, 10);
-  const asOf = editorial.month < today.slice(0, 7) && fx.date > priorMonthEnd ? priorMonthEnd : fx.date;
+  const asOf = conversionDate(editorial.month, fx.date, today);
   if (previousMeta?.asOf && asOf < previousMeta.asOf) throw new Error(`MilhasBot: combined evidence predates stored asOf ${previousMeta.asOf}`);
   const sourceValue = low / 1000;
   const value = Number((sourceValue * 100 / fx.brlPerUsd).toFixed(2));

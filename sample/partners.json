@@ -143,317 +143,1444 @@
     "CHO": "choicehotels.com"
   },
   "airlineValues": {
-    "AF": 1.3,
-    "AV": 1.3,
+    "AF": 1.33,
+    "AV": 1.41,
     "AM": 0.8,
-    "VS": 1.5,
-    "QR": 1.35,
-    "BA": 1.1,
-    "EI": 1.35,
-    "CX": 1.1,
-    "NH": 1.3,
+    "VS": 1.38,
+    "QR": 1.24,
+    "BA": 1.24,
+    "EI": 1.24,
+    "CX": 1.22,
+    "NH": 1.375,
     "G3": 0.36,
-    "LA": 0.57,
-    "AD": 0.34,
-    "BR": 1.3,
-    "QF": 1.3,
+    "LA": 0.458989,
+    "AD": 0.288993,
+    "BR": 1.4,
+    "QF": 1.266667,
     "JL": 1.3,
-    "LH": 1.3,
-    "AS": 1.5,
-    "AA": 1.4,
-    "AC": 1.4,
-    "TK": 1.1,
-    "EK": 1,
-    "SQ": 1.25,
-    "UA": 1.3,
-    "B6": 1.3,
-    "EY": 1.1,
-    "IB": 1.35,
+    "LH": 1.275,
+    "AS": 1.55,
+    "AA": 1.44,
+    "AC": 1.44,
+    "TK": 1.2,
+    "EK": 1.125,
+    "SQ": 1.3,
+    "UA": 1.25,
+    "B6": 1.31,
+    "EY": 1.2,
+    "IB": 1.24,
     "CM": 1.3,
-    "TP": 1.1,
-    "F9": 1,
-    "WN": 1.3,
-    "DL": 1.1,
-    "AY": 1.2,
-    "SK": 1.2,
-    "VN": 1,
-    "MH": 1,
-    "TG": 1.1,
-    "AI": 0.8,
-    "ACCOR": 2.2
+    "TP": 0.569996,
+    "F9": 1.125,
+    "WN": 1.26,
+    "DL": 1.16,
+    "AY": 1.24,
+    "SK": 1.1,
+    "VN": 0.5,
+    "MH": 0.7,
+    "TG": 1,
+    "AI": 0.6,
+    "ACCOR": 2.187,
+    "HU": 0.5
   },
   "airlineValueMeta": {
     "AF": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.45,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "AV": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.4,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.65,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.4,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "VS": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.5,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.1,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.4,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.5,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.4,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "BA": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "CX": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "QF": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "LH": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "AS": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.5,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.5,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.55,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.6,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.6,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "AA": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.4,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.5,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.45,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.45,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.4,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "AC": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.4,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.4,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.45,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.45,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.5,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "QR": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "EI": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "G3": {
       "currency": "BRL",
       "asOf": "2026-11-25",
-      "source": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
-      "estimate": true,
-      "note": "Lower bound of MilhasBot's 2026-11 airfare redemption range of BRL 21 to 27 per 1,000 Smiles miles. Converted to US cents per mile at Banco Central do Brasil's selling USD/BRL PTAX of 5.8825 BRL per USD on 2026-11-25 (https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios).",
       "sourceCurrency": "BRL",
       "sourceValue": 0.021,
-      "fxRate": 5.8825
+      "fxRate": 5.8825,
+      "note": "Lower bound of MilhasBot's 2026-11 airfare redemption range of BRL 21 to 27 per 1,000 Smiles miles. Converted to US cents per mile at Banco Central do Brasil's selling USD/BRL PTAX of 5.8825 BRL per USD on 2026-11-25 (https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios).",
+      "method": "editorial-mean",
+      "source": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "MilhasBot",
+          "source": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
+          "value": 0.36,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-11-30"
+        }
+      ]
     },
     "LA": {
       "currency": "BRL",
-      "asOf": "2026-07-24",
-      "source": "derived:operator-redemption-value",
-      "note": "LATAM Pass: R$0.02895 per point (R$28.95/1,000) — a REDEMPTION value, not an acquisition price. Converted at USD/BRL 5.074167 on 2026-07-24. Not covered by Frequent Miler RRV (US-market measure) nor TPG.",
-      "sourceValue": 0.02895,
+      "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+      "asOf": "2026-11-25",
       "sourceCurrency": "BRL",
-      "fxRate": 5.074167
+      "sourceValue": 0.027,
+      "fxRate": 5.8825,
+      "note": "Lower bound of MilhasBot's 2026-11 airfare redemption range of BRL 27 to 33 per 1,000 miles. Converted to US cents per mile at Banco Central do Brasil's selling USD/BRL PTAX of 5.8825 BRL per USD on 2026-11-25 (https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios).",
+      "method": "editorial-mean",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "MilhasBot",
+          "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+          "value": 0.458989,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-11-30"
+        }
+      ]
     },
     "AD": {
       "currency": "BRL",
-      "asOf": "2026-07-24",
-      "source": "derived:operator-redemption-value",
-      "note": "Azul Fidelidade: R$0.01750 per point (R$17.50/1,000) — a REDEMPTION value, not an acquisition price. Converted at USD/BRL 5.074167 on 2026-07-24. Not covered by Frequent Miler RRV (US-market measure) nor TPG.",
-      "sourceValue": 0.0175,
+      "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+      "asOf": "2026-11-25",
       "sourceCurrency": "BRL",
-      "fxRate": 5.074167
+      "sourceValue": 0.017,
+      "fxRate": 5.8825,
+      "note": "Lower bound of MilhasBot's 2026-11 airfare redemption range of BRL 17 to 21 per 1,000 miles. Converted to US cents per mile at Banco Central do Brasil's selling USD/BRL PTAX of 5.8825 BRL per USD on 2026-11-25 (https://dadosabertos.bcb.gov.br/dataset/dolar-americano-usd-todos-os-boletins-diarios).",
+      "method": "editorial-mean",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "MilhasBot",
+          "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+          "value": 0.288993,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-11-30"
+        }
+      ]
     },
     "AM": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.8,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 0.8,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "NH": {
       "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
-    },
-    "BR": {
-      "currency": "USD",
-      "asOf": "2026-07-24",
-      "source": "derived:peer-estimate",
-      "note": "ESTIMATE — absent from both Frequent Miler RRV and TPG. Third-party sources quote 1.3-5.3c for EVA Air Infinity MileageLands, but the upper end is premium-cabin best-case. 1.3c is the conservative floor, consistent with same-alliance peers in TPG (Singapore 1.3 / Turkish 1.1 / Cathay 1.3 / Qantas 1.3).",
-      "estimate": true
-    },
-    "JL": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Upgraded Points, in US cents per mile; asOf records source verification."
-    },
-    "TK": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
-    },
-    "EK": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
-    },
-    "SQ": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
-    },
-    "UA": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
-    },
-    "B6": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
-    },
-    "EY": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification."
-    },
-    "IB": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from The Points Guy, in US cents per mile; asOf records source verification. Uses the publisher's shared Avios estimate; British Airways retains its separate Frequent Miler estimate."
-    },
-    "CM": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://www.pointsfrog.com/points-value/connectmiles",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Points Frog, in US cents per mile; asOf records source verification."
-    },
-    "TP": {
-      "currency": "USD",
-      "asOf": "2026-07-25",
-      "source": "https://thepointsguy.com/loyalty-programs/the-ultimate-guide-to-earning-and-redeeming-tap-milesgo/",
-      "note": "TPG/10xTravel guides: 1.0-1.3c typical; midpoint used. Not in Frequent Miler RRV."
-    },
-    "F9": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
-    },
-    "WN": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
-    },
-    "DL": {
-      "currency": "USD",
-      "asOf": "2026-11-26",
-      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
-      "estimate": true,
-      "note": "Editorial redemption estimate from Frequent Miler RRV, in US cents per mile; asOf records source verification."
-    },
-    "AY": {
-      "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
       "source": "https://onemileatatime.com/guides/value-miles-points/",
       "estimate": true,
-      "note": "Editorial redemption estimate from One Mile at a Time, in US cents per mile; asOf records source verification."
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.4,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.4,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.4,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "BR": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.4,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
+    },
+    "JL": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://onemileatatime.com/guides/value-miles-points/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "TK": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://onemileatatime.com/guides/value-miles-points/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.1,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "EK": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://onemileatatime.com/guides/value-miles-points/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.1,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "SQ": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://onemileatatime.com/guides/value-miles-points/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "UA": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.25,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.2,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.2,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "B6": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.3,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "EY": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://onemileatatime.com/guides/value-miles-points/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.1,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.1,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.4,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "IB": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "CM": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/points-value/connectmiles",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/points-value/connectmiles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
+    },
+    "TP": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "MilhasBot",
+          "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
+          "value": 0.339992,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-11-30"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.8,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
+    },
+    "F9": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.1,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.1,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "WN": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.3,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.25,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.3,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "DL": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.1,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.2,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.2,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.2,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
+    },
+    "AY": {
+      "currency": "USD",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+      "estimate": true,
+      "sources": [
+        {
+          "name": "Frequent Miler RRV",
+          "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
+          "value": 1.1,
+          "asOf": "2026-10-08",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "One Mile at a Time",
+          "source": "https://onemileatatime.com/guides/value-miles-points/",
+          "value": 1.2,
+          "asOf": "2026-09-02",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-01"
+        },
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.3,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        },
+        {
+          "name": "The Points Guy",
+          "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
+          "value": 1.35,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        },
+        {
+          "name": "Upgraded Points",
+          "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+          "value": 1.25,
+          "asOf": "2026-11-01",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-06"
+        }
+      ]
     },
     "SK": {
       "currency": "USD",
-      "asOf": "2026-07-27",
-      "source": "https://upgradedpoints.com/travel/airlines/sas-eurobonus-loyalty-program/",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Sem RRV. Faixa de econômica 1.0-2.0c; base 1.2c. Desvalorização anunciada dez/2025 atinge cabine premium."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1.1,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     },
     "VN": {
       "currency": "USD",
-      "asOf": "2026-07-27",
-      "source": "https://cardcurator.ai/sweet-spots/vietnam-airlines-lotusmiles",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Sem RRV. Base de resgate 1.0c (topo 1.4c)."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.5,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     },
     "MH": {
       "currency": "USD",
-      "asOf": "2026-07-27",
-      "source": "https://bolehmiles.com/2024/07/09/how-much-is-one-enrich-mile-worth/",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Sem RRV. Faixa de voo MH 0.8-1.2c; ponto médio 1.0c."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.7,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     },
     "TG": {
       "currency": "USD",
-      "asOf": "2026-07-27",
-      "source": "https://upgradedpoints.com/travel/airlines/best-ways-to-earn-thai-airways-royal-orchid-plus-miles/",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Sem RRV. Blog: >1c em econômica; base 1.1c."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 1,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     },
     "AI": {
       "currency": "USD",
-      "asOf": "2026-07-27",
-      "source": "https://www.thepointsanalyst.com/points-and-miles-valuations/",
+      "method": "editorial-mean",
+      "asOf": "2026-11-26",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Sem RRV. Q3 2025 agrupa Maharaja Club no piso, junto de Aeromexico (0.8c) e TAP."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.6,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     },
     "ACCOR": {
+      "source": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
+      "method": "official-fx",
+      "currency": "EUR",
+      "sourceCurrency": "EUR",
+      "sourceValue": 0.02,
+      "fxRate": 1.0935,
+      "fxSource": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html",
+      "asOf": "2026-11-25",
+      "estimate": false,
+      "note": "1.000 pontos Reward dão €20 de desconto em hospedagens participantes. Câmbio de referência do BCE em dólares por euro."
+    },
+    "HU": {
       "currency": "USD",
+      "method": "editorial-mean",
       "asOf": "2026-11-26",
-      "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
+      "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "estimate": true,
-      "note": "Editorial redemption estimate from Upgraded Points, in US cents per point; asOf records source verification."
+      "sources": [
+        {
+          "name": "Points Frog",
+          "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
+          "value": 0.5,
+          "asOf": "2026-10-13",
+          "checkedOn": "2026-11-26",
+          "validUntil": "2026-12-31"
+        }
+      ]
     }
   },
   "transferTimes": {
