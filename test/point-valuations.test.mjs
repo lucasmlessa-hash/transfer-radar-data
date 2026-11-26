@@ -4,7 +4,7 @@ import { readFileSync, mkdtempSync, writeFileSync, rmSync, existsSync, readdirSy
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { parsePointValuations } from '../src/sources/point-valuations.mjs';
+import { parsePointValuations, VALUATION_SOURCES } from '../src/sources/point-valuations.mjs';
 import { refreshPointValuations } from '../scripts/refresh-point-valuations.mjs';
 
 const fixture = id => readFileSync(new URL(`../fixtures/valuations-${id}-2026-10.html`, import.meta.url), 'utf8');
@@ -37,10 +37,68 @@ function files(t) {
   const partnersPath=path.join(dir,'partners.json'),reportPath=path.join(dir,'report.json');
   const before=JSON.parse(readFileSync(new URL('../fixtures/partners-audit-2026-10.json',import.meta.url),'utf8'));
   writeFileSync(partnersPath,JSON.stringify(before,null,2)+'\n');
-  return {partnersPath,reportPath,before,sleepImpl:async()=>{}};
+  return {partnersPath,reportPath,before,sources:VALUATION_SOURCES,sleepImpl:async()=>{}};
 }
 const now=new Date('2026-10-13T16:00:00Z');
 const fetchFixture=async url=>({ok:true,text:async()=>fixture(url.includes('frequentmiler')?'fm':'tpg')});
+
+test('the scheduled refresh includes valuations for all five previously uncovered active destinations', async t => {
+  const f = files(t);
+  const publisherFixtures = {
+    'frequentmiler.com': 'valuations-fm-2026-10',
+    'thepointsguy.com': 'valuations-tpg-2026-10',
+    'upgradedpoints.com': 'valuations-upgraded-points-2026-11',
+    'onemileatatime.com': 'valuations-omaat-2026-11',
+    'www.pointsfrog.com': 'valuations-points-frog-copa-2026-11',
+    'www.milhasbot.com.br': 'smiles-point-valuation-milhasbot',
+  };
+  const fetchImpl = async url => {
+    const { hostname } = new URL(url);
+    if (hostname === 'olinda.bcb.gov.br') return Response.json({
+      '@odata.context': 'https://olinda.bcb.gov.br/odata$metadata#_CotacaoDolarPeriodo(cotacaoVenda,dataHoraCotacao)',
+      value: [{ dataHoraCotacao: '2026-11-25 13:02:42', cotacaoVenda: 5.8825 }],
+    });
+    assert.ok(publisherFixtures[hostname], hostname);
+    return new Response(readFileSync(new URL(`../fixtures/${publisherFixtures[hostname]}.html`, import.meta.url)));
+  };
+  const result = await refreshPointValuations({
+    partnersPath: f.partnersPath, now: new Date('2026-11-26T13:30:00Z'), fetchImpl, sleepImpl: async () => {}, log() {},
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.verified, 29);
+  const saved = JSON.parse(readFileSync(f.partnersPath));
+  for (const [code, value] of Object.entries({ CM: 1.3, JL: 1.3, AY: 1.2, ACCOR: 2.2, G3: 0.36 })) {
+    assert.equal(saved.airlineValues[code], value);
+    assert.match(saved.airlineValueMeta[code].source, /^https:\/\//);
+  }
+});
+
+test('a multi-source BRL estimate retains its exchange-rate date and the evidence behind the conversion', async t => {
+  const f = files(t);
+  const meta = { currency: 'BRL', sourceCurrency: 'BRL', sourceValue: 0.021, fxRate: 5.25, asOf: '2026-10-12' };
+  const evidence = { rateDate: meta.asOf };
+  const publisher = {
+    id: 'brl-test', name: 'Publisher', codes: ['G3'], url: 'https://example.com/redemption',
+    async collect({ previousMeta }) {
+      assert.deepEqual(previousMeta, f.before.airlineValueMeta.G3);
+      return { values: { G3: 0.4 }, missingCodes: [], meta: { G3: meta }, evidence };
+    },
+  };
+  const report = await refreshPointValuations({ ...f, sources: [publisher], now, log() {} });
+  assert.equal(report.ok, true);
+  const saved = JSON.parse(readFileSync(f.partnersPath));
+  assert.equal(saved.airlineValues.G3, 0.4);
+  assert.deepEqual(report.sources[publisher.id].evidence, evidence);
+  assert.equal(saved.airlineValueMeta.G3.asOf, meta.asOf);
+  assert.equal(saved.airlineValueMeta.G3.source, publisher.url);
+  assert.equal(saved.airlineValueMeta.G3.fxRate, meta.fxRate);
+
+  publisher.collect = async () => { throw new Error('Rate unavailable'); };
+  const failed = await refreshPointValuations({ ...f, sources: [publisher], now, log() {} });
+  assert.equal(failed.ok, false);
+  assert.equal(failed.written, false);
+  assert.deepEqual(JSON.parse(readFileSync(f.partnersPath)), saved);
+});
 
 test('refresh verifies only the 24 covered estimates, including unchanged values, and persists a source report',async t=>{
   const f=files(t);const result=await refreshPointValuations({...f,fetchImpl:fetchFixture,now,log:()=>{}});
