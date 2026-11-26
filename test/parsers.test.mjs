@@ -10,6 +10,7 @@ import { source as awardwallet } from '../src/sources/awardwallet.mjs';
 import { source as livelo } from '../src/sources/livelo.mjs';
 import { source as esfera } from '../src/sources/esfera.mjs';
 import { resolveBank, resolvePartner } from '../src/aliases.mjs';
+import { normalize } from '../src/normalize.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -131,6 +132,47 @@ test('frequentmiler: added destination column preserves historical windows', () 
     { bankName: 'Chase Ultimate Rewards', partnerName: 'Air Canada Aeroplan', pct: 20, startDateRaw: '08/12/26', endDateRaw: '09/30/26' },
     { bankName: 'Bilt', partnerName: 'Virgin Atlantic Flying Club', pct: 100, startDateRaw: '09/01/26', endDateRaw: '09/01/26' },
   ]);
+});
+
+test('Capital One’s verified Copa extension resolves only the superseded launch deadline', async () => {
+  const launch = '<tr><td>Capital One Miles</td><td>Copa Airlines ConnectMiles</td><td>30% transfer bonus from Capital One Miles to Copa Airlines ConnectMiles</td><td>11/02/26</td><td>12/01/26</td></tr>';
+  const $ = load(fixture('frequentmiler-2026-10'));
+  $('tbody').html(launch);
+  const [terms] = await frequentmiler.parse($.html());
+  const listing = { bankName: 'Capital One', partnerName: 'Copa Airlines (ConnectMiles)', pct: 30,
+    endDateRaw: 'December 31, 2026', sourceUrl: awardwallet.url, sourceId: awardwallet.id, bonusKind: 'fixed' };
+  const routeAt = (entries, day) => normalize(entries, new Date(day), new Map()).routes[0];
+  for (const entries of [[terms, listing], [listing, terms]]) {
+    const route = routeAt(entries, '2026-11-26');
+    assert.equal(route.offerEvidence.status, 'observed');
+    assert.deepEqual(route.active, { pct: 30, startDate: '2026-11-02', endDate: '2026-12-31' });
+    assert.ok(route.offerEvidence.observations.some(o => o.url.endsWith('/Capital-One-Copa-updated-transfer-bonus-900x264.png')));
+    assert.equal(routeAt(entries, '2026-12-02').active?.pct, 30);
+    assert.equal(routeAt(entries, '2027-01-01').active, undefined);
+  }
+  assert.equal(parseHistory($.html())[0].endDateRaw, terms.endDateRaw);
+  for (const changed of [launch.replace('30%', '35%'), launch.replace('11/02/26', '11/20/26'),
+    launch.replace('12/01/26', '12/15/26'), launch.replaceAll('Capital One Miles', 'Citi ThankYou Rewards')]) {
+    $('tbody').html(changed);
+    const [entry] = await frequentmiler.parse($.html());
+    assert.equal(entry.sourceId, frequentmiler.id);
+    assert.equal(parseHistory($.html())[0].endDateRaw, entry.endDateRaw);
+  }
+  assert.equal(routeAt([terms, { ...listing, endDateRaw: 'December 15, 2026' }], '2026-11-26').offerEvidence.status, 'conflict');
+});
+
+test('AwardWallet percentage ranges are conditional maxima, including when both endpoints have a percent sign', async () => {
+  const $ = load(fixture('awardwallet-2026-10'));
+  for (const range of ['40-55%', '40%–55%', '40% to 55%']) {
+    const text = `Transfer partner added September 1, 2026 and ${range} transfer bonus through November 30, 2026.`;
+    $('.tt-bonus').text(text);
+    const [offer] = await awardwallet.parse($.html());
+    assert.deepEqual([offer.pct, offer.bonusKind, offer.endDateRaw, offer.conditionsText],
+      [55, 'up_to', 'November 30, 2026', text]);
+  }
+  $('.tt-bonus').text('100% through July 30, 2026. Then 70% through August 31, 2026.');
+  const [first] = await awardwallet.parse($.html());
+  assert.deepEqual([first.pct, first.bonusKind, first.endDateRaw], [100, 'fixed', 'July 30, 2026']);
 });
 
 test('frequentmiler: a headerless copy of the current TablePress table retains its expired windows', async () => {

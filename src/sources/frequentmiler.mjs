@@ -80,6 +80,24 @@ function cellText($, td) {
 
 const DETAILS_RE = /(\d+)%\s*transfer bonus\s+from\s+(.+?)\s+to\s+(.+)/i;
 
+// Capital One explicitly replaced the Dec 1 deadline for its Copa launch.
+// Match only the superseded row (also when FM moves it to the archive).
+// A different percentage, campaign, or later deadline needs fresh verification.
+function applyVerifiedDeadline(entry, details) {
+  if (details !== '30% transfer bonus from Capital One Miles to Copa Airlines ConnectMiles'
+      || entry.bankName !== 'Capital One Miles'
+      || !/^11\/0?2\/(?:20)?26$/.test(entry.startDateRaw)
+      || !/^12\/0?1\/(?:20)?26$/.test(entry.endDateRaw)) return entry;
+
+  const corrected = { ...entry, endDateRaw: '12/31/2026' };
+  if (entry.sourceId) {
+    corrected.sourceId = 'Capital One';
+    corrected.campaignUrl = 'https://awardwallet.com/blog/wp-content/uploads/2026/11/Capital-One-Copa-updated-transfer-bonus-900x264.png';
+    corrected.conditionsText = 'Capital One prorrogou o bônus de 30% de 01/12 para 31/12/2026, às 23h59 no horário de Nova York.';
+  }
+  return corrected;
+}
+
 // 2026-10-13: both tables gained a "Transfer To" column. Read the column
 // headers so the original four-column archive and the five-column layout
 // keep their dates and details aligned. Unknown layouts fail closed.
@@ -131,13 +149,13 @@ function parseHistoryFrom($) {
     if (/\[\s*targeted\s*\]/i.test(details)) return;
     const match = details.match(DETAILS_RE);
     if (!match) return; // non-percentage promos ("5,000 bonus points…")
-    out.push({
+    out.push(applyVerifiedDeadline({
       bankName: cellText($, cells[columns.bank]),
       partnerName: match[3].trim(),
       pct: Number(match[1]),
       startDateRaw: cellText($, cells[columns.start]),
       endDateRaw: cellText($, cells[columns.end]),
-    });
+    }, details));
   });
 
   return out;
@@ -222,7 +240,7 @@ export const source = {
       $startCell.find('p').remove();
       const startDateRaw = $startCell.text().trim();
 
-      out.push({
+      out.push(applyVerifiedDeadline({
         bankName,
         partnerName: match[3].trim(),
         pct: Number(match[1]),
@@ -235,7 +253,7 @@ export const source = {
         ...($(cells[columns.details]).find('a[href]').first().attr('href') ? {
           campaignUrl: new URL($(cells[columns.details]).find('a[href]').first().attr('href'), source.url).href,
         } : {}),
-      });
+      }, detailsText));
     });
 
     return out;
