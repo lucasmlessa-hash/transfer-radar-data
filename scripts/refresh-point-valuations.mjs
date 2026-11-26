@@ -1,15 +1,21 @@
 #!/usr/bin/env node
-// Refresh the project's 24 traceable editorial estimates. Other valuations
-// retain their value and review date; a successful fetch is not a review unless
-// the matching numeric table cell was actually extracted.
+// Each estimate keeps its previous value and review date until its publisher
+// supplies a verified replacement in the expected currency and unit.
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VALUATION_SOURCES, parsePointValuations } from '../src/sources/point-valuations.mjs';
+import { ADDITIONAL_VALUATION_SOURCES, parseAdditionalPointValuations } from '../src/sources/additional-point-valuations.mjs';
+import { SMILES_VALUATION_SOURCE } from '../src/sources/smiles-point-valuation.mjs';
 import { validatePartners } from './validate-feed.mjs';
 
 const DEFAULT_PARTNERS = fileURLToPath(new URL('../sample/partners.json', import.meta.url));
 const MAX_DIAGNOSTIC_BYTES = 2 * 1024 * 1024;
+const SOURCES = [
+  ...VALUATION_SOURCES,
+  ...ADDITIONAL_VALUATION_SOURCES.map(source => ({ ...source, parse: parseAdditionalPointValuations })),
+  SMILES_VALUATION_SOURCE,
+];
 
 function captureHtml(diagnosticsDir, sourceId, attempt, html) {
   if (!diagnosticsDir || typeof html !== 'string') return undefined;
@@ -24,7 +30,7 @@ function captureHtml(diagnosticsDir, sourceId, attempt, html) {
 
 export async function refreshPointValuations({
   partnersPath = DEFAULT_PARTNERS, reportPath = null, dryRun = false, diagnosticsDir = null,
-  fetchImpl = fetch, now = new Date(), log = console.log,
+  fetchImpl = fetch, now = new Date(), log = console.log, sources = SOURCES,
   sleepImpl = ms => new Promise(resolve => setTimeout(resolve, ms)),
 } = {}) {
   const doc = JSON.parse(readFileSync(partnersPath, 'utf8'));
@@ -32,19 +38,23 @@ export async function refreshPointValuations({
   const before = JSON.stringify(doc);
   const checkedAt = now.toISOString(), asOf = checkedAt.slice(0, 10);
   const report = { ok: true, checkedAt, verified: 0, changed: false, written: false, sources: {}, changes: [], failures: [] };
-  const collected = await Promise.all(VALUATION_SOURCES.map(async source => {
+  const collected = await Promise.all(sources.map(async source => {
     const attempts = [];
     let selected;
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       let html, parsed, error, diagnostics;
       try {
-        const response = await fetchImpl(source.url, {
-          headers: { 'User-Agent': 'TransferRadar/1.0 (public editorial valuation check)' },
-          signal: AbortSignal.timeout(25000),
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        html = await response.text();
-        parsed = parsePointValuations(html, source.id);
+        if (source.collect) {
+          parsed = await source.collect({ fetchImpl, now, previousMeta: doc.airlineValueMeta?.[source.codes[0]] });
+        } else {
+          const response = await fetchImpl(source.url, {
+            headers: { 'User-Agent': 'TransferRadar/1.0 (public editorial valuation check)' },
+            signal: AbortSignal.timeout(25000),
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          html = await response.text();
+          parsed = (source.parse ?? parsePointValuations)(html, source.id);
+        }
       } catch (failure) { error = failure.message; diagnostics = failure.diagnostics; }
       const verifiedCodes = Object.keys(parsed?.values ?? {}), missingCodes = parsed?.missingCodes ?? source.codes;
       const status = error ? 'failed' : missingCodes.length ? 'degraded' : 'ok';
@@ -75,6 +85,7 @@ export async function refreshPointValuations({
     const evidence = parsed?.diagnostics ?? diagnostics;
     report.sources[source.id] = { status, checkedAt, source: source.url, selectedAttempt, attempts,
       verifiedCodes: Object.keys(values), missingCodes, ...(error ? { error } : {}),
+      ...(parsed?.evidence ? { evidence: parsed.evidence } : {}),
       ...(status !== 'ok' && evidence ? { diagnostics: evidence } : {}) };
     if (status !== 'ok') {
       report.ok = false;
@@ -87,8 +98,9 @@ export async function refreshPointValuations({
       doc.airlineValueMeta ??= {};
       doc.airlineValueMeta[code] = {
         currency: 'USD', asOf, source: source.url, estimate: true,
-        note: `Editorial redemption estimate from ${source.name}, in US cents per mile; asOf records source verification.`
+        note: `Editorial redemption estimate from ${source.name}, in US cents per ${code === 'ACCOR' ? 'point' : 'mile'}; asOf records source verification.`
           + (source.id === 'tpg' && ['QR', 'EI', 'IB'].includes(code) ? ' Uses the publisher\'s shared Avios estimate; British Airways retains its separate Frequent Miler estimate.' : ''),
+        ...parsed.meta?.[code],
       };
       report.verified += 1;
     }
