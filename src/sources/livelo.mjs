@@ -26,6 +26,19 @@ const PDP_LINK = /\/livelo-para-parceiros\/([a-z0-9-]+)\//i;
 const BONUS_PCT = /(\d+(?:[.,]\d+)?)\s*%\s*de\s*b[oô]nus/i;
 const UNTIL_DDMM = /\bat[ée]\s+(?:as\s+\d{1,2}h\d{0,2}\s+d[oe]\s+dia\s+)?(\d{1,2}\/\d{1,2})\b/i;
 const PARA_TAIL = /\bpara\s+(?:o|a|os|as)\s+(.+?)\s*$/i;
+const INTERNAL_ACCOUNT_TRANSFER = /\b(?:transfer[eê]ncias?|transfira|transferir)\s+(?:(?:de\s+)?(?:seus\s+)?pontos\s+)?entre\s+(?:as\s+)?contas\s+(?:da\s+)?Livelo\b/gi;
+
+function cardText(variation) {
+  return `${variation?.title ?? ''} ${variation?.description ?? ''}`.replace(/<[^>]+>|&nbsp;/gi, ' ');
+}
+
+function isPartnerTransferCandidate(link, text) {
+  if (PDP_LINK.test(link)) return true;
+  if (/\/instituicoes-financeiras\//i.test(link)) return false;
+  // A Clube subscription can advertise transfers between two Livelo accounts.
+  // Remove only that phrase so a separate partner transfer still gets checked.
+  return /transf(?:er|ir)/i.test(text.replace(INTERNAL_ACCOUNT_TRANSFER, ' '));
+}
 
 function* nodes(v) {
   if (!v || typeof v !== 'object') return;
@@ -112,13 +125,8 @@ export const source = {
         if (variation?.status && !/vigente/i.test(variation.status)) continue;
         if (variation?.statusCard && variation.statusCard !== 'active') continue;
         const link = String(variation?.button?.redirectLink ?? '');
-        const copy = `${variation?.title ?? ''} ${variation?.description ?? ''}`;
-        // Money-transfer acquisition offers are not loyalty-point transfers.
-        // Keep unknown point-transfer cards conservative below.
-        if (/\/instituicoes-financeiras\//i.test(link)) continue;
-        // Reject any transfer-shaped card, including new percentage formats
-        // that the parser might not yet understand. Zero is then degraded.
-        if (PDP_LINK.test(link) || /transf(?:er|ir)/i.test(copy)) return false;
+        const copy = cardText(variation);
+        if (isPartnerTransferCandidate(link, copy)) return false;
         if (/\/juntar-pontos\/parceiros\//i.test(link) && /pontos|compr/i.test(copy)) {
           shoppingCardFound = true;
         }
@@ -160,15 +168,15 @@ export const source = {
 
         const title = String(v?.title ?? '');
         const link = String(v?.button?.redirectLink ?? '');
-        const text = `${title} ${String(v?.description ?? '')}`.replace(/<[^>]+>/g, ' ');
+        const text = cardText(v);
+        if (!isPartnerTransferCandidate(link, text)) continue;
         const slug = link.match(PDP_LINK)?.[1];
-
-        // Not a points-transfer card at all -> silently ignore (most of
-        // /ofertas is shopping promos; warning on each would be noise).
-        if (/\/instituicoes-financeiras\//i.test(link)) continue;
-        if (!slug && !/transf(?:er|ir)/i.test(text)) continue;
         const pctMatch = text.match(BONUS_PCT);
-        if (!pctMatch) { out.coverageComplete = false; continue; }
+        if (!pctMatch) {
+          out.coverageComplete = false;
+          console.warn(`[livelo] unrecognized transfer bonus: title=${JSON.stringify(title)} link=${JSON.stringify(link)}`);
+          continue;
+        }
 
         const partnerName = slug ? fromSlug(slug) : (title.match(PARA_TAIL)?.[1] ?? '').trim();
         const pct = Number(pctMatch[1].replace(',', '.'));
