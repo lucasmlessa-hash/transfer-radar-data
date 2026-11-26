@@ -11,6 +11,7 @@ import { source as frequentmiler } from './sources/frequentmiler.mjs';
 import { source as awardwallet } from './sources/awardwallet.mjs';
 import { source as livelo } from './sources/livelo.mjs';
 import { source as esfera } from './sources/esfera.mjs';
+import { windowExpired } from './campaign-terms.mjs';
 import { normalize, parseEndDate } from './normalize.mjs';
 import { recordHistory, rawHistory } from './history.mjs';
 import {fitRecurrenceForecast,predictRecurrenceForecast,predictMonthlyRecurrenceForecast} from './recurrence-forecast.mjs';
@@ -227,14 +228,14 @@ export async function runPipeline({
       if (!candidateIds.has(r.id)) {
         const carried = { ...r };
         if (r.offerEvidence) carried.offerEvidence = { ...r.offerEvidence, status: 'carried' };
-        if (carried.active?.endDate < now.toISOString().slice(0, 10)) {
+        if (windowExpired(carried.active, now)) {
           if (!carried.ended || carried.active.endDate > carried.ended.endedAt) {
             carried.ended = { pct: carried.active.pct, endedAt: carried.active.endDate };
           }
           delete carried.active;
         }
         if (carried.ended && now.getTime() - Date.parse(carried.ended.endedAt) > 30 * 86400000) delete carried.ended;
-        if (carried.upcoming?.endDate < now.toISOString().slice(0, 10)) delete carried.upcoming;
+        if (windowExpired(carried.upcoming, now)) delete carried.upcoming;
         candidateRoutes.push(carried);
         mergedFromPrevious += 1;
       }

@@ -357,3 +357,10 @@ One observed start never fills gaps in the rest of its evaluation window.
 `forecast` and `nextCampaignForecast` preserve v2/v3 wire semantics. Updated clients prefer the monthly field without modifying the raw payload. The ledger records and confirms all fields independently. Previously issued windows remain unchanged.
 
 `forecast-history.json` preserves v2/v3 for older clients. `forecast-history-monthly.json` includes all versions and monthly records; models and horizons remain separate. The UI displays three probabilities for the same named origin together, with exact end dates. History retains model and horizon filters.
+
+An active or upcoming window may include `terms` verified for that campaign.
+`url` identifies its official terms, `startsAt` and `endsAt` use the issuer's
+local date and explicit UTC offset. The published closing minute is inclusive.
+`bonusCap` is a limit on extra destination points for the campaign.
+`levels` lists documented percentages and eligibility labels. Without these
+fields the numeric limit, exact time and applicable tiers are unknown.

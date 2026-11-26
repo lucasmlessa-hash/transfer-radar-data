@@ -32,6 +32,25 @@ function checkKeys(obj, required, allowed, ctx) {
   }
 }
 
+function validateOfficialTerms(window, ctx) {
+  if (window.terms !== undefined) {
+    const t = window.terms;
+    if (!isPlainObject(t)) fail(ctx + ': invalid official terms');
+    checkKeys(t, ['url'], ['url','startsAt','endsAt','bonusCap','levels','note'], ctx + '.terms');
+    if (typeof t.url !== 'string' || !/^https:\/\/[^\s/@]+\//.test(t.url)) fail(ctx + ': invalid terms URL');
+    for (const [key, day] of [['startsAt',window.startDate],['endsAt',window.endDate]]) {
+      if (t[key] !== undefined && (typeof t[key] !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00(?:\.000)?(?:Z|[+-]\d{2}:\d{2})$/.test(t[key])
+        || !Number.isFinite(Date.parse(t[key])) || t[key].slice(0,10) !== day)) fail(ctx + ': invalid official ' + key);
+    }
+    if (t.startsAt && t.endsAt && Date.parse(t.startsAt) > Date.parse(t.endsAt)) fail(ctx + ': invalid official times');
+    if (t.bonusCap !== undefined && (!Number.isSafeInteger(t.bonusCap) || t.bonusCap <= 0)) fail(ctx + ': invalid bonus cap');
+    if (t.levels !== undefined && (!Array.isArray(t.levels) || !t.levels.length || t.levels.some(l => !isPlainObject(l)
+      || !Number.isFinite(l.pct) || l.pct <= 0 || typeof l.label !== 'string' || !l.label.trim())
+      || Math.max(...t.levels.map(l=>l.pct)) !== window.pct)) fail(ctx + ': invalid bonus levels');
+    if (t.note !== undefined && typeof t.note !== 'string') fail(ctx + ': invalid terms note');
+  }
+}
+
 function validateRoute(r, i) {
   const ctx = `routes[${i}]`;
   if (!isPlainObject(r)) fail(`${ctx}: must be an object`);
@@ -100,7 +119,8 @@ function validateRoute(r, i) {
   if ('active' in r) {
     const actx = `${ctx}.active`;
     if (!isPlainObject(r.active)) fail(`${actx}: must be an object`);
-    checkKeys(r.active, ['pct', 'endDate'], ['pct', 'startDate', 'endDate'], actx);
+    checkKeys(r.active, ['pct', 'endDate'], ['pct', 'startDate', 'endDate', 'terms'], actx);
+    validateOfficialTerms(r.active, actx);
     if (typeof r.active.pct !== 'number') fail(`${actx}.pct: must be a number`);
     if (typeof r.active.endDate !== 'string' || !ISO_DATE.test(r.active.endDate)) {
       fail(`${actx}.endDate: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(r.active.endDate)}`);
@@ -116,7 +136,8 @@ function validateRoute(r, i) {
   if ('upcoming' in r) {
     const uctx = `${ctx}.upcoming`;
     if (!isPlainObject(r.upcoming)) fail(`${uctx}: must be an object`);
-    checkKeys(r.upcoming, ['pct', 'startDate', 'endDate'], ['pct', 'startDate', 'endDate'], uctx);
+    checkKeys(r.upcoming, ['pct', 'startDate', 'endDate'], ['pct', 'startDate', 'endDate', 'terms'], uctx);
+    validateOfficialTerms(r.upcoming, uctx);
     if (typeof r.upcoming.pct !== 'number') fail(`${uctx}.pct: must be a number`);
     for (const k of ['startDate', 'endDate']) {
       if (typeof r.upcoming[k] !== 'string' || !ISO_DATE.test(r.upcoming[k])) {
