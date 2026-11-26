@@ -823,6 +823,75 @@
         "w1": 0.084,
         "asOf": "2026-11-26"
       }
+    },
+    {
+      "id": "rove-accor",
+      "bank": "ROVE",
+      "code": "ACCOR",
+      "pct": 55,
+      "firstSeen": "2026-11-26",
+      "lastSeen": "2026-11-26",
+      "endDate": "2026-11-30",
+      "pred": {
+        "absent": true,
+        "asOf": "2026-11-26"
+      }
+    },
+    {
+      "id": "rove-af",
+      "bank": "ROVE",
+      "code": "AF",
+      "pct": 55,
+      "firstSeen": "2026-11-26",
+      "lastSeen": "2026-11-26",
+      "endDate": "2026-11-30",
+      "pred": {
+        "p2": 0.215,
+        "w1": 0.115,
+        "asOf": "2026-11-26"
+      }
+    },
+    {
+      "id": "rove-cm",
+      "bank": "ROVE",
+      "code": "CM",
+      "pct": 55,
+      "firstSeen": "2026-11-26",
+      "lastSeen": "2026-11-26",
+      "endDate": "2026-11-30",
+      "pred": {
+        "p2": 0.413,
+        "w1": 0.069,
+        "asOf": "2026-11-26"
+      }
+    },
+    {
+      "id": "rove-ay",
+      "bank": "ROVE",
+      "code": "AY",
+      "pct": 55,
+      "firstSeen": "2026-11-26",
+      "lastSeen": "2026-11-26",
+      "endDate": "2026-11-30",
+      "pred": {
+        "p2": 0.507,
+        "w1": 0.131,
+        "asOf": "2026-11-26"
+      }
+    },
+    {
+      "id": "rove-jl",
+      "bank": "ROVE",
+      "code": "JL",
+      "pct": 55,
+      "firstSeen": "2026-11-26",
+      "lastSeen": "2026-11-26",
+      "endDate": "2026-11-30",
+      "pred": {
+        "p2": 0.304,
+        "w1": 0.137,
+        "asOf": "2026-11-26"
+      }
     }
   ]
 }
