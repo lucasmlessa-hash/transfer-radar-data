@@ -41,7 +41,7 @@ export const source = {
       // pct is the first percentage; the end date is the first date AFTER it
       // ("Transfer partner added July 1 … and 25% bonus through July 31" -> July 31;
       //  "100% … through July 30. Then 70% … through Aug 31" -> the current one).
-      const pctMatch = bonus.match(/(\d+(?:\.\d+)?)\s*%/);
+      const pctMatch = bonus.match(/(\d+(?:\.\d+)?)(?:\s*%?\s*(?:[-–—]|\bto\b)\s*(\d+(?:\.\d+)?))?\s*%/i);
       // The listing includes fixed signup awards that happen to require a
       // transfer. They do not change the transfer ratio.
       if (!pctMatch && /^get\s+[\d,]+\s+bonus\s+(?:[\w-]+\s+){0,3}(?:points|miles)\s+for joining\b/i.test(bonus)) return;
@@ -57,8 +57,11 @@ export const source = {
         return;
       }
 
-      out.push({ bankName, partnerName, pct: Number(pctMatch[1]), endDateRaw, sourceUrl: source.url,
-        sourceId: source.id, bonusKind: /up\s+to\s+\d+(?:\.\d+)?\s*%/i.test(bonus) ? 'up_to' : 'fixed', conditionsText: bonus.slice(0, 600) });
+      const hasRange = pctMatch[2] !== undefined;
+      const pct = hasRange ? Math.max(Number(pctMatch[1]), Number(pctMatch[2])) : Number(pctMatch[1]);
+      const upTo = hasRange || /\bup\s+to\s*$/i.test(bonus.slice(0, pctMatch.index));
+      out.push({ bankName, partnerName, pct, endDateRaw, sourceUrl: source.url,
+        sourceId: source.id, bonusKind: upTo ? 'up_to' : 'fixed', conditionsText: bonus.slice(0, 600) });
     });
 
     return out;
