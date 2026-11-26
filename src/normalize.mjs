@@ -1,3 +1,4 @@
+import { campaignWindow, windowExpired, windowUpcoming } from './campaign-terms.mjs';
 // Turns RawBonus[] (raw strings as scraped) into contract-shaped routes.
 //
 // RawBonus = { bankName, partnerName, pct, endDateRaw, sourceUrl }
@@ -140,8 +141,11 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
   const byId = new Map(); // id -> { route: {..., pct, endDate}, sourceUrls: Set }
   const observationsById = new Map();
   const safeUrl = value => { try { const u = new URL(value); return ['https:', 'http:'].includes(u.protocol) && !u.username && !u.password ? u.href : null; } catch { return null; } };
-  const today = now.toISOString().slice(0, 10);
-  const campaignRank = (r) => !r.endDate ? 0 : r.endDate < today ? 1 : r.startDate > today ? 2 : 3;
+  const campaignRank = (r) => {
+    if (!r.endDate) return 0;
+    const window = campaignWindow(r.id, r.pct, r.startDate, r.endDate);
+    return windowExpired(window, now) ? 1 : windowUpcoming(window, now) ? 2 : 3;
+  };
 
   for (const raw of rawBonuses) {
     const bankCode = resolveBank(raw.bankName);
@@ -167,7 +171,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
 
     // Current observations beat expired/undated rows regardless of percentage.
     // Only compare bonuses within the same temporal state.
-    const rank = campaignRank({ endDate, startDate });
+    const rank = campaignRank({ id, pct: raw.pct, endDate, startDate });
     const url = safeUrl(raw.campaignUrl) || safeUrl(raw.sourceUrl);
     if (url) {
       const observation = {
@@ -219,7 +223,7 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
     const { pct, endDate, startDate, ended, ...rest } = route;
     const out = { ...rest };
     const observations = [...new Map((observationsById.get(id) ?? [])
-      .filter(o => o.rank === campaignRank({ endDate, startDate }))
+      .filter(o => o.rank === campaignRank(route))
       .map(o => [JSON.stringify(o.observation), o.observation])).values()];
     if (observations.length) {
       const disagrees = key => new Set(observations.map(o => o[key]).filter(v => v != null && v !== 'unknown')).size > 1;
@@ -235,15 +239,16 @@ export function normalize(rawBonuses, now = new Date(), history = deriveHistory(
     // transfer into a bonus that would pay nothing. It ships as `upcoming`
     // instead — worth showing, since knowing a +100% lands on the 1st is the
     // most actionable thing this app can say, but never as "live now".
-    if (endDate && endDate < today) {
+    const window = campaignWindow(id, pct, startDate, endDate);
+    if (endDate && windowExpired(window, now)) {
       const latest = ended?.endedAt > endDate ? ended : { pct, endedAt: endDate };
       if (now.getTime() - Date.parse(latest.endedAt) <= 30 * 86400000) out.ended = latest;
     }
-    else if (endDate && startDate && startDate > today) out.upcoming = { pct, startDate, endDate };
+    else if (endDate && windowUpcoming(window, now)) out.upcoming = window;
     // startDate viaja junto no `active` quando a fonte publica: é o que deixa o
     // cliente saber que a campanha começou HOJE. Sem isso, "ENDS IN 27D" não
     // distingue um bônus que abriu agora de um que já corre há três semanas.
-    else if (endDate) out.active = startDate ? { pct, startDate, endDate } : { pct, endDate };
+    else if (endDate) out.active = window;
     else if (ended) out.ended = ended;
     routes.push(out);
     sourceUrlsById[id] = [...sourceUrls];
