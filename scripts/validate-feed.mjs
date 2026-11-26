@@ -407,9 +407,9 @@ export function validatePartners(doc) {
       const ctx = `partners.airlineValueMeta.${code}`;
       if (!isPlainObject(m)) fail(`${ctx}: must be an object`);
       checkKeys(m, ['currency', 'asOf', 'source'],
-        ['currency', 'asOf', 'source', 'note', 'sourceValue', 'sourceCurrency', 'fxRate', 'estimate'], ctx);
+        ['currency', 'asOf', 'source', 'note', 'sourceValue', 'sourceCurrency', 'fxRate', 'estimate', 'method', 'sources', 'fxSource'], ctx);
       if (!(code in doc.airlineValues)) fail(`${ctx}: no matching airlineValues entry`);
-      if (m.currency !== 'USD' && m.currency !== 'BRL') fail(`${ctx}.currency: must be "USD" or "BRL", got ${JSON.stringify(m.currency)}`);
+      if (!['USD','BRL','EUR'].includes(m.currency)) fail(`${ctx}.currency: unrecognized currency`);
       if (typeof m.asOf !== 'string' || !ISO_DATE.test(m.asOf)) fail(`${ctx}.asOf: must be an ISO date (YYYY-MM-DD), got ${JSON.stringify(m.asOf)}`);
       for (const f of ['source', 'note']) {
         if (f in m && (typeof m[f] !== 'string' || m[f] === '')) fail(`${ctx}.${f}: must be a non-empty string`);
@@ -419,10 +419,39 @@ export function validatePartners(doc) {
       for (const f of ['sourceValue', 'fxRate']) {
         if (f in m && (typeof m[f] !== 'number' || !(m[f] > 0))) fail(`${ctx}.${f}: must be a positive number`);
       }
-      if ('sourceCurrency' in m && m.sourceCurrency !== 'USD' && m.sourceCurrency !== 'BRL') {
-        fail(`${ctx}.sourceCurrency: must be "USD" or "BRL", got ${JSON.stringify(m.sourceCurrency)}`);
+      if ('sourceCurrency' in m && !['USD','BRL','EUR'].includes(m.sourceCurrency)) {
+        fail(`${ctx}.sourceCurrency: must be USD, BRL or EUR, got ${JSON.stringify(m.sourceCurrency)}`);
       }
       if ('estimate' in m && typeof m.estimate !== 'boolean') fail(`${ctx}.estimate: must be a boolean`);
+      if ('method' in m || 'sources' in m || 'fxSource' in m || m.currency === 'EUR') {
+        const realDate = day => typeof day === 'string' && ISO_DATE.test(day) && Number.isFinite(Date.parse(day))
+          && new Date(day).toISOString().slice(0,10) === day;
+        const https = url => typeof url === 'string' && URL.canParse(url) && new URL(url).protocol === 'https:';
+        if (!realDate(m.asOf) || !https(m.source)) fail(`${ctx}: invalid dated citation`);
+        if (m.method === 'official-fx') {
+          if (code !== 'ACCOR' || m.currency !== 'EUR' || m.sourceCurrency !== 'EUR' || !m.fxRate || !m.sourceValue ||
+              !https(m.fxSource) || m.sources || Math.abs(doc.airlineValues[code] - m.sourceValue * m.fxRate * 100) > 0.000001)
+            fail(`${ctx}: invalid official EUR redemption or exchange rate`);
+        } else if (m.method === 'editorial-mean') {
+          if (code === 'ACCOR' || m.currency === 'EUR' || m.fxSource || !Array.isArray(m.sources) || !m.sources.length) fail(`${ctx}: invalid editorial mean`);
+          const publishers = new Set();
+          let sum = 0;
+          for (const item of m.sources) {
+            const keys = ['name','source','value','asOf','checkedOn','validUntil'];
+            if (!isPlainObject(item)) fail(`${ctx}: invalid valuation source`);
+            checkKeys(item, keys, keys, ctx);
+            if (!https(item.source) || typeof item.name !== 'string' || !item.name.trim() || !Number.isFinite(item.value) || item.value <= 0 ||
+                ![item.asOf,item.checkedOn,item.validUntil].every(realDate) || item.asOf > item.checkedOn || item.checkedOn > item.validUntil ||
+                (m.currency !== 'BRL' && item.checkedOn > m.asOf)) fail(`${ctx}: invalid dated source`);
+            const publisher = new URL(item.source).hostname.replace(/^www\./, '');
+            if (publishers.has(publisher)) fail(`${ctx}: repeated valuation publisher`);
+            publishers.add(publisher);
+            sum += item.value;
+          }
+          if (!m.sources.some(item => item.source === m.source) || Math.abs(doc.airlineValues[code] - sum / publishers.size) > 0.000001)
+            fail(`${ctx}: published value differs from source average`);
+        } else fail(`${ctx}: unknown valuation method`);
+      }
       if (m.currency === 'BRL' && !('sourceValue' in m && 'fxRate' in m)) {
         fail(`${ctx}: a BRL-denominated value must record sourceValue and fxRate so it can be re-converted`);
       }

@@ -165,10 +165,21 @@ YYYY-MM-DD) e `estimate` (boolean). Um prazo observado por uma fonte editorial
 é estimativa, não garantia do programa. Ausência ou revisão vencida deve ficar
 visível. A coleta diária só renova a data quando extrai o prazo daquela rota.
 
-`airlineValueMeta` tem relógio próprio: valor sem fonte verificável ou conferência
-de até 35 dias fica fora de CPP/BEST VALUE. Estimativas editoriais em centavos de
-USD não são preço de compra/venda nem valor garantido de resgate. A atualização
-de promoções não renova automaticamente essas conferências.
+Cada valor em `airlineValues` representa centavos de dólar por ponto no destino. Em
+`airlineValueMeta`, `editorial-mean` registra a média aritmética, com o mesmo peso
+para cada publicação. Cada item de `sources` identifica publicação, URL, valor,
+data da edição, última consulta bem-sucedida e limite de validade. A edição mensal
+vale por até 35 dias a partir do início do mês, e uma avaliação avulsa datada vale
+por até 90 dias. A última consulta vale por até 35 dias. O painel descarta fontes
+vencidas e recalcula a média quando necessário. Uma única publicação aparece como
+“1 fonte”. Os Avios transferíveis entre contas elegíveis de British Airways, Iberia,
+Aer Lingus, Qatar e Finnair compartilham a mesma avaliação.
+
+O ALL usa `official-fx`. A referência de hospedagem é €20 por 1.000 pontos.
+`fxRate` contém dólares por euro e `asOf` é a data do fixing publicado pelo BCE.
+A publicação periódica consulta o BCE também depois da divulgação diária e aceita
+o último fixing disponível por até sete dias corridos. A atualização de uma
+promoção não renova a validade das fontes ou da cotação.
 
 Relatórios diários de hotéis, valores e prazos são publicados em
 `hotel-ratios-health.json`, `point-valuations-health.json` e

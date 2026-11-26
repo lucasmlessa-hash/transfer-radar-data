@@ -6,7 +6,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { VALUATION_SOURCES, parsePointValuations } from '../src/sources/point-valuations.mjs';
 import { ADDITIONAL_VALUATION_SOURCES, parseAdditionalPointValuations } from '../src/sources/additional-point-valuations.mjs';
+import { BR_REDEMPTION_SOURCE } from '../src/sources/br-redemption-point-valuations.mjs';
+import { POINTS_FROG_AIRLINES } from '../src/sources/points-frog-airlines.mjs';
+import { ACCOR_VALUATION_SOURCE } from '../src/sources/accor-point-valuation.mjs';
 import { SMILES_VALUATION_SOURCE } from '../src/sources/smiles-point-valuation.mjs';
+import { applyPointValuations } from '../src/valuation-mean.mjs';
 import { validatePartners } from './validate-feed.mjs';
 
 const DEFAULT_PARTNERS = fileURLToPath(new URL('../sample/partners.json', import.meta.url));
@@ -14,7 +18,7 @@ const MAX_DIAGNOSTIC_BYTES = 2 * 1024 * 1024;
 const SOURCES = [
   ...VALUATION_SOURCES,
   ...ADDITIONAL_VALUATION_SOURCES.map(source => ({ ...source, parse: parseAdditionalPointValuations })),
-  SMILES_VALUATION_SOURCE,
+  SMILES_VALUATION_SOURCE, BR_REDEMPTION_SOURCE, ACCOR_VALUATION_SOURCE, POINTS_FROG_AIRLINES,
 ];
 
 function captureHtml(diagnosticsDir, sourceId, attempt, html) {
@@ -53,7 +57,7 @@ export async function refreshPointValuations({
           });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           html = await response.text();
-          parsed = (source.parse ?? parsePointValuations)(html, source.id);
+          parsed = (source.parse ?? parsePointValuations)(html, source.id, { now });
         }
       } catch (failure) { error = failure.message; diagnostics = failure.diagnostics; }
       const verifiedCodes = Object.keys(parsed?.values ?? {}), missingCodes = parsed?.missingCodes ?? source.codes;
@@ -91,21 +95,9 @@ export async function refreshPointValuations({
       report.ok = false;
       report.failures.push({ source: source.id, error: error ?? 'Missing or unreadable valuation cells', missingCodes });
     }
-    for (const [code, value] of Object.entries(values)) {
-      const previous = doc.airlineValues[code];
-      if (previous !== value) report.changes.push({ code, before: previous ?? null, after: value, source: source.id });
-      doc.airlineValues[code] = value;
-      doc.airlineValueMeta ??= {};
-      doc.airlineValueMeta[code] = {
-        currency: 'USD', asOf, source: source.url, estimate: true,
-        note: `Editorial redemption estimate from ${source.name}, in US cents per ${code === 'ACCOR' ? 'point' : 'mile'}; asOf records source verification.`
-          + (source.id === 'tpg' && ['QR', 'EI', 'IB'].includes(code) ? ' Uses the publisher\'s shared Avios estimate; British Airways retains its separate Frequent Miler estimate.' : ''),
-        ...parsed.meta?.[code],
-      };
-      report.verified += 1;
-    }
     log(`[valuations] ${source.id}: ${Object.keys(values).length}/${source.codes.length} verified (${status})`);
   }
+  applyPointValuations(doc, collected, asOf, report);
   validatePartners(doc);
   report.changed = JSON.stringify(doc) !== before;
   if (!dryRun && report.changed) {

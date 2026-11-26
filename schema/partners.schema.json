@@ -69,7 +69,7 @@
       }
     },
     "airlineValueMeta": {
-      "description": "OPTIONAL. Airline code -> provenance for the matching airlineValues entry. `currency` names the market the valuation came from (BRL-denominated programs are converted to USD cents so airlineValues stays one comparable unit). `source` is a citation URL, a \"derived:*\" slug, or \"unsourced\" for a placeholder that was never researched. When a value originates in a non-USD market, sourceValue/sourceCurrency/fxRate record the native figure and the rate used, so it can be re-converted instead of silently drifting. estimate:true marks a value no published source covers.",
+      "description": "Provenance for USD cents per destination point. Editorial means keep one dated observation per publisher. ALL uses the official EUR hotel discount and a dated USD/EUR fixing.",
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -83,7 +83,8 @@
           "currency": {
             "enum": [
               "USD",
-              "BRL"
+              "BRL",
+              "EUR"
             ]
           },
           "asOf": {
@@ -103,17 +104,70 @@
           "sourceCurrency": {
             "enum": [
               "USD",
-              "BRL"
+              "BRL",
+              "EUR"
             ],
             "description": "OPTIONAL. Currency of sourceValue."
           },
           "fxRate": {
             "type": "number",
-            "description": "OPTIONAL. USD/BRL rate used to convert sourceValue into the USD cents stored in airlineValues, captured on asOf."
+            "description": "USD per EUR for official ALL redemption, BRL per USD for Brazilian valuations."
           },
           "estimate": {
             "type": "boolean",
             "description": "True for a published or derived valuation estimate; never a guaranteed cash value."
+          },
+          "method": {
+            "enum": [
+              "editorial-mean",
+              "official-fx"
+            ]
+          },
+          "fxSource": {
+            "type": "string",
+            "pattern": "^https://"
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "source",
+                "value",
+                "asOf",
+                "checkedOn",
+                "validUntil"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "source": {
+                  "type": "string",
+                  "pattern": "^https://"
+                },
+                "value": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "asOf": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "checkedOn": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "validUntil": {
+                  "type": "string",
+                  "format": "date"
+                }
+              }
+            }
           }
         }
       }
