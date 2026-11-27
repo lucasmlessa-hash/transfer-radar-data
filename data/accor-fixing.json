@@ -1,14 +1,14 @@
 {
-  "value": 2.195,
+  "value": 2.1914,
   "meta": {
     "source": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
     "method": "official-fx",
     "currency": "EUR",
     "sourceCurrency": "EUR",
     "sourceValue": 0.02,
-    "fxRate": 1.0975,
+    "fxRate": 1.0957,
     "fxSource": "https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html",
-    "asOf": "2026-11-26",
+    "asOf": "2026-11-27",
     "estimate": false,
     "note": "1.000 pontos Reward dão €20 de desconto em hospedagens participantes. Câmbio de referência do BCE em dólares por euro."
   }
