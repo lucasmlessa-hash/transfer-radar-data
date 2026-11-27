@@ -1,13 +1,13 @@
 {
   "ok": true,
-  "checkedAt": "2026-11-26T14:18:24.764Z",
+  "checkedAt": "2026-11-27T09:02:52.301Z",
   "verified": 39,
-  "changed": false,
-  "written": false,
+  "changed": true,
+  "written": true,
   "sources": {
     "fm": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://frequentmiler.com/reasonable-redemption-values-rrvs/",
       "selectedAttempt": 1,
       "attempts": [
@@ -63,7 +63,7 @@
     },
     "tpg": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://thepointsguy.com/loyalty-programs/monthly-valuations/",
       "selectedAttempt": 1,
       "attempts": [
@@ -129,7 +129,7 @@
     },
     "upgraded-points": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://upgradedpoints.com/travel/points-and-miles-valuations/",
       "selectedAttempt": 1,
       "attempts": [
@@ -195,7 +195,7 @@
     },
     "omaat": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://onemileatatime.com/guides/value-miles-points/",
       "selectedAttempt": 1,
       "attempts": [
@@ -259,7 +259,7 @@
     },
     "points-frog-copa": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://www.pointsfrog.com/points-value/connectmiles",
       "selectedAttempt": 1,
       "attempts": [
@@ -279,7 +279,7 @@
     },
     "milhasbot-smiles": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
       "selectedAttempt": 1,
       "attempts": [
@@ -297,7 +297,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:18:24.764Z",
+        "checkedAt": "2026-11-27T09:02:52.301Z",
         "editorial": {
           "url": "https://www.milhasbot.com.br/valores-do-milheiro/smiles/",
           "month": "2026-11",
@@ -307,16 +307,16 @@
           ]
         },
         "fx": {
-          "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?%40dataInicial=%2711-21-2026%27&%40dataFinalCotacao=%2711-26-2026%27&%24format=json&%24select=cotacaoVenda%2CdataHoraCotacao",
-          "date": "2026-11-25",
-          "timestampBrasilia": "2026-11-25 13:02:42.418138",
-          "brlPerUsd": 5.8825
+          "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?%40dataInicial=%2711-22-2026%27&%40dataFinalCotacao=%2711-27-2026%27&%24format=json&%24select=cotacaoVenda%2CdataHoraCotacao",
+          "date": "2026-11-26",
+          "timestampBrasilia": "2026-11-26 13:11:27.937451",
+          "brlPerUsd": 5.7446
         }
       }
     },
     "milhasbot-br": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://www.milhasbot.com.br/valores-do-milheiro/",
       "selectedAttempt": 1,
       "attempts": [
@@ -338,7 +338,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:18:24.764Z",
+        "checkedAt": "2026-11-27T09:02:52.301Z",
         "editorial": {
           "url": "https://www.milhasbot.com.br/valores-do-milheiro/",
           "month": "2026-11",
@@ -358,16 +358,16 @@
           }
         },
         "fx": {
-          "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?%40dataInicial=%2711-21-2026%27&%40dataFinalCotacao=%2711-26-2026%27&%24format=json&%24select=cotacaoVenda%2CdataHoraCotacao",
-          "date": "2026-11-25",
-          "timestampBrasilia": "2026-11-25 13:02:42.418138",
-          "brlPerUsd": 5.8825
+          "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)?%40dataInicial=%2711-22-2026%27&%40dataFinalCotacao=%2711-27-2026%27&%24format=json&%24select=cotacaoVenda%2CdataHoraCotacao",
+          "date": "2026-11-26",
+          "timestampBrasilia": "2026-11-26 13:11:27.937451",
+          "brlPerUsd": 5.7446
         }
       }
     },
     "accor-ecb": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
       "selectedAttempt": 1,
       "attempts": [
@@ -385,7 +385,7 @@
       ],
       "missingCodes": [],
       "evidence": {
-        "checkedAt": "2026-11-26T14:18:24.764Z",
+        "checkedAt": "2026-11-27T09:02:52.301Z",
         "redemption": {
           "url": "https://all.accor.com/loyalty-program/use/booking-with-points/index.en.shtml",
           "points": 1000,
@@ -393,14 +393,14 @@
         },
         "fx": {
           "url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?format=jsondata&lastNObservations=1",
-          "date": "2026-11-25",
-          "usdPerEur": 1.0935
+          "date": "2026-11-26",
+          "usdPerEur": 1.0975
         }
       }
     },
     "points-frog-airlines": {
       "status": "ok",
-      "checkedAt": "2026-11-26T14:18:24.764Z",
+      "checkedAt": "2026-11-27T09:02:52.301Z",
       "source": "https://www.pointsfrog.com/best-points-programs/airline-miles",
       "selectedAttempt": 1,
       "attempts": [
@@ -477,6 +477,32 @@
       "missingCodes": []
     }
   },
-  "changes": [],
+  "changes": [
+    {
+      "code": "G3",
+      "before": 0.36,
+      "after": 0.37
+    },
+    {
+      "code": "LA",
+      "before": 0.458989,
+      "after": 0.470007
+    },
+    {
+      "code": "AD",
+      "before": 0.288993,
+      "after": 0.29593
+    },
+    {
+      "code": "TP",
+      "before": 0.569996,
+      "after": 0.574076
+    },
+    {
+      "code": "ACCOR",
+      "before": 2.187,
+      "after": 2.195
+    }
+  ],
   "failures": []
 }
